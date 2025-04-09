@@ -16,61 +16,8 @@
             <span>控制台</span>
           </el-menu-item>
 
-          <!-- 管理员菜单 -->
-          <template v-if="userStore.isAdmin">
-            <el-sub-menu index="system">
-              <template #title>
-                <el-icon><Setting /></el-icon>
-                <span>系统管理</span>
-              </template>
-              <el-menu-item index="/system/users">
-                <el-icon><User /></el-icon>
-                <span>用户管理</span>
-              </el-menu-item>
-              <el-menu-item index="/system/roles">
-                <el-icon><UserFilled /></el-icon>
-                <span>角色管理</span>
-              </el-menu-item>
-            </el-sub-menu>
-          </template>
+          
 
-          <!-- 监管人员菜单 -->
-          <template v-if="userStore.isInspector">
-            <el-menu-item index="/inspection/tasks">
-              <el-icon><List /></el-icon>
-              <span>检查任务</span>
-            </el-menu-item>
-            <el-menu-item index="/inspection/reports">
-              <el-icon><Document /></el-icon>
-              <span>检查报告</span>
-            </el-menu-item>
-            <el-menu-item index="/inspection/statistics">
-              <el-icon><PieChart /></el-icon>
-              <span>统计分析</span>
-            </el-menu-item>
-          </template>
-
-          <!-- 食堂工作人员菜单 -->
-          <template v-if="userStore.isStaff">
-            <el-menu-item index="/canteen/daily">
-              <el-icon><Calendar /></el-icon>
-              <span>日常记录</span>
-            </el-menu-item>
-            <el-menu-item index="/canteen/food">
-              <el-icon><Food /></el-icon>
-              <span>食品管理</span>
-            </el-menu-item>
-            <el-menu-item index="/canteen/inventory">
-              <el-icon><Box /></el-icon>
-              <span>库存管理</span>
-            </el-menu-item>
-          </template>
-
-          <!-- 所有角色共有的菜单 -->
-          <el-menu-item index="/profile">
-            <el-icon><UserFilled /></el-icon>
-            <span>个人信息</span>
-          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-container>

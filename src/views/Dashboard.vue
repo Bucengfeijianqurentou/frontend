@@ -37,39 +37,5 @@ const getRoleName = (role) => {
 </script>
 
 <style scoped>
-.dashboard-container {
-  padding: 1.5rem;
-}
 
-h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.user-info p {
-  color: #4b5563;
-  margin: 0;
-}
-
-.user-info strong {
-  color: #1f2937;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
 </style> 
