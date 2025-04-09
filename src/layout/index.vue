@@ -16,6 +16,72 @@
             <span>控制台</span>
           </el-menu-item>
 
+          <!-- 管理员菜单 -->
+          <template v-if="userStore.isAdmin">
+            <el-menu-item index="/system">
+              <el-icon><Monitor /></el-icon>
+              <span>系统监控</span>
+            </el-menu-item>
+
+            <el-menu-item index="/admin/analysis">
+              <el-icon><DataLine /></el-icon>
+              <span>数据分析</span>
+            </el-menu-item>
+
+            <el-menu-item index="/admin/tracing">
+              <el-icon><Link /></el-icon>
+              <span>溯源查询</span>
+            </el-menu-item>
+
+            <el-sub-menu index="user-manage">
+              <template #title>
+                <el-icon><User /></el-icon>
+                <span>用户管理</span>
+              </template>
+              <el-menu-item index="/admin/users">
+                <el-icon><UserFilled /></el-icon>
+                <span>用户列表</span>
+              </el-menu-item>
+              <el-menu-item index="/admin/roles">
+                <el-icon><Lock /></el-icon>
+                <span>角色管理</span>
+              </el-menu-item>
+            </el-sub-menu>
+
+            <el-menu-item index="/admin/permissions">
+              <el-icon><Lock /></el-icon>
+              <span>权限管理</span>
+            </el-menu-item>
+
+            <el-menu-item index="/admin/notifications">
+              <el-icon><Bell /></el-icon>
+              <span>通知管理</span>
+            </el-menu-item>
+
+            <el-menu-item index="/admin/reports">
+              <el-icon><Document /></el-icon>
+              <span>报表生成</span>
+            </el-menu-item>
+          </template>
+
+          <!-- 监管方菜单 -->
+          <template v-if="userStore.isInspector">
+            <el-menu-item index="/inspection">
+              <el-icon><Search /></el-icon>
+              <span>监管检查</span>
+            </el-menu-item>
+
+            <el-menu-item index="/tracing">
+              <el-icon><Link /></el-icon>
+              <span>溯源查询</span>
+            </el-menu-item>
+
+            <el-menu-item index="/analysis">
+              <el-icon><DataLine /></el-icon>
+              <span>数据分析</span>
+            </el-menu-item>
+          </template>
+
           <!-- 食堂工作人员菜单 -->
           <template v-if="userStore.isStaff">
             <el-sub-menu index="purchase">
@@ -53,6 +119,12 @@
               <span>供应商管理</span>
             </el-menu-item>
           </template>
+
+          <!-- 所有用户可见的菜单 -->
+          <el-menu-item index="/profile">
+            <el-icon><UserFilled /></el-icon>
+            <span>个人信息</span>
+          </el-menu-item>
 
         </el-menu>
       </el-aside>
@@ -102,7 +174,12 @@ import {
   Plus,
   KnifeFork,
   Memo,
-  Connection
+  Connection,
+  Search,
+  Link,
+  DataLine,
+  Lock,
+  Bell
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

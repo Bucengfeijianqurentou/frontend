@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { getToken } from '@/utils/auth'
+import { ElMessage } from 'element-plus'
 
 const routes = [
   {
@@ -27,6 +28,81 @@ const routes = [
         name: 'Dashboard',
         component: () => import('@/views/Dashboard.vue'),
         meta: { requiresAuth: true }
+      },
+      // 个人信息路由
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/profile.vue'),
+        meta: { requiresAuth: true }
+      },
+      // 管理员路由
+      {
+        path: 'system',
+        name: 'System',
+        component: () => import('@/views/admin/system.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/analysis',
+        name: 'AdminAnalysis',
+        component: () => import('@/views/admin/analysis.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/tracing',
+        name: 'AdminTracing',
+        component: () => import('@/views/admin/tracing.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/users',
+        name: 'Users',
+        component: () => import('@/views/admin/users.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/roles',
+        name: 'Roles',
+        component: () => import('@/views/admin/roles.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/permissions',
+        name: 'Permissions',
+        component: () => import('@/views/admin/permissions.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/notifications',
+        name: 'Notifications',
+        component: () => import('@/views/admin/notifications.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
+        path: 'admin/reports',
+        name: 'Reports',
+        component: () => import('@/views/admin/reports.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      // 监管方路由
+      {
+        path: 'inspection',
+        name: 'Inspection',
+        component: () => import('@/views/inspection.vue'),
+        meta: { requiresAuth: true, role: 'INSPECTOR' }
+      },
+      {
+        path: 'tracing',
+        name: 'Tracing',
+        component: () => import('@/views/tracing.vue'),
+        meta: { requiresAuth: true, role: 'INSPECTOR' }
+      },
+      {
+        path: 'analysis',
+        name: 'Analysis',
+        component: () => import('@/views/analysis.vue'),
+        meta: { requiresAuth: true, role: 'INSPECTOR' }
       },
       // 食堂工作人员路由
       {
@@ -75,7 +151,7 @@ const router = createRouter({
 })
 
 // 全局路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const token = getToken()
   const userStore = useUserStore()
 
@@ -83,26 +159,22 @@ router.beforeEach((to, from, next) => {
     if (!token) {
       next({ name: 'Login' })
     } else {
-      if (!userStore.user) {
-        // 如果store中没有用户信息，尝试获取
-        userStore.getUserInfoAction().then(() => {
-          // 检查角色权限
-          if (to.meta.role && !userStore.hasRole(to.meta.role)) {
-            next({ name: 'Dashboard' })
-          } else {
-            next()
-          }
-        }).catch(() => {
-          userStore.logout()
-          next({ name: 'Login' })
-        })
-      } else {
+      try {
+        // 如果没有用户信息，先获取用户信息
+        if (!userStore.user) {
+          await userStore.getUserInfoAction()
+        }
+        
         // 检查角色权限
         if (to.meta.role && !userStore.hasRole(to.meta.role)) {
+          ElMessage.warning('您没有访问该页面的权限')
           next({ name: 'Dashboard' })
-        } else {
-          next()
+          return
         }
+        next()
+      } catch (error) {
+        userStore.logout()
+        next({ name: 'Login' })
       }
     }
   } else {
