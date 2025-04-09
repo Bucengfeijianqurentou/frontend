@@ -48,7 +48,7 @@ router.beforeEach((to, from, next) => {
     } else {
       if (!userStore.user) {
         // 如果store中没有用户信息，尝试获取
-        userStore.getUserInfo().then(() => {
+        userStore.getUserInfoAction().then(() => {
           next()
         }).catch(() => {
           userStore.logout()
