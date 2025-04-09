@@ -1,7 +1,7 @@
 <template>
   <div class="layout-container">
     <el-container>
-      <el-aside width="200px">
+      <el-aside width="240px">
         <div class="logo-container">
           <el-icon class="logo-icon"><School /></el-icon>
           <h1 class="title">食堂监管平台</h1>
@@ -16,7 +16,43 @@
             <span>控制台</span>
           </el-menu-item>
 
-          
+          <!-- 食堂工作人员菜单 -->
+          <template v-if="userStore.isStaff">
+            <el-sub-menu index="purchase">
+              <template #title>
+                <el-icon><ShoppingCart /></el-icon>
+                <span>食品采购</span>
+              </template>
+              <el-menu-item index="/purchase/create">
+                <el-icon><Plus /></el-icon>
+                <span>新建采购单</span>
+              </el-menu-item>
+              <el-menu-item index="/purchase/list">
+                <el-icon><List /></el-icon>
+                <span>采购记录</span>
+              </el-menu-item>
+            </el-sub-menu>
+
+            <el-menu-item index="/processing">
+              <el-icon><KnifeFork /></el-icon>
+              <span>食品加工</span>
+            </el-menu-item>
+
+            <el-menu-item index="/distribution">
+              <el-icon><Box /></el-icon>
+              <span>食品发放</span>
+            </el-menu-item>
+
+            <el-menu-item index="/menu">
+              <el-icon><Memo /></el-icon>
+              <span>菜单管理</span>
+            </el-menu-item>
+
+            <el-menu-item index="/suppliers">
+              <el-icon><Connection /></el-icon>
+              <span>供应商管理</span>
+            </el-menu-item>
+          </template>
 
         </el-menu>
       </el-aside>
@@ -61,7 +97,12 @@ import {
   Calendar,
   Food,
   Box,
-  School
+  School,
+  ShoppingCart,
+  Plus,
+  KnifeFork,
+  Memo,
+  Connection
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

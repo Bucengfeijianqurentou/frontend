@@ -27,6 +27,43 @@ const routes = [
         name: 'Dashboard',
         component: () => import('@/views/Dashboard.vue'),
         meta: { requiresAuth: true }
+      },
+      // 食堂工作人员路由
+      {
+        path: 'purchase/create',
+        name: 'PurchaseCreate',
+        component: () => import('@/views/purchase/create.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
+      {
+        path: 'purchase/list',
+        name: 'PurchaseList',
+        component: () => import('@/views/purchase/list.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
+      {
+        path: 'processing',
+        name: 'Processing',
+        component: () => import('@/views/processing.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
+      {
+        path: 'distribution',
+        name: 'Distribution',
+        component: () => import('@/views/distribution.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
+      {
+        path: 'menu',
+        name: 'Menu',
+        component: () => import('@/views/menu.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
+      {
+        path: 'suppliers',
+        name: 'Suppliers',
+        component: () => import('@/views/suppliers.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
       }
     ]
   }
@@ -49,13 +86,23 @@ router.beforeEach((to, from, next) => {
       if (!userStore.user) {
         // 如果store中没有用户信息，尝试获取
         userStore.getUserInfoAction().then(() => {
-          next()
+          // 检查角色权限
+          if (to.meta.role && !userStore.hasRole(to.meta.role)) {
+            next({ name: 'Dashboard' })
+          } else {
+            next()
+          }
         }).catch(() => {
           userStore.logout()
           next({ name: 'Login' })
         })
       } else {
-        next()
+        // 检查角色权限
+        if (to.meta.role && !userStore.hasRole(to.meta.role)) {
+          next({ name: 'Dashboard' })
+        } else {
+          next()
+        }
       }
     }
   } else {
