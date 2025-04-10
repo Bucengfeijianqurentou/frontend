@@ -89,20 +89,11 @@
 
           <!-- 食堂工作人员菜单 -->
           <template v-if="userStore.isStaff">
-            <el-sub-menu index="purchase">
-              <template #title>
+
+            <el-menu-item index="/purchase/create">
                 <el-icon><ShoppingCart /></el-icon>
                 <span>食品采购</span>
-              </template>
-              <el-menu-item index="/purchase/create">
-                <el-icon><Plus /></el-icon>
-                <span>新建采购单</span>
               </el-menu-item>
-              <el-menu-item index="/purchase/list">
-                <el-icon><List /></el-icon>
-                <span>采购记录</span>
-              </el-menu-item>
-            </el-sub-menu>
 
             <el-menu-item index="/processing">
               <el-icon><KnifeFork /></el-icon>

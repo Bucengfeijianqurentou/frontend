@@ -117,12 +117,7 @@ const routes = [
         component: () => import('@/views/purchase/create.vue'),
         meta: { requiresAuth: true, role: 'STAFF' }
       },
-      {
-        path: 'purchase/list',
-        name: 'PurchaseList',
-        component: () => import('@/views/purchase/list.vue'),
-        meta: { requiresAuth: true, role: 'STAFF' }
-      },
+      
       {
         path: 'processing',
         name: 'Processing',
