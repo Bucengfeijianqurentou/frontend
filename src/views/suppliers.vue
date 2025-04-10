@@ -1,80 +1,129 @@
 <template>
-  <div class="p-4 flex flex-col gap-4">
+  <div class="p-6 flex flex-col gap-6">
     <!-- 标题和新增按钮 -->
-    <div class="flex justify-between items-center">
-      <h2 class="text-2xl font-bold text-gray-800">供应商管理</h2>
-      <el-button type="primary" @click="showAddDialog" class="animate-bounce-in">
-        <el-icon class="mr-1"><Plus /></el-icon>新增供应商
-      </el-button>
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="border-b border-gray-100 p-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+              <el-icon class="text-blue-500 text-2xl"><Shop /></el-icon>
+              <span class="text-2xl font-semibold text-gray-900">供应商管理</span>
+            </div>
+            <el-tag size="default" effect="plain" type="info" class="border-none bg-blue-50 text-blue-500">
+              共 {{ suppliers.length || 0 }} 家
+            </el-tag>
+          </div>
+          <el-button type="primary" @click="showAddDialog" class="!flex items-center gap-1">
+            <el-icon><Plus /></el-icon>
+            <span>新增供应商</span>
+          </el-button>
+        </div>
+        <p class="mt-2 text-gray-500 text-sm">管理系统中的供应商信息</p>
+      </div>
     </div>
 
     <!-- 搜索栏 -->
-    <div class="flex gap-4 bg-gray-50 p-4 rounded-lg shadow-sm">
+    <div class="flex gap-4 bg-white p-6 rounded-lg shadow-sm">
       <el-input
         v-model="searchName"
-        placeholder="供应商名称"
+        placeholder="搜索供应商名称..."
         class="max-w-xs"
         clearable
         @clear="handleSearch"
       >
         <template #prefix>
-          <el-icon><Search /></el-icon>
+          <el-icon class="text-gray-400"><Search /></el-icon>
         </template>
       </el-input>
       <el-input
         v-model="searchContact"
-        placeholder="联系方式"
+        placeholder="搜索联系方式..."
         class="max-w-xs"
         clearable
         @clear="handleSearch"
       >
         <template #prefix>
-          <el-icon><Phone /></el-icon>
+          <el-icon class="text-gray-400"><Phone /></el-icon>
         </template>
       </el-input>
-      <el-button type="primary" @click="handleSearch">搜索</el-button>
+      <el-button type="primary" @click="handleSearch" :icon="Search">搜索</el-button>
     </div>
 
-    <!-- 供应商列表 -->
-    <el-table
-      :data="suppliers"
-      border
-      stripe
-      class="w-full animate-fade-in"
-      v-loading="loading"
-    >
-      <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="name" label="供应商名称" />
-      <el-table-column prop="contact" label="联系方式" />
-      <el-table-column label="操作" width="200" fixed="right">
-        <template #default="{ row }">
-          <el-button-group>
-            <el-button type="primary" @click="handleEdit(row)" :icon="Edit">
-              编辑
-            </el-button>
-            <el-button
-              type="danger"
-              @click="handleDelete(row)"
-              :icon="Delete"
-            >
-              删除
-            </el-button>
-          </el-button-group>
-        </template>
-      </el-table-column>
-    </el-table>
+    <!-- 供应商列表卡片 -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <el-table
+        :data="suppliers"
+        border
+        stripe
+        class="w-full animate-fade-in"
+        v-loading="loading"
+        :header-cell-style="{
+          background: '#f8fafc',
+          color: '#475569',
+          fontWeight: 600
+        }"
+      >
+        <el-table-column prop="id" label="ID" width="100" align="center">
+          <template #default="{ row }">
+            <span class="px-2 py-1 bg-gray-100 rounded text-gray-600">#{{ row.id }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="供应商名称">
+          <template #default="{ row }">
+            <div class="flex items-center gap-2">
+              <el-icon class="text-blue-500"><Shop /></el-icon>
+              <span>{{ row.name }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="contact" label="联系方式">
+          <template #default="{ row }">
+            <div class="flex items-center gap-2">
+              <el-icon class="text-green-500"><Phone /></el-icon>
+              <span>{{ row.contact }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <div class="flex gap-2">
+              <el-button
+                type="primary"
+                @click="handleEdit(row)"
+                :icon="Edit"
+                plain
+                class="!flex items-center"
+              >
+                编辑
+              </el-button>
+              <el-button
+                type="danger"
+                @click="handleDelete(row)"
+                :icon="Delete"
+                plain
+                class="!flex items-center"
+              >
+                删除
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="flex justify-end mt-4">
-      <el-pagination
-        v-model="currentPage"
-        :page-size="pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <!-- 分页 -->
+      <div class="flex justify-end mt-6">
+        <el-pagination
+          v-model="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          background
+          class="pagination-with-background"
+        />
+      </div>
     </div>
 
     <!-- 新增/编辑对话框 -->
@@ -83,6 +132,7 @@
       :title="dialogType === 'add' ? '新增供应商' : '编辑供应商'"
       width="500px"
       class="animate-zoom-in"
+      destroy-on-close
     >
       <el-form
         ref="formRef"
@@ -92,17 +142,25 @@
         class="mt-4"
       >
         <el-form-item label="供应商名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入供应商名称" />
+          <el-input 
+            v-model="form.name" 
+            placeholder="请输入供应商名称"
+            :prefix-icon="Shop"
+          />
         </el-form-item>
         <el-form-item label="联系方式" prop="contact">
-          <el-input v-model="form.contact" placeholder="请输入联系方式" />
+          <el-input 
+            v-model="form.contact" 
+            placeholder="请输入联系方式"
+            :prefix-icon="Phone"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button @click="dialogVisible = false" plain>取消</el-button>
           <el-button type="primary" @click="handleSubmit" :loading="submitting">
-            确定
+            {{ dialogType === 'add' ? '新增' : '保存' }}
           </el-button>
         </div>
       </template>
@@ -113,7 +171,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, Phone, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Search, Phone, Edit, Delete, Shop } from '@element-plus/icons-vue'
 import { useSupplierApi } from '@/api/supplier'
 
 const supplierApi = useSupplierApi()
@@ -296,5 +354,39 @@ onMounted(() => {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  font-weight: 600;
+}
+
+:deep(.pagination-with-background) {
+  --el-pagination-button-bg-color: white;
+}
+
+:deep(.el-dialog) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:deep(.el-dialog__header) {
+  margin: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+:deep(.el-dialog__body) {
+  padding: 24px;
+}
+
+:deep(.el-dialog__footer) {
+  margin: 0;
+  padding: 20px 24px;
+  border-top: 1px solid var(--el-border-color-lighter);
 }
 </style> 
