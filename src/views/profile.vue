@@ -30,13 +30,19 @@
           <el-tag :type="roleType">{{ roleText }}</el-tag>
         </el-form-item>
 
+        <el-form-item label="id">
+            <el-input v-model="userStore.user.id" disabled />
+          </el-form-item>
+
         <el-form-item label="邮箱">
           <el-input v-model="userStore.user.email" disabled />
         </el-form-item>
 
         <el-form-item label="注册时间">
-          <el-input :model-value="formatDate(userStore.user.createdAt)" disabled />
+          <el-input :model-value="formatDate(userStore.user.createTime)" disabled />
         </el-form-item>
+
+
 
         <el-form-item>
           <el-button type="primary" @click="handleUpdateProfile">
