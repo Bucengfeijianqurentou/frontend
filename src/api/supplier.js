@@ -16,6 +16,14 @@ export function useSupplierApi() {
       })
     },
 
+    // 获取所有供应商列表（不分页）
+    getAllSuppliers() {
+      return request({
+        url: '/api/supplier/all',
+        method: 'get'
+      })
+    },
+
     // 创建供应商
     createSupplier(data) {
       return request({
