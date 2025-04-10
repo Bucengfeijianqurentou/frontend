@@ -62,6 +62,12 @@ const routes = [
         meta: { requiresAuth: true, role: 'ADMIN' }
       },
       {
+        path: 'suppliers',
+        name: 'Suppliers',
+        component: () => import('@/views/suppliers.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
+      {
         path: 'admin/roles',
         name: 'Roles',
         component: () => import('@/views/admin/roles.vue'),
@@ -135,12 +141,7 @@ const routes = [
         component: () => import('@/views/menu.vue'),
         meta: { requiresAuth: true, role: 'STAFF' }
       },
-      {
-        path: 'suppliers',
-        name: 'Suppliers',
-        component: () => import('@/views/suppliers.vue'),
-        meta: { requiresAuth: true, role: 'STAFF' }
-      }
+      
     ]
   }
 ]

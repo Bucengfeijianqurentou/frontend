@@ -33,6 +33,11 @@
               <span>溯源查询</span>
             </el-menu-item>
 
+            <el-menu-item index="/suppliers">
+                <el-icon><Connection /></el-icon>
+                <span>供应商管理</span>
+              </el-menu-item>
+
             <el-sub-menu index="user-manage">
               <template #title>
                 <el-icon><User /></el-icon>
@@ -114,10 +119,7 @@
               <span>菜单管理</span>
             </el-menu-item>
 
-            <el-menu-item index="/suppliers">
-              <el-icon><Connection /></el-icon>
-              <span>供应商管理</span>
-            </el-menu-item>
+            
           </template>
 
           <!-- 所有用户可见的菜单 -->
