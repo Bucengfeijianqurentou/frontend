@@ -26,6 +26,14 @@ export function useInventoryApi() {
         method: 'get'
       })
     },
+    
+    // 获取库存详情（包含食品名称）
+    getInventoryDetail(batchNumber) {
+      return request({
+        url: `/api/inventory/detail/${batchNumber}`,
+        method: 'get'
+      })
+    },
 
     // 根据食品ID查询库存
     getInventoryByFoodId(foodId, page, size) {
@@ -50,6 +58,14 @@ export function useInventoryApi() {
         url: '/api/inventory/low-stock',
         method: 'get',
         params: { threshold, page, size }
+      })
+    },
+
+    // 获取所有有效库存记录（剩余数量大于0）
+    getAvailableInventory() {
+      return request({
+        url: '/api/inventory/available',
+        method: 'get'
       })
     }
   }

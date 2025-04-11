@@ -64,7 +64,7 @@ const routes = [
       {
         path: 'suppliers',
         name: 'Suppliers',
-        component: () => import('@/views/suppliers.vue'),
+        component: () => import('@/views/admin/suppliers.vue'),
         meta: { requiresAuth: true, role: 'ADMIN' }
       },
       {
@@ -121,7 +121,7 @@ const routes = [
       {
         path: 'processing',
         name: 'Processing',
-        component: () => import('@/views/processing.vue'),
+        component: () => import('@/views/processing/processing.vue'),
         meta: { requiresAuth: true, role: 'STAFF' }
       },
       {
