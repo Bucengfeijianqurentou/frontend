@@ -18,6 +18,11 @@
       <!-- 加工记录表格 -->
       <el-table v-loading="loading" :data="processingList" stripe border>
         <el-table-column label="批次号" prop="batchNumber" min-width="120" />
+        <el-table-column label="食品名称" min-width="120">
+          <template #default="{ row }">
+            {{ row.foodName || '未知食品' }}
+          </template>
+        </el-table-column>
         <el-table-column label="加工时间" min-width="150">
           <template #default="{ row }">
             {{ formatDateTime(row.processingTime) }}
@@ -25,6 +30,7 @@
         </el-table-column>
         <el-table-column label="加工方法" prop="method" min-width="100" />
         <el-table-column label="加工数量" prop="quantity" min-width="80" />
+        <el-table-column label="加工人" prop="processorName" min-width="100" />
         <el-table-column label="卫生条件" min-width="80">
           <template #default="{ row }">
             <el-tag :type="getHygieneTagType(row.hygieneCondition)">
@@ -164,9 +170,12 @@
     >
       <div v-if="processingDetail">
         <div class="mb-2"><span class="font-bold">批次号:</span> {{ processingDetail.batchNumber }}</div>
+        <div class="mb-2"><span class="font-bold">食品名称:</span> {{ processingDetail.foodName || '未知食品' }}</div>
         <div class="mb-2"><span class="font-bold">加工时间:</span> {{ formatDateTime(processingDetail.processingTime) }}</div>
         <div class="mb-2"><span class="font-bold">加工方法:</span> {{ processingDetail.method }}</div>
         <div class="mb-2"><span class="font-bold">加工数量:</span> {{ processingDetail.quantity }}</div>
+        <div class="mb-2"><span class="font-bold">加工人姓名:</span> {{ processingDetail.processorName || '未知' }}</div>
+        <div class="mb-2"><span class="font-bold">加工人联系方式:</span> {{ processingDetail.processorPhone || '无' }}</div>
         <div class="mb-2">
           <span class="font-bold">卫生条件:</span> 
           <el-tag :type="getHygieneTagType(processingDetail.hygieneCondition)">
@@ -227,6 +236,8 @@ const processingForm = reactive({
   method: '',
   hygieneCondition: 'GOOD',
   processorId: null,
+  processorName: '',
+  processorPhone: '',
   imagePath: '',
   inventoryId: null // 选中的库存ID，用于后续更新库存
 })
@@ -247,9 +258,26 @@ onMounted(() => {
   fetchProcessingList()
   loadInventoryOptions()
   
-  // 获取当前用户ID
-  processingForm.processorId = userStore.user?.id
-  console.log('初始化用户ID:', processingForm.processorId)
+  // 获取当前用户信息
+  if (userStore.user) {
+    // 设置处理人信息
+    processingForm.processorId = userStore.user.id
+    processingForm.processorName = userStore.user.realName || userStore.user.username
+    processingForm.processorPhone = userStore.user.phone || ''
+    
+    console.log('初始化用户信息:', {
+      id: processingForm.processorId,
+      name: processingForm.processorName,
+      phone: processingForm.processorPhone
+    })
+  } else {
+    // 如果没有用户信息，尝试获取
+    userStore.getUserInfoAction().then(() => {
+      processingForm.processorId = userStore.user?.id
+      processingForm.processorName = userStore.user?.realName || userStore.user?.username
+      processingForm.processorPhone = userStore.user?.phone || ''
+    })
+  }
 })
 
 // 获取加工记录列表
@@ -259,6 +287,20 @@ const fetchProcessingList = async () => {
     const res = await processingApi.listProcessings(currentPage.value, pageSize.value)
     processingList.value = res.data.records || []
     total.value = res.data.total || 0
+    
+    // 获取每条记录对应的食品名称
+    for (const record of processingList.value) {
+      if (!record.foodName && record.batchNumber) {
+        try {
+          const inventoryRes = await inventoryApi.getInventoryDetail(record.batchNumber)
+          if (inventoryRes.code === 200 && inventoryRes.data) {
+            record.foodName = inventoryRes.data.foodName
+          }
+        } catch (error) {
+          console.error('获取食品名称失败:', error)
+        }
+      }
+    }
   } catch (error) {
     console.error('获取加工记录失败:', error)
     ElMessage.error('获取加工记录失败')
@@ -303,8 +345,18 @@ const handleAddProcessing = () => {
   selectedFoodName.value = ''
   availableQuantity.value = ''
   
-  // 获取当前用户ID
-  processingForm.processorId = userStore.user?.id
+  // 获取当前用户信息
+  if (userStore.user) {
+    processingForm.processorId = userStore.user.id
+    processingForm.processorName = userStore.user.realName || userStore.user.username
+    processingForm.processorPhone = userStore.user.phone || ''
+  } else {
+    userStore.getUserInfoAction().then(() => {
+      processingForm.processorId = userStore.user?.id
+      processingForm.processorName = userStore.user?.realName || userStore.user?.username
+      processingForm.processorPhone = userStore.user?.phone || ''
+    })
+  }
   
   dialogVisible.value = true
 }
@@ -358,18 +410,30 @@ const submitProcessing = async () => {
       }
     }
     
+    // 确保processorName和processorPhone已设置
+    if (!processingForm.processorName) {
+      processingForm.processorName = userStore.user?.realName || userStore.user?.username || '未知'
+    }
+    
+    if (!processingForm.processorPhone) {
+      processingForm.processorPhone = userStore.user?.phone || ''
+    }
+    
     try {
       console.log('提交的表单数据:', JSON.stringify(processingForm)) // 添加日志便于调试
       // 创建加工记录
-      await processingApi.createProcessing(processingForm)
-      
-      ElMessage.success('加工记录已保存，库存已更新')
-      dialogVisible.value = false
-      
-      // 刷新列表
-      fetchProcessingList()
-      // 刷新库存选项
-      loadInventoryOptions()
+      const response = await processingApi.createProcessing(processingForm)
+      if (response.code === 200) {
+        ElMessage.success('加工记录已保存，库存已更新')
+        dialogVisible.value = false
+        
+        // 刷新列表
+        fetchProcessingList()
+        // 刷新库存选项
+        loadInventoryOptions()
+      } else {
+        ElMessage.error(response.message || '创建加工记录失败')
+      }
     } catch (error) {
       console.error('创建加工记录失败:', error)
       ElMessage.error('创建加工记录失败: ' + (error.message || '未知错误'))
@@ -414,8 +478,21 @@ const beforeUpload = (file) => {
 }
 
 // 查看加工详情
-const viewProcessingDetail = (row) => {
+const viewProcessingDetail = async (row) => {
   processingDetail.value = row
+  
+  // 如果没有食品名称，获取食品名称
+  if (!processingDetail.value.foodName && processingDetail.value.batchNumber) {
+    try {
+      const res = await inventoryApi.getInventoryDetail(processingDetail.value.batchNumber)
+      if (res.code === 200 && res.data) {
+        processingDetail.value.foodName = res.data.foodName
+      }
+    } catch (error) {
+      console.error('获取食品名称失败:', error)
+    }
+  }
+  
   detailDialogVisible.value = true
 }
 
