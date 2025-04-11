@@ -12,11 +12,11 @@ export function usePurchaseApi() {
     },
 
     // 获取采购单列表
-    listPurchases(page, size) {
+    listPurchases(page, size, keyword) {
       return request({
         url: '/api/purchases',
         method: 'get',
-        params: { page, size }
+        params: { page, size, keyword }
       })
     },
 

@@ -1,25 +1,26 @@
 <template>
   <div class="p-4">
-    <el-card class="w-full">
+    <el-card class="w-full shadow-md">
       <template #header>
-        <div class="flex justify-between items-center">
-          <div class="flex items-center">
-            <el-icon class="mr-2"><ShoppingCart /></el-icon>
-            <span>采购管理</span>
+        <div class="flex justify-between items-center py-2">
+        <div class="flex items-center">
+            <el-icon class="text-blue-500 mr-2 text-xl"><ShoppingCart /></el-icon>
+            <span class="text-xl font-medium">采购管理</span>
           </div>
-          <el-button type="primary" @click="dialogVisible = true">
+          <el-button type="primary" size="large" @click="dialogVisible = true" class="bg-blue-500 hover:bg-blue-600">
             <el-icon class="mr-1"><Plus /></el-icon>新增采购
           </el-button>
         </div>
       </template>
 
       <!-- 搜索区域 -->
-      <div class="mb-4 flex gap-4 flex-wrap">
+      <div class="mb-5 flex gap-4 flex-wrap bg-gray-50 p-4 rounded-md shadow-sm">
         <el-input
           v-model="searchForm.keyword"
           placeholder="搜索食品名称/批次号"
-          class="w-60"
+          class="w-64"
           clearable
+          size="large"
           @clear="loadPurchaseList"
         >
           <template #prefix>
@@ -35,14 +36,17 @@
           end-placeholder="结束日期"
           format="YYYY-MM-DD"
           value-format="YYYY-MM-DD"
-          class="w-80"
+          class="w-96"
+          size="large"
+          style="--el-date-editor-width: 100%;"
         />
         
         <el-select
           v-model="searchForm.supplier"
           placeholder="选择供应商"
           clearable
-          class="w-60"
+          class="w-64"
+          size="large"
         >
           <el-option
             v-for="item in supplierOptions"
@@ -52,10 +56,10 @@
           />
         </el-select>
         
-        <el-button type="primary" @click="loadPurchaseList">
+        <el-button type="primary" size="large" @click="loadPurchaseList" class="bg-blue-500 hover:bg-blue-600">
           <el-icon class="mr-1"><Search /></el-icon>搜索
         </el-button>
-        <el-button @click="resetSearch">
+        <el-button size="large" @click="resetSearch">
           <el-icon class="mr-1"><Refresh /></el-icon>重置
         </el-button>
       </div>
@@ -67,50 +71,53 @@
         border
         stripe
         style="width: 100%"
+        class="rounded-md overflow-hidden"
+        :header-cell-style="{ background: '#f5f7fa', color: '#606266', fontWeight: 'bold' }"
       >
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="食品名称" min-width="120" />
-        <el-table-column prop="supplier" label="供应商" min-width="120" />
-        <el-table-column prop="batchNumber" label="批次号" min-width="180" />
-        <el-table-column prop="quantity" label="数量" width="100" />
-        <el-table-column label="采购日期" min-width="120">
+        <el-table-column prop="id" label="ID" width="80" align="center" />
+        <el-table-column prop="name" label="食品名称" min-width="120" align="center" />
+        <el-table-column prop="supplier" label="供应商" min-width="150" align="center" />
+        <el-table-column prop="batchNumber" label="批次号" min-width="180" align="center" />
+        <el-table-column prop="quantity" label="数量" width="100" align="center" />
+        <el-table-column label="采购日期" min-width="120" align="center">
           <template #default="scope">
             {{ scope.row.purchaseDate }}
           </template>
         </el-table-column>
-        <el-table-column label="图片" width="100">
+        <el-table-column label="图片" width="120" align="center">
           <template #default="scope">
             <el-image
               v-if="scope.row.imagePath"
               :src="`${apiBaseUrl}${scope.row.imagePath}`"
               fit="cover"
-              class="w-12 h-12 cursor-pointer"
+              class="w-16 h-16 cursor-pointer rounded-md border border-gray-200 shadow-sm object-cover hover:shadow-md transition-all"
               @click="previewImage(scope.row.imagePath)"
             />
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="scope">
-            <el-button link type="primary" @click="handleView(scope.row)">
-              详情
+            <el-button link type="primary" size="small" @click="handleView(scope.row)" class="text-blue-500 hover:text-blue-700 font-medium">
+              <el-icon class="mr-1"><View /></el-icon>详情
             </el-button>
             <el-divider direction="vertical" />
-            <el-button link type="danger" @click="handleDelete(scope.row)">
-              删除
+            <el-button link type="danger" size="small" @click="handleDelete(scope.row)" class="text-red-500 hover:text-red-700 font-medium">
+              <el-icon class="mr-1"><Delete /></el-icon>删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <!-- 分页 -->
-      <div class="flex justify-end mt-4">
+      <div class="flex justify-end mt-5">
         <el-pagination
           :current-page="currentPage"
           :page-size="pageSize"
           :page-sizes="[10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
+          background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -127,147 +134,186 @@
     <!-- 采购单弹窗 -->
     <el-dialog
       v-model="dialogVisible"
-      title="新增采购"
-      width="70%"
+      width="60%"
       destroy-on-close
+      :show-close="true"
+      :close-on-click-modal="false"
     >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="120px"
-        class="max-w-4xl mx-auto"
-      >
-        <!-- 食品基本信息 -->
-        <el-divider content-position="left">食品基本信息</el-divider>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="食品名称" prop="name">
-              <el-input v-model="form.name" placeholder="请输入食品名称"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="食品描述" prop="description">
-              <el-input v-model="form.description" placeholder="请输入食品描述"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <template #header>
+        <div class="flex items-center">
+          <el-icon class="text-blue-500 mr-2"><Plus /></el-icon>
+          <span class="text-lg font-medium">新增采购</span>
+        </div>
+      </template>
+      <div class="p-4">
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          label-width="100px"
+          class="mx-auto"
+        >
+          <!-- 食品基本信息 -->
+          <div class="mb-4">
+            <div class="flex items-center mb-2">
+              <el-icon class="mr-2 text-gray-500"><CircleCheck /></el-icon>
+              <span class="text-gray-700 font-medium">食品基本信息</span>
+            </div>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="食品名称" prop="name">
+                  <el-input v-model="form.name" placeholder="请输入食品名称"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="食品描述" prop="description">
+                  <el-input v-model="form.description" placeholder="请输入食品描述"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
 
-        <!-- 采购信息 -->
-        <el-divider content-position="left">采购信息</el-divider>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="供应商" prop="supplier">
-              <el-select v-model="form.supplier" placeholder="请选择供应商" class="w-full">
-                <el-option
-                  v-for="item in supplierOptions"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.name"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="批次号" prop="batchNumber">
-              <el-input v-model="form.batchNumber" placeholder="系统自动生成" disabled></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="采购数量" prop="quantity">
-              <el-input-number v-model="form.quantity" :min="1" class="w-full"></el-input-number>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="采购日期" prop="purchaseDate">
-              <el-date-picker
-                v-model="form.purchaseDate"
-                type="date"
-                placeholder="选择采购日期"
-                class="w-full"
-                value-format="YYYY-MM-DD"
-              ></el-date-picker>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="生产日期" prop="productionDate">
-              <el-date-picker
-                v-model="form.productionDate"
-                type="date"
-                placeholder="选择生产日期"
-                class="w-full"
-                value-format="YYYY-MM-DD"
-              ></el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="保质期(天)" prop="shelfLife">
-              <el-input-number v-model="form.shelfLife" :min="1" class="w-full"></el-input-number>
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <!-- 采购信息 -->
+          <div class="mb-4">
+            <div class="flex items-center mb-2">
+              <el-icon class="mr-2 text-gray-500"><ShoppingCart /></el-icon>
+              <span class="text-gray-700 font-medium">采购信息</span>
+            </div>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="供应商" prop="supplier">
+                  <el-select v-model="form.supplier" placeholder="请选择供应商" class="w-full">
+                    <el-option
+                      v-for="item in supplierOptions"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.name"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="批次号">
+                  <el-input v-model="form.batchNumber" disabled></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="采购数量" prop="quantity">
+                  <el-input-number v-model="form.quantity" :min="1" class="w-full"></el-input-number>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="采购日期" prop="purchaseDate">
+                  <el-date-picker
+                    v-model="form.purchaseDate"
+                    type="date"
+                    placeholder="选择采购日期"
+                    class="w-full"
+                    value-format="YYYY-MM-DD"
+                  ></el-date-picker>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="生产日期" prop="productionDate">
+                  <el-date-picker
+                    v-model="form.productionDate"
+                    type="date"
+                    placeholder="选择生产日期"
+                    class="w-full"
+                    value-format="YYYY-MM-DD"
+                  ></el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="保质期(天)" prop="shelfLife">
+                  <el-input-number v-model="form.shelfLife" :min="1" class="w-full"></el-input-number>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
 
-        <!-- 图片上传 -->
-        <el-divider content-position="left">相关图片</el-divider>
-        <el-form-item label="采购凭证" prop="imagePath">
-          <el-upload
-            class="upload-demo"
-            :action="`${apiBaseUrl}/api/files/upload`"
-            :headers="uploadHeaders"
-            :on-success="handleUploadSuccess"
-            :on-error="handleUploadError"
-            :before-upload="beforeUpload"
-            :limit="1"
-            :file-list="fileList"
-            list-type="picture"
-          >
-            <el-button type="primary">点击上传</el-button>
-            <template #tip>
-              <div class="el-upload__tip text-gray-500 mt-1">
-                只能上传jpg/png/jpeg文件，且不超过10MB
-              </div>
-            </template>
-          </el-upload>
-        </el-form-item>
+          <!-- 图片上传 -->
+          <div class="mb-4">
+            <div class="flex items-center mb-2">
+              <el-icon class="mr-2 text-gray-500"><Picture /></el-icon>
+              <span class="text-gray-700 font-medium">相关图片</span>
+            </div>
+            <el-form-item label="采购凭证" prop="imagePath">
+              <el-upload
+                class="upload-demo"
+                :action="`${apiBaseUrl}/api/files/upload`"
+                :headers="uploadHeaders"
+                :on-success="handleUploadSuccess"
+                :on-error="handleUploadError"
+                :before-upload="beforeUpload"
+                :limit="1"
+                :file-list="fileList"
+              >
+                <el-button type="primary">点击上传</el-button>
+                <template #tip>
+                  <div class="el-upload__tip text-gray-500 mt-1">
+                    只能上传jpg/png/jpeg文件，且不超过10MB
+                  </div>
+                </template>
+              </el-upload>
+            </el-form-item>
+          </div>
 
-        <!-- 提交按钮 -->
-        <el-form-item>
-          <el-button type="primary" @click="submitForm" :loading="submitLoading">提交</el-button>
-          <el-button @click="dialogVisible = false">取消</el-button>
-        </el-form-item>
-      </el-form>
+          <!-- 提交按钮 -->
+          <div class="flex justify-center mt-6">
+            <el-button type="primary" @click="submitForm" :loading="submitLoading" class="mr-4">
+              提交
+            </el-button>
+            <el-button @click="dialogVisible = false">取消</el-button>
+          </div>
+        </el-form>
+      </div>
     </el-dialog>
 
     <!-- 详情弹窗 -->
     <el-dialog
       v-model="detailVisible"
-      title="采购详情"
       width="60%"
+      :show-close="true"
+      destroy-on-close
     >
-      <div v-if="currentRecord" class="purchase-detail">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="ID">{{ currentRecord.id }}</el-descriptions-item>
-          <el-descriptions-item label="食品名称">{{ currentRecord.name }}</el-descriptions-item>
-          <el-descriptions-item label="供应商">{{ currentRecord.supplier }}</el-descriptions-item>
-          <el-descriptions-item label="批次号">{{ currentRecord.batchNumber }}</el-descriptions-item>
-          <el-descriptions-item label="采购数量">{{ currentRecord.quantity }}</el-descriptions-item>
-          <el-descriptions-item label="采购日期">{{ currentRecord.purchaseDate }}</el-descriptions-item>
-          <el-descriptions-item label="生产日期">{{ currentRecord.productionDate }}</el-descriptions-item>
-          <el-descriptions-item label="保质期(天)">{{ currentRecord.shelfLife }}</el-descriptions-item>
+      <template #header>
+        <div class="flex items-center">
+          <el-icon class="text-blue-500 mr-2 text-xl"><InfoFilled /></el-icon>
+          <span class="text-xl font-medium">采购详情</span>
+        </div>
+      </template>
+      <div v-if="currentRecord" class="purchase-detail p-2">
+        <el-descriptions :column="4" border class="rounded-lg overflow-hidden" :label-style="{ 'background-color': '#f5f7fa', 'font-weight': 'bold' }">
+          <el-descriptions-item label="ID" label-align="center" align="center">{{ currentRecord.id }}</el-descriptions-item>
+          <el-descriptions-item label="食品名称" label-align="center" align="center">{{ currentRecord.name }}</el-descriptions-item>
+          <el-descriptions-item label="供应商" label-align="center" align="center">{{ currentRecord.supplier }}</el-descriptions-item>
+          <el-descriptions-item label="批次号" label-align="center" align="center">{{ currentRecord.batchNumber }}</el-descriptions-item>
+          <el-descriptions-item label="采购数量" label-align="center" align="center">{{ currentRecord.quantity }}</el-descriptions-item>
+          <el-descriptions-item label="采购日期" label-align="center" align="center">{{ currentRecord.purchaseDate }}</el-descriptions-item>
+          <el-descriptions-item label="生产日期" label-align="center" align="center">{{ currentRecord.productionDate }}</el-descriptions-item>
+          <el-descriptions-item label="保质期(天)" label-align="center" align="center">{{ currentRecord.shelfLife }}</el-descriptions-item>
+          <el-descriptions-item label="采购人员" label-align="center" align="center">{{ purchaserName }}</el-descriptions-item>
+          <el-descriptions-item label="联系电话" label-align="center" align="center">{{ purchaserPhone || '-' }}</el-descriptions-item>
         </el-descriptions>
         
-        <div class="mt-4" v-if="currentRecord.imagePath">
-          <div class="text-gray-600 mb-2">采购凭证:</div>
-          <el-image
-            :src="`${apiBaseUrl}${currentRecord.imagePath}`"
-            fit="contain"
-            class="max-h-60 cursor-pointer"
-            @click="previewImage(currentRecord.imagePath)"
-          />
+        <div class="mt-6" v-if="currentRecord.imagePath">
+          <div class="text-gray-600 mb-2 font-medium flex items-center">
+            <el-icon class="mr-1"><Picture /></el-icon>
+            采购凭证:
+          </div>
+          <div class="flex justify-center">
+            <el-image
+              :src="`${apiBaseUrl}${currentRecord.imagePath}`"
+              fit="contain"
+              class="max-h-80 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-all border border-gray-200"
+              @click="previewImage(currentRecord.imagePath)"
+            />
+          </div>
         </div>
       </div>
     </el-dialog>
@@ -277,11 +323,12 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ShoppingCart, Plus, Search, Refresh } from '@element-plus/icons-vue'
+import { ShoppingCart, Plus, Search, Refresh, View, Delete, Check, Upload, Picture, InfoFilled, Food, CircleCheck, Phone } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 import { usePurchaseApi } from '@/api/purchase'
 import { useSupplierApi } from '@/api/supplier'
 import { useUserStore } from '@/stores/user'
+import { getUserById } from '@/api/user'
 
 const purchaseApi = usePurchaseApi()
 const supplierApi = useSupplierApi()
@@ -308,6 +355,8 @@ const searchForm = reactive({
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const currentRecord = ref(null)
+const purchaserName = ref('') // 采购人员姓名
+const purchaserPhone = ref('') // 采购人员电话
 
 // 图片预览
 const showViewer = ref(false)
@@ -375,41 +424,73 @@ const rules = {
 async function loadPurchaseList() {
   loading.value = true
   try {
-    // 处理日期范围
+    let res;
+    
+    // 构建基本参数
     const params = {
       page: currentPage.value,
       size: pageSize.value
-    }
+    };
     
+    // 处理不同的搜索情况
     if (searchForm.keyword) {
-      params.keyword = searchForm.keyword
+      // 如果关键词像是批次号格式，则使用专门的批次号API
+      if (searchForm.keyword.startsWith('PO-')) {
+        res = await purchaseApi.getPurchaseByBatchNumber(searchForm.keyword);
+        // 批次号API会返回单个对象，需要包装成列表格式
+        if (res.code === 200 && res.data) {
+          purchaseList.value = [res.data];
+          total.value = 1;
+        } else {
+          purchaseList.value = [];
+          total.value = 0;
+        }
+        loading.value = false;
+        return;
+      }
     }
     
+    // 其他搜索类型
     if (searchForm.supplier) {
-      params.supplier = searchForm.supplier
-    }
-    
-    if (searchForm.dateRange && searchForm.dateRange.length === 2) {
-      params.startDate = searchForm.dateRange[0]
-      params.endDate = searchForm.dateRange[1]
-      const res = await purchaseApi.getPurchaseByDateRange(
+      params.supplier = searchForm.supplier;
+      res = await purchaseApi.getPurchaseBySupplier(
+        params.supplier,
+        params.page,
+        params.size
+      );
+    } else if (searchForm.dateRange && searchForm.dateRange.length === 2) {
+      params.startDate = searchForm.dateRange[0];
+      params.endDate = searchForm.dateRange[1];
+      res = await purchaseApi.getPurchaseByDateRange(
         params.startDate,
         params.endDate,
         params.page,
         params.size
-      )
-      purchaseList.value = res.data.records || []
-      total.value = res.data.total || 0
+      );
+    } else if (searchForm.keyword) {
+      // 关键词搜索（非批次号格式）- 这里传递keyword参数到通用列表API
+      params.keyword = searchForm.keyword;
+      res = await purchaseApi.listPurchases(params.page, params.size, params.keyword);
     } else {
-      const res = await purchaseApi.listPurchases(params.page, params.size)
-      purchaseList.value = res.data.records || []
-      total.value = res.data.total || 0
+      // 无搜索条件，获取所有列表
+      res = await purchaseApi.listPurchases(params.page, params.size);
+    }
+    
+    if (res && res.code === 200) {
+      purchaseList.value = res.data.records || [];
+      total.value = res.data.total || 0;
+    } else {
+      purchaseList.value = [];
+      total.value = 0;
+      ElMessage.warning(res?.message || '没有找到匹配的记录');
     }
   } catch (error) {
-    console.error('获取采购列表失败', error)
-    ElMessage.error('获取采购列表失败')
+    console.error('获取采购列表失败', error);
+    ElMessage.error('获取采购列表失败');
+    purchaseList.value = [];
+    total.value = 0;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
@@ -433,9 +514,30 @@ function handleCurrentChange(page) {
 }
 
 // 查看详情
-function handleView(row) {
-  currentRecord.value = row
+async function handleView(row) {
+  currentRecord.value = {...row}
   detailVisible.value = true
+  
+  // 获取采购人员信息
+  if (row.purchaserId) {
+    try {
+      const res = await getUserById(row.purchaserId)
+      if (res && res.id) {
+        purchaserName.value = res.realName || res.username || `ID:${row.purchaserId}`
+        purchaserPhone.value = res.phone || '未知'
+      } else {
+        purchaserName.value = `未知(ID:${row.purchaserId})`
+        purchaserPhone.value = '未知'
+      }
+    } catch (error) {
+      console.error('获取采购人员信息失败', error)
+      purchaserName.value = `未知(ID:${row.purchaserId})`
+      purchaserPhone.value = '未知'
+    }
+  } else {
+    purchaserName.value = '未知'
+    purchaserPhone.value = '未知'
+  }
 }
 
 // 删除采购记录
@@ -581,11 +683,55 @@ onMounted(async () => {
   fetchSuppliers()
   loadPurchaseList()
 })
-</script>
+</script> 
 
 <style scoped>
 .purchase-detail {
   max-height: 70vh;
   overflow-y: auto;
+}
+
+.el-divider {
+  margin: 16px 0;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+:deep(.el-input__inner) {
+  height: 40px;
+}
+
+:deep(.el-upload--picture-card) {
+  width: 200px;
+  height: 200px;
+  line-height: 200px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 15px 20px;
+  margin-right: 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+:deep(.el-table th) {
+  background-color: #f5f7fa !important;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
+  background-color: #409eff;
+}
+
+:deep(.el-range-editor.el-input__wrapper) {
+  width: 360px !important;
+}
+
+:deep(.el-range-editor .el-range-input) {
+  width: 42% !important;
 }
 </style> 

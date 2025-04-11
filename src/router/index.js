@@ -136,7 +136,12 @@ const routes = [
         component: () => import('@/views/menu.vue'),
         meta: { requiresAuth: true, role: 'STAFF' }
       },
-      
+      {
+        path: 'inventory',
+        name: 'Inventory',
+        component: () => import('@/views/inventory/index.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
     ]
   }
 ]

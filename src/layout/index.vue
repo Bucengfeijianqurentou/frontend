@@ -95,6 +95,11 @@
                 <span>食品采购</span>
               </el-menu-item>
 
+            <el-menu-item index="/inventory">
+                <el-icon><Goods /></el-icon>
+                <span>库存管理</span>
+            </el-menu-item>
+
             <el-menu-item index="/processing">
               <el-icon><KnifeFork /></el-icon>
               <span>食品加工</span>
@@ -172,7 +177,8 @@ import {
   Link,
   DataLine,
   Lock,
-  Bell
+  Bell,
+  Goods
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

@@ -24,4 +24,12 @@ export function getUserInfo() {
     url: '/api/user/info',
     method: 'get'
   })
+}
+
+// 根据ID获取用户信息
+export function getUserById(id) {
+  return request({
+    url: `/api/user/${id}`,
+    method: 'get'
+  })
 } 
