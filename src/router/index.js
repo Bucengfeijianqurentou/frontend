@@ -91,6 +91,12 @@ const routes = [
         component: () => import('@/views/admin/reports.vue'),
         meta: { requiresAuth: true, role: 'ADMIN' }
       },
+      {
+        path: 'admin/distribution',
+        name: 'AdminDistribution',
+        component: () => import('@/views/admin/distribution.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
       // 监管方路由
       {
         path: 'inspection',

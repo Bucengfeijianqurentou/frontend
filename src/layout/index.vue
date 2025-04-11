@@ -34,9 +34,14 @@
             </el-menu-item>
 
             <el-menu-item index="/suppliers">
-                <el-icon><Connection /></el-icon>
-                <span>供应商管理</span>
-              </el-menu-item>
+              <el-icon><Connection /></el-icon>
+              <span>供应商管理</span>
+            </el-menu-item>
+
+            <el-menu-item index="/admin/distribution">
+              <el-icon><Reading /></el-icon>
+              <span>年级管理</span>
+            </el-menu-item>
 
             <el-sub-menu index="user-manage">
               <template #title>
@@ -178,7 +183,8 @@ import {
   DataLine,
   Lock,
   Bell,
-  Goods
+  Goods,
+  Reading
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

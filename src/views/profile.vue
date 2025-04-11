@@ -38,6 +38,14 @@
           <el-input v-model="userStore.user.email" disabled />
         </el-form-item>
 
+        <el-form-item label="电话">
+              <el-input v-model="userStore.user.phone" disabled />
+          </el-form-item>
+
+        <el-form-item label="真实姓名">
+            <el-input v-model="userStore.user.realName" disabled />
+        </el-form-item>
+
         <el-form-item label="注册时间">
           <el-input :model-value="formatDate(userStore.user.createTime)" disabled />
         </el-form-item>
