@@ -166,32 +166,50 @@
     <el-dialog
       v-model="detailDialogVisible"
       title="加工详情"
-      width="500px"
+      width="650px"
+      top="5vh"
     >
-      <div v-if="processingDetail">
-        <div class="mb-2"><span class="font-bold">批次号:</span> {{ processingDetail.batchNumber }}</div>
-        <div class="mb-2"><span class="font-bold">食品名称:</span> {{ processingDetail.foodName || '未知食品' }}</div>
-        <div class="mb-2"><span class="font-bold">加工时间:</span> {{ formatDateTime(processingDetail.processingTime) }}</div>
-        <div class="mb-2"><span class="font-bold">加工方法:</span> {{ processingDetail.method }}</div>
-        <div class="mb-2"><span class="font-bold">加工数量:</span> {{ processingDetail.quantity }}</div>
-        <div class="mb-2"><span class="font-bold">加工人姓名:</span> {{ processingDetail.processorName || '未知' }}</div>
-        <div class="mb-2"><span class="font-bold">加工人联系方式:</span> {{ processingDetail.processorPhone || '无' }}</div>
-        <div class="mb-2">
-          <span class="font-bold">卫生条件:</span> 
-          <el-tag :type="getHygieneTagType(processingDetail.hygieneCondition)">
-            {{ getHygieneLabel(processingDetail.hygieneCondition) }}
-          </el-tag>
+      <div v-if="processingDetail" class="processing-detail">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="detail-item">
+            <span class="font-bold">批次号:</span> {{ processingDetail.batchNumber }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">食品名称:</span> {{ processingDetail.foodName || '未知食品' }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">加工时间:</span> {{ formatDateTime(processingDetail.processingTime) }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">加工方法:</span> {{ processingDetail.method }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">加工数量:</span> {{ processingDetail.quantity }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">加工人姓名:</span> {{ processingDetail.processorName || '未知' }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">加工人联系方式:</span> {{ processingDetail.processorPhone || '无' }}
+          </div>
+          <div class="detail-item">
+            <span class="font-bold">卫生条件:</span> 
+            <el-tag :type="getHygieneTagType(processingDetail.hygieneCondition)">
+              {{ getHygieneLabel(processingDetail.hygieneCondition) }}
+            </el-tag>
+          </div>
         </div>
-        <div class="mb-2">
-          <span class="font-bold">加工图片:</span>
-          <div class="mt-2">
+        
+        <div class="mt-4">
+          <div class="font-bold mb-2">加工图片:</div>
+          <div class="image-container">
             <el-image 
               v-if="processingDetail.imagePath" 
               :src="getImageUrl(processingDetail.imagePath)" 
-              style="width: 100%"
+              style="max-width: 100%; max-height: 300px;"
               :preview-src-list="[getImageUrl(processingDetail.imagePath)]"
             />
-            <span v-else>无图片</span>
+            <div v-else class="no-image">无图片</div>
           </div>
         </div>
       </div>
@@ -571,5 +589,32 @@ const getImageUrl = (path) => {
   height: 178px;
   display: block;
   object-fit: cover;
+}
+
+/* 详情页样式 */
+.processing-detail {
+  padding: 10px;
+}
+
+.detail-item {
+  padding: 8px;
+  margin-bottom: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 10px;
+  min-height: 200px;
+}
+
+.no-image {
+  color: #909399;
+  font-size: 14px;
 }
 </style> 
