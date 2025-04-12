@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import { useUserStore } from '@/stores/user'
 
 export function useMenuApi() {
   return {
@@ -91,6 +92,19 @@ export function useMenuApi() {
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
+        }
+      })
+    },
+    
+    // 发放菜单
+    distributeMenu(menuId, recipients) {
+      return request({
+        url: '/api/distributions/batch',
+        method: 'post',
+        data: {
+          menuId,
+          recipients,
+          distributor: useUserStore().user.realName || useUserStore().user.username
         }
       })
     }

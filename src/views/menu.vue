@@ -233,6 +233,62 @@
         />
       </div>
     </el-dialog>
+
+    <!-- 菜单发放对话框 -->
+    <el-dialog
+      v-model="distributeDialogVisible"
+      title="发放菜单"
+      width="500px"
+      destroy-on-close
+    >
+      <el-form
+        ref="distributeFormRef"
+        :model="distributeForm"
+        :rules="distributeRules"
+        label-width="80px"
+      >
+        <el-form-item label="菜单信息" class="mb-4">
+          <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded">
+            <div>
+              <strong>日期：</strong>{{ formatDate(currentMenu.menuDate) }}
+            </div>
+            <div>
+              <strong>餐次：</strong>
+              <el-tag :type="getMealTypeTag(currentMenu.mealType)" size="small">
+                {{ currentMenu.mealType }}
+              </el-tag>
+            </div>
+            <div class="col-span-2">
+              <strong>菜品：</strong>{{ currentMenu.dishes }}
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item label="发放对象" prop="recipients" required>
+          <el-select
+            v-model="distributeForm.recipients"
+            multiple
+            filterable
+            placeholder="请选择发放年级"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="grade in gradeList"
+              :key="grade.id"
+              :label="grade.grade"
+              :value="grade.grade"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="distributeDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitDistributeForm" :loading="distributingMenu">
+            确认发放
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -241,14 +297,31 @@ import { ref, onMounted, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Memo, Plus, Edit, Delete, Search, Refresh, Picture } from '@element-plus/icons-vue'
 import { useMenuApi } from '@/api/menu'
+import { useGradeApi } from '@/api/grade'
 import { useUserStore } from '@/stores/user'
 
 const menuApi = useMenuApi()
+const gradeApi = useGradeApi()
 const userStore = useUserStore()
 
 // 图片预览相关
 const previewVisible = ref(false)
 const previewImage = ref('')
+
+// 菜单发放相关
+const distributeDialogVisible = ref(false)
+const distributeFormRef = ref(null)
+const distributingMenu = ref(false)
+const distributeForm = reactive({
+  recipients: []
+})
+const distributeRules = {
+  recipients: [
+    { required: true, message: '请选择发放年级', trigger: 'change' }
+  ]
+}
+const currentMenu = ref({})
+const gradeList = ref([])
 
 // 表格数据相关
 const loading = ref(false)
@@ -331,6 +404,7 @@ const userRole = computed(() => userStore.user?.role || '')
 // 初始化
 onMounted(() => {
   fetchMenuList()
+  fetchGradeList()
 })
 
 // 获取菜单列表
@@ -559,29 +633,32 @@ const handleDelete = (row) => {
 
 // 修改菜单状态
 const handleChangeStatus = (row) => {
-  // 如果菜单状态是"可发放"，则变更为"已发放"
+  // 如果菜单状态是"可发放"，则打开发放对话框
   // 如果菜单状态是"已发放"，则变更为"待审查"
-  const newStatus = row.status === '2' ? '0' : '2'
-  const statusText = newStatus === '2' ? '发放' : '撤回'
-  
-  ElMessageBox.confirm(`确定要${statusText}该菜单吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    try {
-      const res = await menuApi.updateMenuStatus(row.id, newStatus)
-      if (res.code === 200 && res.data) {
-        ElMessage.success(`${statusText}菜单成功`)
-        fetchMenuList()
-      } else {
-        ElMessage.error(res.message || `${statusText}菜单失败`)
+  if (row.status === '1') {
+    // 可发放 -> 打开发放对话框
+    openDistributeDialog(row)
+  } else if (row.status === '2') {
+    // 已发放 -> 撤回
+    ElMessageBox.confirm(`确定要撤回该菜单吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(async () => {
+      try {
+        const res = await menuApi.updateMenuStatus(row.id, '0')
+        if (res.code === 200 && res.data) {
+          ElMessage.success('撤回菜单成功')
+          fetchMenuList()
+        } else {
+          ElMessage.error(res.message || '撤回菜单失败')
+        }
+      } catch (error) {
+        console.error('撤回菜单失败:', error)
+        ElMessage.error('撤回菜单失败')
       }
-    } catch (error) {
-      console.error(`${statusText}菜单失败:`, error)
-      ElMessage.error(`${statusText}菜单失败`)
-    }
-  }).catch(() => {})
+    }).catch(() => {})
+  }
 }
 
 // 工具函数
@@ -639,6 +716,54 @@ const getImageUrl = (path) => {
   if (!path) return ''
   if (path.startsWith('http')) return path
   return `${import.meta.env.VITE_API_BASE_URL}${path}`
+}
+
+// 菜单发放相关
+const openDistributeDialog = (row) => {
+  currentMenu.value = row
+  distributeForm.recipients = [] // 清空之前的选择
+  distributeDialogVisible.value = true
+}
+
+const submitDistributeForm = async () => {
+  if (!distributeFormRef.value) return
+  
+  await distributeFormRef.value.validate(async (valid) => {
+    if (!valid) {
+      return
+    }
+    
+    distributingMenu.value = true
+    try {
+      // 调用分发接口
+      const res = await menuApi.distributeMenu(currentMenu.value.id, distributeForm.recipients)
+      if (res.code === 200 && res.data) {
+        ElMessage.success('菜单发放成功')
+        distributeDialogVisible.value = false
+        fetchMenuList() // 刷新菜单列表
+      } else {
+        ElMessage.error(res.message || '菜单发放失败')
+      }
+    } catch (error) {
+      console.error('菜单发放失败:', error)
+      ElMessage.error('菜单发放失败')
+    } finally {
+      distributingMenu.value = false
+    }
+  })
+}
+
+// 获取年级列表
+const fetchGradeList = async () => {
+  try {
+    const res = await gradeApi.getAllGrades()
+    if (res.code === 200 && res.data) {
+      gradeList.value = res.data
+    }
+  } catch (error) {
+    console.error('获取年级列表失败:', error)
+    ElMessage.error('获取年级列表失败')
+  }
 }
 </script>
 
