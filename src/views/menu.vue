@@ -94,8 +94,8 @@
         <el-table-column prop="userRealname" label="创建人" width="120" />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === '1' ? 'success' : 'warning'">
-              {{ row.status === '1' ? '已发放' : '未发放' }}
+            <el-tag :type="getStatusTag(row.status)">
+              {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -108,11 +108,13 @@
               </el-button>
               <el-button 
                 size="small" 
-                :type="row.status === '1' ? 'warning' : 'success'" 
+                :type="row.status === '2' ? 'warning' : 'success'" 
                 @click="handleChangeStatus(row)"
                 plain
+                :disabled="row.status === '0'"
+                :title="row.status === '0' ? '菜单待审查，无法发放' : ''"
               >
-                {{ row.status === '1' ? '撤回' : '发放' }}
+                {{ row.status === '2' ? '撤回' : '发放' }}
               </el-button>
               <el-button size="small" type="danger" @click="handleDelete(row)" plain>
                 <el-icon><Delete /></el-icon>
@@ -178,10 +180,11 @@
           />
         </el-form-item>
 
-        <el-form-item label="菜单状态" prop="status">
+        <el-form-item label="菜单状态" v-if="dialogType === 'edit' && userRole === 'ADMIN'">
           <el-radio-group v-model="menuForm.status">
-            <el-radio label="0">未发放</el-radio>
-            <el-radio label="1">已发放</el-radio>
+            <el-radio label="0">待审查</el-radio>
+            <el-radio label="1">可发放</el-radio>
+            <el-radio label="2">已发放</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -234,7 +237,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Memo, Plus, Edit, Delete, Search, Refresh, Picture } from '@element-plus/icons-vue'
 import { useMenuApi } from '@/api/menu'
@@ -321,6 +324,9 @@ const rules = {
     { required: true, message: '请输入菜品列表', trigger: 'blur' }
   ]
 }
+
+// 获取用户角色
+const userRole = computed(() => userStore.user?.role || '')
 
 // 初始化
 onMounted(() => {
@@ -553,8 +559,10 @@ const handleDelete = (row) => {
 
 // 修改菜单状态
 const handleChangeStatus = (row) => {
-  const newStatus = row.status === '1' ? '0' : '1'
-  const statusText = newStatus === '1' ? '发放' : '撤回'
+  // 如果菜单状态是"可发放"，则变更为"已发放"
+  // 如果菜单状态是"已发放"，则变更为"待审查"
+  const newStatus = row.status === '2' ? '0' : '2'
+  const statusText = newStatus === '2' ? '发放' : '撤回'
   
   ElMessageBox.confirm(`确定要${statusText}该菜单吗？`, '提示', {
     confirmButtonText: '确定',
@@ -582,6 +590,26 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString()
 }
 
+// 获取菜单状态显示文本
+const getStatusText = (status) => {
+  switch (status) {
+    case '0': return '待审查'
+    case '1': return '可发放'
+    case '2': return '已发放'
+    default: return '未知状态'
+  }
+}
+
+// 获取菜单状态标签类型
+const getStatusTag = (status) => {
+  switch (status) {
+    case '0': return 'info'     // 待审查：灰色
+    case '1': return 'warning'  // 可发放：黄色
+    case '2': return 'success'  // 已发放：绿色
+    default: return 'info'
+  }
+}
+
 const getMealTypeTag = (type) => {
   switch (type) {
     case '早餐':
@@ -595,12 +623,6 @@ const getMealTypeTag = (type) => {
   }
 }
 
-const getImageUrl = (path) => {
-  if (!path) return ''
-  if (path.startsWith('http')) return path
-  return `${import.meta.env.VITE_API_BASE_URL}${path}`
-}
-
 // 处理图片预览
 const handlePreviewImage = (imagePath) => {
   if (!imagePath) return
@@ -611,6 +633,12 @@ const handlePreviewImage = (imagePath) => {
 // 关闭图片预览
 const closePreview = () => {
   previewVisible.value = false
+}
+
+const getImageUrl = (path) => {
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return `${import.meta.env.VITE_API_BASE_URL}${path}`
 }
 </script>
 
