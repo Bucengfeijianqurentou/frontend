@@ -34,9 +34,9 @@
             @clear="handleSearch"
             style="width: 100%"
           >
-            <el-option label="早餐" value="BREAKFAST" />
-            <el-option label="午餐" value="LUNCH" />
-            <el-option label="晚餐" value="DINNER" />
+            <el-option label="早餐" value="早餐" />
+            <el-option label="午餐" value="午餐" />
+            <el-option label="晚餐" value="晚餐" />
           </el-select>
         </div>
         
@@ -79,14 +79,16 @@
         <el-table-column prop="dishes" label="菜品列表" min-width="250" show-overflow-tooltip />
         <el-table-column label="菜单图片" width="120">
           <template #default="{ row }">
-            <el-image
-              v-if="row.imagePath"
-              :src="getImageUrl(row.imagePath)"
-              fit="cover"
-              style="width: 60px; height: 60px"
-              :preview-src-list="[getImageUrl(row.imagePath)]"
-            />
-            <el-icon v-else class="text-gray-400"><Picture /></el-icon>
+            <div class="flex justify-center">
+              <el-image
+                v-if="row.imagePath"
+                :src="getImageUrl(row.imagePath)"
+                fit="cover"
+                style="width: 60px; height: 60px; border-radius: 4px; cursor: pointer;"
+                @click="handlePreviewImage(row.imagePath)"
+              />
+              <el-icon v-else class="text-gray-400"><Picture /></el-icon>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="userRealname" label="创建人" width="120" />
@@ -161,9 +163,9 @@
 
         <el-form-item label="餐次" prop="mealType">
           <el-select v-model="menuForm.mealType" placeholder="请选择餐次" style="width: 100%">
-            <el-option label="早餐" value="BREAKFAST" />
-            <el-option label="午餐" value="LUNCH" />
-            <el-option label="晚餐" value="DINNER" />
+            <el-option label="早餐" value="早餐" />
+            <el-option label="午餐" value="午餐" />
+            <el-option label="晚餐" value="晚餐" />
           </el-select>
         </el-form-item>
 
@@ -207,6 +209,27 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 图片预览对话框 -->
+    <el-dialog
+      v-model="previewVisible"
+      title="图片预览"
+      width="50%"
+      destroy-on-close
+      center
+      :close-on-click-modal="true"
+      class="preview-dialog"
+    >
+      <div class="image-preview-container">
+        <el-image
+          :src="previewImage"
+          fit="contain"
+          :preview-src-list="[previewImage]"
+          :initial-index="0"
+          preview-teleported
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -219,6 +242,10 @@ import { useUserStore } from '@/stores/user'
 
 const menuApi = useMenuApi()
 const userStore = useUserStore()
+
+// 图片预览相关
+const previewVisible = ref(false)
+const previewImage = ref('')
 
 // 表格数据相关
 const loading = ref(false)
@@ -557,13 +584,10 @@ const formatDate = (dateStr) => {
 
 const getMealTypeTag = (type) => {
   switch (type) {
-    case 'BREAKFAST':
     case '早餐':
       return 'success'
-    case 'LUNCH':
     case '午餐':
       return 'warning'
-    case 'DINNER':
     case '晚餐':
       return 'danger'
     default:
@@ -575,6 +599,18 @@ const getImageUrl = (path) => {
   if (!path) return ''
   if (path.startsWith('http')) return path
   return `${import.meta.env.VITE_API_BASE_URL}${path}`
+}
+
+// 处理图片预览
+const handlePreviewImage = (imagePath) => {
+  if (!imagePath) return
+  previewImage.value = getImageUrl(imagePath)
+  previewVisible.value = true
+}
+
+// 关闭图片预览
+const closePreview = () => {
+  previewVisible.value = false
 }
 </script>
 
@@ -610,5 +646,24 @@ const getImageUrl = (path) => {
   height: 178px;
   display: block;
   object-fit: cover;
+}
+
+.preview-dialog {
+  /* Add your styles here */
+}
+
+.image-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.image-preview-container :deep(.el-image) {
+  max-width: 100%;
+  max-height: 450px;
 }
 </style> 
