@@ -77,6 +77,20 @@
           </template>
         </el-table-column>
         <el-table-column prop="dishes" label="菜品列表" min-width="250" show-overflow-tooltip />
+        <el-table-column label="使用食品" width="150">
+          <template #default="{ row }">
+            <div v-if="row.processIds">
+              <el-tag size="small" type="success">{{ row.processIds.split(',').length }}个食品</el-tag>
+              <el-button 
+                link 
+                type="primary" 
+                size="small" 
+                @click="viewProcessingDetail(row.processIds)"
+              >查看详情</el-button>
+            </div>
+            <span v-else class="text-gray-400">无</span>
+          </template>
+        </el-table-column>
         <el-table-column label="菜单图片" width="120">
           <template #default="{ row }">
             <div class="flex justify-center">
@@ -180,6 +194,45 @@
           />
         </el-form-item>
 
+        <el-form-item label="食品选择" prop="processIds">
+          <div class="mb-2 text-gray-500 text-sm">请选择菜单所使用的食品（可多选）</div>
+          <el-select
+            v-model="menuForm.processIds"
+            multiple
+            filterable
+            placeholder="请选择食品"
+            style="width: 100%"
+            :loading="processingListLoading"
+          >
+            <el-option
+              v-for="item in processingList"
+              :key="item.id"
+              :label="`${item.method} (批次: ${item.batchNumber})`"
+              :value="item.id"
+            >
+              <div class="flex items-center">
+                <span class="mr-2">{{ item.method }}</span>
+                <el-tag size="small" type="info">批次: {{ item.batchNumber }}</el-tag>
+                <span class="ml-auto text-gray-400 text-xs">{{ formatProcessingTime(item.processingTime) }}</span>
+              </div>
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="使用食品" v-if="dialogType === 'edit' && menuForm.processIds && menuForm.processIds.length > 0">
+          <div class="text-gray-500 text-sm mb-1">此菜单使用的食品</div>
+          <div class="flex flex-wrap gap-2">
+            <el-tag 
+              v-for="id in menuForm.processIds" 
+              :key="id"
+              type="success"
+              effect="light"
+            >
+              {{ getProcessingName(id) }}
+            </el-tag>
+          </div>
+        </el-form-item>
+
         <el-form-item label="菜单状态" v-if="dialogType === 'edit' && userRole === 'ADMIN'">
           <el-radio-group v-model="menuForm.status">
             <el-radio label="0">待审查</el-radio>
@@ -206,7 +259,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitForm" :loading="submitting">
+          <el-button type="primary" @click="handleSubmit" :loading="submitting">
             {{ dialogType === 'add' ? '新增' : '保存' }}
           </el-button>
         </span>
@@ -289,6 +342,66 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 食品详情对话框 -->
+    <el-dialog
+      v-model="processingDetailVisible"
+      title="菜单使用的食品"
+      width="700px"
+      destroy-on-close
+    >
+      <div v-loading="processingDetailLoading">
+        <el-empty v-if="selectedProcessings.length === 0" description="暂无食品信息" />
+        <div v-else class="space-y-4">
+          <div v-for="item in selectedProcessings" :key="item.id" 
+            class="border rounded-md p-4 hover:shadow-md transition-shadow"
+          >
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-bold mb-2 flex items-center">
+                  <span>{{ item.method }}</span>
+                  <el-tag class="ml-2" size="small" type="success">批次号: {{ item.batchNumber }}</el-tag>
+                </h3>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                  <div>
+                    <span class="text-gray-500">加工时间:</span>
+                    <span class="ml-2">{{ formatProcessingTime(item.processingTime) }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">加工数量:</span>
+                    <span class="ml-2">{{ item.quantity }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">加工人:</span>
+                    <span class="ml-2">{{ item.processorName }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">卫生条件:</span>
+                    <span class="ml-2">
+                      <el-tag :type="getHygieneTag(item.hygieneCondition)" size="small">
+                        {{ getHygieneText(item.hygieneCondition) }}
+                      </el-tag>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="w-24 h-24 flex-shrink-0">
+                <el-image
+                  v-if="item.imagePath"
+                  :src="getImageUrl(item.imagePath)"
+                  fit="cover"
+                  class="w-full h-full rounded-md object-cover"
+                  :preview-src-list="[getImageUrl(item.imagePath)]"
+                />
+                <div v-else class="w-full h-full bg-gray-100 flex items-center justify-center rounded-md">
+                  <el-icon class="text-gray-400 text-xl"><Picture /></el-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -298,10 +411,12 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Memo, Plus, Edit, Delete, Search, Refresh, Picture } from '@element-plus/icons-vue'
 import { useMenuApi } from '@/api/menu'
 import { useGradeApi } from '@/api/grade'
+import { useProcessingApi } from '@/api/processing'
 import { useUserStore } from '@/stores/user'
 
 const menuApi = useMenuApi()
 const gradeApi = useGradeApi()
+const processingApi = useProcessingApi()
 const userStore = useUserStore()
 
 // 图片预览相关
@@ -379,7 +494,8 @@ const menuForm = reactive({
   userId: '',
   userRealname: '',
   status: '0',
-  imagePath: ''
+  imagePath: '',
+  processIds: []
 })
 
 // 上传相关
@@ -401,10 +517,20 @@ const rules = {
 // 获取用户角色
 const userRole = computed(() => userStore.user?.role || '')
 
+// 加工记录相关
+const processingList = ref([])
+const processingListLoading = ref(false)
+
+// 食品详情相关
+const processingDetailVisible = ref(false)
+const processingDetailLoading = ref(false)
+const selectedProcessings = ref([])
+
 // 初始化
 onMounted(() => {
   fetchMenuList()
   fetchGradeList()
+  fetchProcessingList()
 })
 
 // 获取菜单列表
@@ -499,14 +625,18 @@ const handleAddMenu = () => {
 // 编辑菜单
 const handleEdit = (row) => {
   dialogType.value = 'edit'
-  resetForm()
-  
-  // 填充表单数据
   Object.keys(menuForm).forEach(key => {
-    if (row[key] !== undefined) {
+    if (key in row) {
       menuForm[key] = row[key]
     }
   })
+  
+  // 处理processIds，将字符串转为数组
+  if (typeof menuForm.processIds === 'string' && menuForm.processIds) {
+    menuForm.processIds = menuForm.processIds.split(',').map(id => parseInt(id))
+  } else {
+    menuForm.processIds = []
+  }
   
   dialogVisible.value = true
 }
@@ -521,6 +651,7 @@ const resetForm = () => {
   menuForm.userRealname = ''
   menuForm.status = '0'
   menuForm.imagePath = ''
+  menuForm.processIds = []
   
   if (menuFormRef.value) {
     menuFormRef.value.resetFields()
@@ -569,42 +700,49 @@ const beforeUpload = (file) => {
 }
 
 // 提交表单
-const submitForm = async () => {
+const handleSubmit = async () => {
   if (!menuFormRef.value) return
   
   await menuFormRef.value.validate(async (valid) => {
-    if (!valid) {
-      return
-    }
+    if (!valid) return
     
     submitting.value = true
+    
     try {
-      let res
-      
       // 设置创建人信息
       if (dialogType.value === 'add' && userStore.user) {
         menuForm.userId = userStore.user.id
         menuForm.userRealname = userStore.user.realName || userStore.user.username
       }
       
-      if (dialogType.value === 'add') {
-        res = await menuApi.createMenu(menuForm)
+      // 处理processIds，将数组转为逗号分隔的字符串
+      if (menuForm.processIds && menuForm.processIds.length > 0) {
+        menuForm.processIds = menuForm.processIds.join(',')
       } else {
-        res = await menuApi.updateMenu(menuForm.id, menuForm)
+        menuForm.processIds = ''
       }
       
+      // 创建或更新菜单
+      const res = dialogType.value === 'add'
+        ? await menuApi.createMenu(menuForm)
+        : await menuApi.updateMenu(menuForm.id, menuForm)
+      
       if (res.code === 200 && res.data) {
-        ElMessage.success(dialogType.value === 'add' ? '新增菜单成功' : '更新菜单成功')
+        ElMessage.success(dialogType.value === 'add' ? '创建菜单成功' : '更新菜单成功')
         dialogVisible.value = false
         fetchMenuList()
       } else {
-        ElMessage.error(res.message || (dialogType.value === 'add' ? '新增菜单失败' : '更新菜单失败'))
+        ElMessage.error(res.message || '操作失败')
       }
     } catch (error) {
-      console.error(dialogType.value === 'add' ? '新增菜单失败:' : '更新菜单失败:', error)
-      ElMessage.error(dialogType.value === 'add' ? '新增菜单失败' : '更新菜单失败')
+      console.error('提交菜单失败:', error)
+      ElMessage.error('提交菜单失败')
     } finally {
       submitting.value = false
+      // 重置为数组形式，防止影响下次操作
+      if (typeof menuForm.processIds === 'string') {
+        menuForm.processIds = menuForm.processIds ? menuForm.processIds.split(',').map(id => parseInt(id)) : []
+      }
     }
   })
 }
@@ -764,6 +902,90 @@ const fetchGradeList = async () => {
     console.error('获取年级列表失败:', error)
     ElMessage.error('获取年级列表失败')
   }
+}
+
+// 获取加工记录列表
+const fetchProcessingList = async () => {
+  processingListLoading.value = true
+  try {
+    const res = await processingApi.getAllProcessings()
+    if (res.code === 200 && res.data) {
+      processingList.value = res.data
+    }
+  } catch (error) {
+    console.error('获取加工记录失败:', error)
+    ElMessage.error('获取加工记录失败')
+  } finally {
+    processingListLoading.value = false
+  }
+}
+
+// 格式化加工时间
+const formatProcessingTime = (timeStr) => {
+  if (!timeStr) return ''
+  const date = new Date(timeStr)
+  return date.toLocaleString()
+}
+
+// 查看加工详情
+const viewProcessingDetail = async (processIds) => {
+  if (!processIds) return
+  
+  processingDetailLoading.value = true
+  try {
+    const res = await processingApi.getProcessingsByIds(processIds)
+    if (res.code === 200 && res.data) {
+      selectedProcessings.value = res.data
+      processingDetailVisible.value = true
+    } else {
+      ElMessage.error('获取食品详情失败')
+    }
+  } catch (error) {
+    console.error('获取食品详情失败:', error)
+    ElMessage.error('获取食品详情失败')
+  } finally {
+    processingDetailLoading.value = false
+  }
+}
+
+// 获取食品卫生条件文本
+const getHygieneText = (condition) => {
+  if (!condition) return '未知'
+  
+  // 针对不同格式的枚举值处理
+  if (typeof condition === 'object' && condition.description) {
+    return condition.description
+  }
+  
+  // 根据枚举名匹配
+  switch (condition) {
+    case 'GOOD': return '良好'
+    case 'NORMAL': return '一般'
+    case 'POOR': return '差'
+    default: return '未知'
+  }
+}
+
+// 获取食品卫生条件标签类型
+const getHygieneTag = (condition) => {
+  if (!condition) return 'info'
+  
+  // 针对不同格式的枚举处理
+  const hygiene = typeof condition === 'object' ? condition.name : condition
+  
+  // 根据枚举名匹配
+  switch (hygiene) {
+    case 'GOOD': return 'success'
+    case 'NORMAL': return 'warning'
+    case 'POOR': return 'danger'
+    default: return 'info'
+  }
+}
+
+// 获取加工记录名称
+const getProcessingName = (id) => {
+  const processing = processingList.value.find(item => item.id === id)
+  return processing ? `${processing.method} (批次: ${processing.batchNumber})` : `加工ID: ${id}`
 }
 </script>
 

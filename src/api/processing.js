@@ -58,6 +58,23 @@ export function useProcessingApi() {
           'Content-Type': 'multipart/form-data'
         }
       })
+    },
+
+    // 获取所有加工记录（不分页）
+    getAllProcessings() {
+      return request({
+        url: '/api/processings/all',
+        method: 'get'
+      })
+    },
+
+    // 根据ID列表获取加工记录
+    getProcessingsByIds(ids) {
+      return request({
+        url: '/api/processings/ids',
+        method: 'get',
+        params: { ids }
+      })
     }
   }
 }

@@ -110,14 +110,14 @@
               <span>食品加工</span>
             </el-menu-item>
 
-            <el-menu-item index="/distribution">
-              <el-icon><Box /></el-icon>
-              <span>食品发放</span>
-            </el-menu-item>
-
             <el-menu-item index="/menu">
               <el-icon><Memo /></el-icon>
               <span>菜单管理</span>
+            </el-menu-item>
+
+            <el-menu-item index="/distribution">
+                <el-icon><Box /></el-icon>
+                <span>食品发放</span>
             </el-menu-item>
 
             
