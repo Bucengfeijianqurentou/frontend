@@ -13,7 +13,7 @@ export function useMenuApi() {
     },
 
     // 搜索菜单
-    searchMenus(page, size, startDate, endDate, mealType) {
+    searchMenus(page, size, startDate, endDate, mealType, status) {
       return request({
         url: '/api/menu/search',
         method: 'get',
@@ -22,7 +22,8 @@ export function useMenuApi() {
           size,
           startDate,
           endDate,
-          mealType
+          mealType,
+          status
         }
       })
     },
