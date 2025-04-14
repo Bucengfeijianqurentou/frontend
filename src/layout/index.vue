@@ -76,10 +76,20 @@
 
           <!-- 监管方菜单 -->
           <template v-if="userStore.isInspector">
-            <el-menu-item index="/inspection">
-              <el-icon><Search /></el-icon>
-              <span>监管检查</span>
-            </el-menu-item>
+            <el-sub-menu index="inspection-manage">
+              <template #title>
+                <el-icon><Search /></el-icon>
+                <span>监管检查</span>
+              </template>
+              <el-menu-item index="/inspection">
+                <el-icon><Document /></el-icon>
+                <span>菜单审查</span>
+              </el-menu-item>
+              <el-menu-item index="/inspection/records">
+                <el-icon><List /></el-icon>
+                <span>审查记录</span>
+              </el-menu-item>
+            </el-sub-menu>
 
             <el-menu-item index="/tracing">
               <el-icon><Link /></el-icon>

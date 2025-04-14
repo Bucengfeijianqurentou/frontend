@@ -7,13 +7,13 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/Login.vue'),
+    component: () => import('@/views/common/Login.vue'),
     meta: { requiresAuth: false }
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('@/views/Register.vue'),
+    component: () => import('@/views/common/Register.vue'),
     meta: { requiresAuth: false }
   },
   {
@@ -33,7 +33,7 @@ const routes = [
       {
         path: 'profile',
         name: 'Profile',
-        component: () => import('@/views/profile.vue'),
+        component: () => import('@/views/common/profile.vue'),
         meta: { requiresAuth: true }
       },
       // 管理员路由
@@ -101,7 +101,13 @@ const routes = [
       {
         path: 'inspection',
         name: 'Inspection',
-        component: () => import('@/views/inspection.vue'),
+        component: () => import('@/views/inspection/inspection.vue'),
+        meta: { requiresAuth: true, role: 'INSPECTOR' }
+      },
+      {
+        path: 'inspection/records',
+        name: 'InspectionRecords',
+        component: () => import('@/views/inspection/records.vue'),
         meta: { requiresAuth: true, role: 'INSPECTOR' }
       },
       {
