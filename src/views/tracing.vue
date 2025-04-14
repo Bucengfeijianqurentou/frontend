@@ -62,8 +62,19 @@
           <!-- 未找到结果的提示 -->
           <el-empty 
             v-if="!tracingResult || !tracingResult.found" 
-            description="未找到符合条件的溯源信息"
-          />
+          >
+            <template #image>
+              <el-icon class="text-6xl text-yellow-400"><WarningFilled /></el-icon>
+            </template>
+            <template #description>
+              <div>
+                <p class="text-lg mb-2 text-gray-700">未查询到符合条件的溯源信息</p>
+                <p class="text-gray-500">
+                  {{ tracingResult && tracingResult.errorMessage ? tracingResult.errorMessage : '请尝试修改查询条件后重新查询' }}
+                </p>
+              </div>
+            </template>
+          </el-empty>
           
           <!-- 溯源结果展示 -->
           <div v-else class="max-w-4xl mx-auto">
@@ -132,46 +143,48 @@
                   <div
                     v-for="(purchase, index) in tracingResult.purchaseList"
                     :key="purchase.id"
-                    class="border rounded-md p-4 mb-4 hover:shadow-md transition-shadow"
+                    class="border rounded-md p-4 mb-4"
                   >
-                    <h3 class="text-lg font-medium mb-2 flex items-center">
+                    <h3 class="text-lg font-medium mb-4 flex items-center">
                       <span>采购记录 #{{ index + 1 }}</span>
                       <el-tag class="ml-2" size="small" type="info">
                         批次号: {{ purchase.batchNumber }}
                       </el-tag>
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p><span class="text-gray-500">食品名称:</span> {{ purchase.name }}</p>
-                        <p><span class="text-gray-500">采购日期:</span> {{ formatDate(purchase.purchaseDate) }}</p>
-                        <p><span class="text-gray-500">生产日期:</span> {{ formatDate(purchase.productionDate) }}</p>
-                        <p><span class="text-gray-500">保质期:</span> {{ purchase.shelfLife }}天</p>
-                      </div>
-                      <div>
-                        <p><span class="text-gray-500">供应商:</span> {{ purchase.supplier }}</p>
-                        <p><span class="text-gray-500">采购数量:</span> {{ purchase.quantity }}</p>
-                        <p>
-                          <span class="text-gray-500">采购人员:</span> 
+                    <el-descriptions 
+                      :column="1" 
+                      border 
+                      class="w-full"
+                      label-class-name="bg-gray-50"
+                    >
+                      <el-descriptions-item label="食品名称">{{ purchase.name }}</el-descriptions-item>
+                      <el-descriptions-item label="采购日期">{{ formatDate(purchase.purchaseDate) }}</el-descriptions-item>
+                      <el-descriptions-item label="生产日期">{{ formatDate(purchase.productionDate) }}</el-descriptions-item>
+                      <el-descriptions-item label="保质期">{{ purchase.shelfLife }}天</el-descriptions-item>
+                      <el-descriptions-item label="供应商">{{ purchase.supplier }}</el-descriptions-item>
+                      <el-descriptions-item label="采购数量">{{ purchase.quantity }}</el-descriptions-item>
+                      <el-descriptions-item label="采购人员">
+                        <div>
                           <template v-if="tracingResult.purchaserInfoMap && tracingResult.purchaserInfoMap[purchase.purchaserId]">
                             {{ tracingResult.purchaserInfoMap[purchase.purchaserId].realName || tracingResult.purchaserInfoMap[purchase.purchaserId].username }}
-                            <span class="text-gray-500 ml-1">
-                              (联系方式: {{ tracingResult.purchaserInfoMap[purchase.purchaserId].phone || '无' }})
-                            </span>
+                            <div v-if="tracingResult.purchaserInfoMap[purchase.purchaserId].phone" class="text-gray-500">
+                              联系方式: {{ tracingResult.purchaserInfoMap[purchase.purchaserId].phone || '无' }}
+                            </div>
                           </template>
                           <template v-else>
                             {{ purchase.purchaserId }}
                           </template>
-                        </p>
-                      </div>
-                    </div>
-                    <div v-if="purchase.imagePath" class="mt-2">
-                      <el-image
-                        :src="getImageUrl(purchase.imagePath)"
-                        fit="cover"
-                        style="width: 80px; height: 80px; border-radius: 4px;"
-                        :preview-src-list="[getImageUrl(purchase.imagePath)]"
-                      />
-                    </div>
+                        </div>
+                      </el-descriptions-item>
+                      <el-descriptions-item label="采购凭证" v-if="purchase.imagePath">
+                        <el-image
+                          :src="getImageUrl(purchase.imagePath)"
+                          fit="cover"
+                          style="width: 120px; height: 120px; border-radius: 4px;"
+                          :preview-src-list="[getImageUrl(purchase.imagePath)]"
+                        />
+                      </el-descriptions-item>
+                    </el-descriptions>
                   </div>
                 </div>
                 <el-empty v-else description="暂无采购信息" />
@@ -191,39 +204,39 @@
                   <div
                     v-for="(processing, index) in tracingResult.processingList"
                     :key="processing.id"
-                    class="border rounded-md p-4 mb-4 hover:shadow-md transition-shadow"
+                    class="border rounded-md p-4 mb-4"
                   >
-                    <h3 class="text-lg font-medium mb-2 flex items-center">
+                    <h3 class="text-lg font-medium mb-4 flex items-center">
                       <span>加工记录 #{{ index + 1 }}</span>
                       <el-tag class="ml-2" size="small" type="success">
                         批次号: {{ processing.batchNumber }}
                       </el-tag>
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p><span class="text-gray-500">加工方法:</span> {{ processing.method }}</p>
-                        <p><span class="text-gray-500">加工时间:</span> {{ formatDateTime(processing.processingTime) }}</p>
-                        <p><span class="text-gray-500">加工数量:</span> {{ processing.quantity }}</p>
-                      </div>
-                      <div>
-                        <p><span class="text-gray-500">加工人员:</span> {{ processing.processorName }}</p>
-                        <p><span class="text-gray-500">联系方式:</span> {{ processing.processorPhone }}</p>
-                        <p>
-                          <span class="text-gray-500">卫生条件:</span>
-                          <el-tag :type="getHygieneConditionTag(processing.hygieneCondition)" size="small">
-                            {{ getHygieneConditionText(processing.hygieneCondition) }}
-                          </el-tag>
-                        </p>
-                      </div>
-                    </div>
-                    <div v-if="processing.imagePath" class="mt-2">
-                      <el-image
-                        :src="getImageUrl(processing.imagePath)"
-                        fit="cover"
-                        style="width: 80px; height: 80px; border-radius: 4px;"
-                        :preview-src-list="[getImageUrl(processing.imagePath)]"
-                      />
-                    </div>
+                    <el-descriptions 
+                      :column="1" 
+                      border 
+                      class="w-full"
+                      label-class-name="bg-gray-50"
+                    >
+                      <el-descriptions-item label="加工方法">{{ processing.method }}</el-descriptions-item>
+                      <el-descriptions-item label="加工时间">{{ formatDateTime(processing.processingTime) }}</el-descriptions-item>
+                      <el-descriptions-item label="加工数量">{{ processing.quantity }}</el-descriptions-item>
+                      <el-descriptions-item label="加工人员">{{ processing.processorName }}</el-descriptions-item>
+                      <el-descriptions-item label="联系方式">{{ processing.processorPhone }}</el-descriptions-item>
+                      <el-descriptions-item label="卫生条件">
+                        <el-tag :type="getHygieneConditionTag(processing.hygieneCondition)">
+                          {{ getHygieneConditionText(processing.hygieneCondition) }}
+                        </el-tag>
+                      </el-descriptions-item>
+                      <el-descriptions-item label="加工图片" v-if="processing.imagePath">
+                        <el-image
+                          :src="getImageUrl(processing.imagePath)"
+                          fit="cover"
+                          style="width: 120px; height: 120px; border-radius: 4px;"
+                          :preview-src-list="[getImageUrl(processing.imagePath)]"
+                        />
+                      </el-descriptions-item>
+                    </el-descriptions>
                   </div>
                 </div>
                 <el-empty v-else description="暂无加工信息" />
@@ -295,9 +308,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, h } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Link, Search, Refresh, Calendar, ShoppingCart, Box, Check } from '@element-plus/icons-vue'
+import { Link, Search, Refresh, Calendar, ShoppingCart, Box, Check, WarningFilled } from '@element-plus/icons-vue'
 import { useTracingApi } from '@/api/tracing'
 
 const tracingApi = useTracingApi()
@@ -333,7 +346,8 @@ const handleQuery = async () => {
     if (!valid) return
     
     loading.value = true
-    showResult.value = false
+    showResult.value = true // 始终显示结果区域
+    tracingResult.value = { found: false, errorMessage: '' } // 默认设置为未找到
     
     try {
       const res = await tracingApi.queryTracing({
@@ -346,13 +360,13 @@ const handleQuery = async () => {
       
       if (res.code === 200 && res.data) {
         tracingResult.value = res.data
-        showResult.value = true
       } else {
-        ElMessage.error(res.message || '查询失败')
+        console.log('查询服务异常:', res.message || '未知错误')
+        tracingResult.value.errorMessage = '查询服务异常，请稍后重试'
       }
     } catch (error) {
       console.error('溯源查询失败:', error)
-      ElMessage.error('查询失败: ' + (error.message || '未知错误'))
+      tracingResult.value.errorMessage = '查询服务异常，请稍后重试'
     } finally {
       loading.value = false
     }
@@ -441,6 +455,11 @@ const getInspectionResultText = (result) => {
     default: return result
   }
 }
+
+// 添加一个自定义的警告图标组件
+const WarningIcon = () => h('div', { class: 'text-yellow-500 text-xl mb-3' }, [
+  h('i', { class: 'el-icon-warning' })
+])
 </script>
 
 <style scoped>
