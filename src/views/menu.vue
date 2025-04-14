@@ -3,7 +3,7 @@
     <el-card class="w-full mb-4">
       <template #header>
         <div class="flex items-center justify-between">
-          <div class="flex items-center">
+        <div class="flex items-center">
             <el-icon class="mr-2 text-blue-500 text-xl"><Memo /></el-icon>
             <span class="text-lg font-medium">菜单管理</span>
           </div>
@@ -987,7 +987,7 @@ const getProcessingName = (id) => {
   const processing = processingList.value.find(item => item.id === id)
   return processing ? `${processing.method} (批次: ${processing.batchNumber})` : `加工ID: ${id}`
 }
-</script>
+</script> 
 
 <style scoped>
 .avatar-uploader {

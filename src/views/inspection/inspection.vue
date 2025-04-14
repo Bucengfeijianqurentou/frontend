@@ -156,6 +156,27 @@
             placeholder="请输入整改建议（如无可不填）"
           />
         </el-form-item>
+        
+        <el-form-item label="监察凭证" prop="imagePath">
+          <el-upload
+            class="upload-demo"
+            action="#"
+            :auto-upload="false"
+            :on-change="handleImageChange"
+            :limit="1"
+            :file-list="fileList"
+            list-type="picture"
+          >
+            <template #trigger>
+              <el-button type="primary">选择图片</el-button>
+            </template>
+            <template #tip>
+              <div class="el-upload__tip text-gray-500">
+                请上传监察凭证图片，仅支持jpg/png格式，大小不超过5MB
+              </div>
+            </template>
+          </el-upload>
+        </el-form-item>
       </el-form>
       
       <template #footer>
@@ -285,6 +306,7 @@ const inspectionDialogVisible = ref(false)
 const inspectionFormRef = ref(null)
 const submitting = ref(false)
 const currentMenu = ref({})
+const fileList = ref([])
 const inspectionForm = reactive({
   inspectorId: null,
   inspectionTime: null,
@@ -292,7 +314,8 @@ const inspectionForm = reactive({
   result: 'PASS',
   issues: '',
   suggestions: '',
-  menuId: null
+  menuId: null,
+  imagePath: null
 })
 
 const inspectionRules = {
@@ -364,8 +387,31 @@ const handleInspect = (row) => {
   inspectionForm.issues = ''
   inspectionForm.suggestions = ''
   inspectionForm.menuId = row.id
+  inspectionForm.imagePath = null
+  fileList.value = []
   
   inspectionDialogVisible.value = true
+}
+
+// 处理图片上传
+const handleImageChange = (file) => {
+  const isImage = file.raw.type === 'image/jpeg' || file.raw.type === 'image/png';
+  const isLt5M = file.raw.size / 1024 / 1024 < 5;
+
+  if (!isImage) {
+    ElMessage.error('监察凭证图片只能是JPG或PNG格式!');
+    fileList.value = [];
+    return false;
+  }
+  
+  if (!isLt5M) {
+    ElMessage.error('监察凭证图片大小不能超过5MB!');
+    fileList.value = [];
+    return false;
+  }
+  
+  fileList.value = [file];
+  return true;
 }
 
 // 提交审查结果
@@ -378,6 +424,18 @@ const submitInspection = async () => {
     submitting.value = true
     
     try {
+      // 处理图片上传
+      if (fileList.value.length > 0) {
+        const file = fileList.value[0].raw;
+        const uploadRes = await inspectionApi.uploadInspectionImage(file);
+        
+        if (uploadRes && uploadRes.data) {
+          inspectionForm.imagePath = uploadRes.data;
+        } else {
+          ElMessage.warning('凭证图片上传失败，将继续提交其他信息');
+        }
+      }
+      
       // 创建检查记录
       const res = await inspectionApi.createInspection(inspectionForm)
       

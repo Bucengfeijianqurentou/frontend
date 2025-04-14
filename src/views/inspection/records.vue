@@ -104,6 +104,22 @@
             <div>{{ getInspectorName(row) }}</div>
           </template>
         </el-table-column>
+        <el-table-column label="监察凭证" width="100">
+          <template #default="{ row }">
+            <div class="text-center">
+              <el-image 
+                v-if="row.imagePath" 
+                :src="getImageUrl(row.imagePath)" 
+                style="width: 50px; height: 50px; border-radius: 4px;"
+                fit="cover"
+                :preview-src-list="[getImageUrl(row.imagePath)]"
+                class="cursor-pointer"
+                preview-teleported
+              />
+              <el-icon v-else class="text-gray-400"><Picture /></el-icon>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleViewDetail(row)">
@@ -152,6 +168,19 @@
         </el-descriptions-item>
         <el-descriptions-item label="问题发现">{{ currentInspection.issues || '无' }}</el-descriptions-item>
         <el-descriptions-item label="改进建议">{{ currentInspection.suggestions || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="监察凭证">
+          <div v-if="currentInspection.imagePath" class="mt-2">
+            <el-image
+              :src="getImageUrl(currentInspection.imagePath)"
+              style="max-width: 300px; max-height: 200px;"
+              fit="contain"
+              :preview-src-list="[getImageUrl(currentInspection.imagePath)]"
+              preview-teleported
+              :initial-index="0"
+            />
+          </div>
+          <span v-else class="text-gray-400">无</span>
+        </el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
@@ -165,7 +194,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Search, List, Refresh, View } from '@element-plus/icons-vue'
+import { Search, List, Refresh, View, Picture } from '@element-plus/icons-vue'
 import { useInspectionApi } from '@/api/inspection'
 import { useMenuApi } from '@/api/menu'
 import { useUserStore } from '@/stores/user'
@@ -636,4 +665,17 @@ const getInspectorDetail = (record) => {
   
   return details.length > 0 ? details.join('\n') : `ID: ${record.inspectorId}`;
 }
-</script> 
+
+// 获取图片URL
+const getImageUrl = (path) => {
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return `${import.meta.env.VITE_API_BASE_URL}${path}`
+}
+</script>
+
+<style scoped>
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+</style> 
