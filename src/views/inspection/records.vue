@@ -84,6 +84,10 @@
                   {{ row.menu.mealType }}
                 </el-tag>
               </div>
+              <div>
+                  <span class="text-gray-500">菜品名称：</span>
+                  <span>{{ row.menu.dishes }}</span>
+              </div>
             </div>
             <span v-else-if="row.menuId" class="text-gray-500">菜单ID: {{ row.menuId }}</span>
             <span v-else class="text-gray-400">无菜单信息</span>
