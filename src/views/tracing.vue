@@ -100,7 +100,12 @@
                     {{ tracingResult.menu.dishes }}
                   </el-descriptions-item>
                   <el-descriptions-item label="创建人员">
-                    {{ tracingResult.menu.userRealname }}
+                    <div>
+                      <span>{{ tracingResult.menu.userRealname }}</span>
+                      <span v-if="tracingResult.menuCreatorContact" class="ml-2 text-gray-500">
+                        (联系方式: {{ tracingResult.menuCreatorContact }})
+                      </span>
+                    </div>
                   </el-descriptions-item>
                   <el-descriptions-item label="菜单图片" v-if="tracingResult.menu.imagePath">
                     <el-image
@@ -145,7 +150,18 @@
                       <div>
                         <p><span class="text-gray-500">供应商:</span> {{ purchase.supplier }}</p>
                         <p><span class="text-gray-500">采购数量:</span> {{ purchase.quantity }}</p>
-                        <p><span class="text-gray-500">采购人员:</span> {{ purchase.purchaserId }}</p>
+                        <p>
+                          <span class="text-gray-500">采购人员:</span> 
+                          <template v-if="tracingResult.purchaserInfoMap && tracingResult.purchaserInfoMap[purchase.purchaserId]">
+                            {{ tracingResult.purchaserInfoMap[purchase.purchaserId].realName || tracingResult.purchaserInfoMap[purchase.purchaserId].username }}
+                            <span class="text-gray-500 ml-1">
+                              (联系方式: {{ tracingResult.purchaserInfoMap[purchase.purchaserId].phone || '无' }})
+                            </span>
+                          </template>
+                          <template v-else>
+                            {{ purchase.purchaserId }}
+                          </template>
+                        </p>
                       </div>
                     </div>
                     <div v-if="purchase.imagePath" class="mt-2">
@@ -247,8 +263,16 @@
                     <el-descriptions-item label="整改建议" v-if="tracingResult.inspection.suggestions">
                       {{ tracingResult.inspection.suggestions }}
                     </el-descriptions-item>
-                    <el-descriptions-item label="监察人员ID">
-                      {{ tracingResult.inspection.inspectorId }}
+                    <el-descriptions-item label="监察人员">
+                      <div v-if="tracingResult.inspectorInfo">
+                        <div>{{ tracingResult.inspectorInfo.realName || tracingResult.inspectorInfo.username }}</div>
+                        <div v-if="tracingResult.inspectorInfo.phone" class="text-gray-500">
+                          联系方式: {{ tracingResult.inspectorInfo.phone }}
+                        </div>
+                      </div>
+                      <div v-else>
+                        ID: {{ tracingResult.inspection.inspectorId }}
+                      </div>
                     </el-descriptions-item>
                     <el-descriptions-item label="监察凭证" v-if="tracingResult.inspection.imagePath">
                       <el-image
