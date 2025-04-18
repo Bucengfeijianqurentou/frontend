@@ -52,6 +52,15 @@ export function usePurchaseApi() {
         method: 'get',
         params: { page, size }
       })
+    },
+
+    //根据id删除采购记录
+    deletePurchase(id){
+      return request({
+        url: `/api/purchases/${id}`,
+        method:'delete',
+      })
     }
+
   }
 } 
