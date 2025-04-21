@@ -72,6 +72,13 @@
                 </template>
               </el-menu-item>
 
+              <el-menu-item index="/admin/monitoring" class="menu-item">
+                  <el-icon><VideoCamera /></el-icon>
+                  <template #title>
+                    <span>实时监控</span>
+                  </template>
+                </el-menu-item>
+
               <el-sub-menu index="user-manage" class="menu-item">
                 <template #title>
                   <el-icon><User /></el-icon>
@@ -136,6 +143,14 @@
                   <span>数据分析</span>
                 </template>
               </el-menu-item>
+
+              <el-menu-item index="/monitoring" class="menu-item">
+                  <el-icon><VideoCamera /></el-icon>
+                  <template #title>
+                    <span>实时监控</span>
+                  </template>
+                </el-menu-item>
+
             </template>
 
             <!-- 食堂工作人员菜单 -->

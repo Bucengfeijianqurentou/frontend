@@ -97,6 +97,13 @@ const routes = [
         component: () => import('@/views/admin/distribution.vue'),
         meta: { requiresAuth: true, role: 'ADMIN' }
       },
+      // 实时监控路由 - 管理员可访问
+      {
+        path: 'admin/monitoring',
+        name: 'AdminMonitoring',
+        component: () => import('@/views/monitoring/index.vue'),
+        meta: { requiresAuth: true, role: 'ADMIN' }
+      },
       // 监管方路由
       {
         path: 'inspection',
@@ -120,6 +127,13 @@ const routes = [
         path: 'analysis',
         name: 'Analysis',
         component: () => import('@/views/analysis.vue'),
+        meta: { requiresAuth: true, role: 'INSPECTOR' }
+      },
+      // 实时监控路由 - 监管方可访问
+      {
+        path: 'monitoring',
+        name: 'Monitoring',
+        component: () => import('@/views/monitoring/index.vue'),
         meta: { requiresAuth: true, role: 'INSPECTOR' }
       },
       // 食堂工作人员路由
