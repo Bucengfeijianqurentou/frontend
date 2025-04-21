@@ -52,7 +52,7 @@ const routes = [
       {
         path: 'admin/tracing',
         name: 'AdminTracing',
-        component: () => import('@/views/admin/tracing.vue'),
+        component: () => import('@/views/tracing.vue'),
         meta: { requiresAuth: true, role: 'ADMIN' }
       },
       {
