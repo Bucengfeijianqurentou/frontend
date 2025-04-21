@@ -176,7 +176,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import * as echarts from 'echarts/core'
-import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import { BarChart, LineChart, PieChart, RadarChart } from 'echarts/charts'
 import { 
   TitleComponent, 
   TooltipComponent, 
@@ -225,6 +225,7 @@ echarts.use([
   BarChart,
   LineChart,
   PieChart,
+  RadarChart,
   CanvasRenderer
 ])
 

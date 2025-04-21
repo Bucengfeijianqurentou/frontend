@@ -32,7 +32,7 @@
           class="w-64"
           size="large"
         >
-          <el-option label="所有库存" :value="null" />
+          <el-option label="所有库存" :value="''" />
           <el-option label="库存不足" :value="true" />
         </el-select>
         
@@ -221,7 +221,7 @@ const total = ref(0)
 // 搜索表单
 const searchForm = reactive({
   keyword: '',  // 批次号搜索
-  lowStock: null  // 库存状态
+  lowStock: ''  // 库存状态
 })
 
 // 弹窗控制
@@ -321,7 +321,7 @@ function getFoodName(foodId) {
 // 重置搜索条件
 function resetSearch() {
   searchForm.keyword = ''
-  searchForm.lowStock = null
+  searchForm.lowStock = ''
   loadInventoryList()
 }
 
