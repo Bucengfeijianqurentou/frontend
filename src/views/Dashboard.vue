@@ -3,7 +3,7 @@
     <div class="welcome-section animate__animated animate__fadeIn">
       <h2>欢迎使用中小学食堂监管平台</h2>
       <p class="subtitle">{{ welcomeMessage }}</p>
-      <el-divider />
+      <div class="welcome-decoration"></div>
     </div>
 
     <div class="dashboard-content animate__animated animate__fadeInUp">
@@ -11,7 +11,7 @@
       <div class="stat-cards">
         <el-row :gutter="20">
           <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="(card, index) in statCards" :key="index">
-            <el-card class="stat-card hover-scale" shadow="hover">
+            <el-card class="stat-card hover-scale" shadow="always">
               <div class="card-content">
                 <el-icon class="card-icon" :style="{ color: card.color }">
                   <component :is="card.icon"></component>
@@ -21,7 +21,7 @@
                   <p class="card-label">{{ card.label }}</p>
                 </div>
               </div>
-              <div class="card-footer" v-if="card.change">
+              <div class="card-footer" v-if="card.change !== null">
                 <el-tag :type="card.change > 0 ? 'success' : 'danger'" size="small">
                   <el-icon v-if="card.change > 0"><ArrowUp /></el-icon>
                   <el-icon v-else><ArrowDown /></el-icon>
@@ -209,6 +209,13 @@ import {
   Check
 } from '@element-plus/icons-vue'
 import 'animate.css'
+
+// 添加 CSS 变量计算
+document.documentElement.style.setProperty('--primary-color-rgb', '30, 58, 138')
+document.documentElement.style.setProperty('--success-color-rgb', '16, 185, 129')
+document.documentElement.style.setProperty('--warning-color-rgb', '245, 158, 11')
+document.documentElement.style.setProperty('--danger-color-rgb', '239, 68, 68')
+document.documentElement.style.setProperty('--light-border-rgb', '229, 231, 235')
 
 echarts.use([
   TitleComponent, 
@@ -559,23 +566,48 @@ onMounted(() => {
 <style scoped>
 .dashboard-container {
   padding: 1.5rem;
+  min-height: 100%;
+  width: 100%;
 }
 
 .welcome-section {
   margin-bottom: 2rem;
+  background: linear-gradient(120deg, var(--primary-color), var(--primary-dark));
+  padding: 2rem;
+  border-radius: 12px;
+  color: white;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill-opacity="0.1" width="50" height="50" x="0" y="0"></rect><rect fill-opacity="0.1" width="50" height="50" x="50" y="50"></rect></svg>');
+  opacity: 0.1;
+  z-index: 0;
 }
 
 h2 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: var(--el-color-primary);
+  color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .subtitle {
-  font-size: 1rem;
-  color: var(--el-text-color-secondary);
-  margin: 0.5rem 0 1rem;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0.5rem 0;
+  position: relative;
+  z-index: 1;
 }
 
 .dashboard-content {
@@ -588,15 +620,27 @@ h2 {
   display: flex;
   align-items: center;
   font-size: 1.25rem;
-  margin-bottom: 1rem;
-  color: var(--el-text-color-primary);
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
   font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  height: 1.25rem;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+  border-radius: 2px;
 }
 
 .section-title .el-icon {
   margin-right: 0.5rem;
   font-size: 1.25rem;
-  color: var(--el-color-primary);
+  color: var(--primary-color);
 }
 
 /* 统计卡片样式 */
@@ -608,16 +652,37 @@ h2 {
   height: 100%;
   transition: all 0.3s;
   margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  border: none;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent, rgba(30, 58, 138, 0.05));
+  z-index: 0;
 }
 
 .card-content {
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .card-icon {
   font-size: 2.5rem;
-  margin-right: 1rem;
+  margin-right: 1.5rem;
+  padding: 0.75rem;
+  background-color: rgba(30, 58, 138, 0.1);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
 .card-data {
@@ -625,23 +690,33 @@ h2 {
 }
 
 .card-value {
-  font-size: 1.75rem;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 700;
   margin: 0 0 0.25rem;
+  color: var(--text-primary);
+  line-height: 1;
 }
 
 .card-label {
-  color: var(--el-text-color-secondary);
+  color: var(--text-secondary);
   margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .card-footer {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
 }
 
 /* 快捷操作样式 */
 .quick-actions {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
 }
 
 .action-card {
@@ -650,60 +725,75 @@ h2 {
   align-items: center;
   justify-content: center;
   padding: 1.5rem 1rem;
-  background-color: var(--el-fill-color-light);
-  border-radius: 8px;
+  background-color: white;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--light-border);
 }
 
 .action-card:hover {
-  background-color: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
+  background: linear-gradient(to bottom right, var(--primary-bg), white);
+  border-color: var(--primary-light);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
 }
 
 .action-icon {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
-  color: var(--el-color-primary);
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  background-color: var(--primary-bg);
+  padding: 1rem;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
 }
 
 .action-label {
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 500;
   margin: 0;
   text-align: center;
+  color: var(--text-primary);
 }
 
 /* 任务与通知样式 */
 .tasks-notifications {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .task-card, .notification-card {
   height: 100%;
-  min-height: 320px;
+  min-height: 380px;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow-md);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .task-item {
-  margin-bottom: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: 0.75rem;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .task-content {
   flex: 1;
+  padding: 0.5rem 0;
 }
 
 .task-content h4 {
   margin: 0 0 0.25rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .task-content p {
   margin: 0;
-  color: var(--el-text-color-secondary);
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -715,8 +805,13 @@ h2 {
 
 .notification-item {
   display: flex;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  padding: 1rem;
+  border-bottom: 1px solid var(--light-border);
+  transition: all 0.3s;
+}
+
+.notification-item:hover {
+  background-color: var(--primary-bg);
 }
 
 .notification-item:last-child {
@@ -734,43 +829,129 @@ h2 {
 .notification-content h4 {
   margin: 0 0 0.25rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .notification-content p {
   margin: 0 0 0.5rem;
-  color: var(--el-text-color-secondary);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .notification-time {
   font-size: 0.8rem;
-  color: var(--el-text-color-secondary);
+  color: var(--text-tertiary);
+  display: block;
+  text-align: right;
 }
 
 /* 图表样式 */
 .chart-card {
   height: 100%;
   margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
 }
 
 .chart-title {
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--el-text-color-primary);
+  color: var(--text-primary);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--light-border);
 }
 
 .chart {
-  height: 300px;
+  height: 320px;
   width: 100%;
 }
 
-/* 悬停缩放效果 */
+/* 创建悬停缩放效果的新实现 */
 .hover-scale {
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .hover-scale:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 系统状态和图表区域样式 */
+.system-stats, .inspection-summary, .staff-summary {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+/* 增加动画延迟，创造错落有致的加载效果 */
+.stat-card {
+  animation-delay: 0.1s;
+}
+
+.quick-actions {
+  animation-delay: 0.2s;
+}
+
+.task-card {
+  animation-delay: 0.3s;
+}
+
+.notification-card {
+  animation-delay: 0.4s;
+}
+
+.chart-card {
+  animation-delay: 0.5s;
+}
+
+/* 为统计卡片增加不同颜色变体 */
+:deep(.el-col:nth-child(1) .stat-card .card-icon) {
+  color: var(--primary-color);
+  background-color: rgba(30, 58, 138, 0.1);
+}
+
+:deep(.el-col:nth-child(2) .stat-card .card-icon) {
+  color: var(--success-color);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+:deep(.el-col:nth-child(3) .stat-card .card-icon) {
+  color: var(--warning-color);
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+:deep(.el-col:nth-child(4) .stat-card .card-icon) {
+  color: var(--danger-color);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.welcome-decoration {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 0;
+}
+
+@media (max-width: 768px) {
+  .welcome-section {
+    padding: 1.5rem;
+  }
+  
+  .card-value {
+    font-size: 1.5rem;
+  }
+  
+  .action-icon {
+    font-size: 1.75rem;
+    padding: 0.75rem;
+  }
 }
 </style> 

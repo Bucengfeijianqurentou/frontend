@@ -1,16 +1,163 @@
 :root {
-  --primary-color: #409EFF;
-  --success-color: #67C23A;
-  --warning-color: #E6A23C;
-  --danger-color: #F56C6C;
-  --info-color: #909399;
+  /* 主色调 - 深蓝色系 */
+  --primary-color: #1e3a8a;
+  --primary-light: #2563eb;
+  --primary-dark: #1e40af;
+  --primary-bg: #f0f5ff;
+  
+  /* 辅助色 */
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #3b82f6;
+  
+  /* 中性色 */
+  --dark-bg: #111827;
+  --dark-secondary: #1f2937;
+  --dark-tertiary: #374151;
+  --light-border: #e5e7eb;
+  --light-bg: #f9fafb;
+  
+  /* 文字颜色 */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #9ca3af;
+  --text-light: #f9fafb;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* 覆盖Element Plus变量 */
+  --el-color-primary: var(--primary-color);
+  --el-color-primary-light-3: var(--primary-light);
+  --el-color-primary-dark-2: var(--primary-dark);
+  --el-color-success: var(--success-color);
+  --el-color-warning: var(--warning-color);
+  --el-color-danger: var(--danger-color);
+  --el-color-info: var(--info-color);
+  
+  --el-menu-bg-color: var(--dark-bg);
+  --el-menu-text-color: var(--text-light);
+  --el-menu-hover-bg-color: var(--dark-tertiary);
+  --el-menu-hover-text-color: white;
+  --el-menu-active-color: white;
+  
+  --el-border-color-light: var(--light-border);
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-secondary: var(--text-secondary);
+  --el-fill-color-light: var(--light-bg);
 }
 
-html, body {
+body {
   margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--light-bg);
+  color: var(--text-primary);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* 卡片样式增强 */
+.el-card {
+  border-radius: 8px;
+  border: none;
+  box-shadow: var(--shadow-sm) !important;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.el-card:hover {
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* 按钮样式增强 */
+.el-button {
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.el-button--primary {
+  background: linear-gradient(to right, var(--primary-color), var(--primary-light));
+  border: none;
+}
+
+.el-button--primary:hover {
+  background: linear-gradient(to right, var(--primary-dark), var(--primary-color));
+  transform: translateY(-1px);
+}
+
+/* 输入框样式增强 */
+.el-input__inner {
+  border-radius: 6px;
+}
+
+.el-input__inner:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
+}
+
+/* 表格样式增强 */
+.el-table th {
+  background-color: #f8fafc !important;
+  font-weight: 600;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: rgba(240, 245, 255, 0.7) !important;
+}
+
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* 通用页面容器 */
+.page-container {
+  padding: 1.5rem;
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+/* 文本截断 */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #app {
