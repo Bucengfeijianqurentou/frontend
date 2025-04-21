@@ -163,12 +163,12 @@
               >
                 {{ scope.row.status }}
               </el-tag>
-            </template>
+          </template>
           </el-table-column>
           <el-table-column prop="time" label="响应时间" width="120" align="center">
             <template #default="scope">
               <span>{{ scope.row.time }}ms</span>
-            </template>
+          </template>
           </el-table-column>
           <el-table-column prop="timestamp" label="访问时间" width="180" align="center" />
         </el-table>
@@ -702,7 +702,7 @@ function handleCurrentChange(page) {
   hasNewLogs.value = false
   loadAccessLogs()
 }
-</script>
+</script> 
 
 <style scoped>
 .stat-card {

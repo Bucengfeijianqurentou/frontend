@@ -751,7 +751,7 @@ function resetReportForm() {
   reportForm.granularity = 'day'
   reportForm.format = 'excel'
 }
-</script>
+</script> 
 
 <style scoped>
 .stat-card {

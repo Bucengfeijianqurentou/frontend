@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <div class="welcome-section animate__animated animate__fadeIn">
-      <h2>欢迎使用中小学食堂监管平台</h2>
+    <h2>欢迎使用中小学食堂监管平台</h2>
       <p class="subtitle">{{ welcomeMessage }}</p>
       <div class="welcome-decoration"></div>
     </div>
