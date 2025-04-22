@@ -30,6 +30,10 @@
           <el-tag :type="roleType">{{ roleText }}</el-tag>
         </el-form-item>
 
+        <el-form-item label="区块链账户">
+            <el-input v-model="userStore.user.chainAccount" disabled />
+        </el-form-item>
+
         <el-form-item label="id">
             <el-input v-model="userStore.user.id" disabled />
           </el-form-item>
