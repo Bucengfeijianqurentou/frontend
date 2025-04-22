@@ -32,4 +32,38 @@ export function getUserById(id) {
     url: `/api/user/${id}`,
     method: 'get'
   })
+}
+
+// 获取用户列表
+export function getUserList(params) {
+  return request({
+    url: '/api/user',
+    method: 'get',
+    params
+  })
+}
+
+// 切换用户状态（启用/禁用）
+export function toggleUserStatus(id, status) {
+  return request({
+    url: `/api/user/${id}/status/${status}`,
+    method: 'put'
+  })
+}
+
+// 更新用户信息
+export function updateUser(id, data) {
+  return request({
+    url: `/api/user/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+// 删除用户
+export function deleteUser(id) {
+  return request({
+    url: `/api/user/${id}`,
+    method: 'delete'
+  })
 } 

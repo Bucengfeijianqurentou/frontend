@@ -26,7 +26,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
-    const res = response.data
+    const res = response.data  //简化了返回格式
     if (res.code && res.code !== 200) {
       ElMessage({
         message: res.message || '请求失败',
