@@ -157,7 +157,7 @@
       destroy-on-close
       close-on-click-modal
     >
-      <el-descriptions border v-loading="detailLoading" column="1" size="large">
+      <el-descriptions border v-loading="detailLoading" :column="1" size="large">
         <el-descriptions-item label="记录ID">{{ currentInspection.id }}</el-descriptions-item>
         <el-descriptions-item label="审查时间">{{ formatDateTime(currentInspection.inspectionTime) }}</el-descriptions-item>
         <el-descriptions-item label="审查人员">
@@ -172,6 +172,25 @@
         </el-descriptions-item>
         <el-descriptions-item label="问题发现">{{ currentInspection.issues || '无' }}</el-descriptions-item>
         <el-descriptions-item label="改进建议">{{ currentInspection.suggestions || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="交易哈希">
+          <div v-if="currentInspection.transactionHash" class="flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <div class="bg-gray-50 p-2 rounded-md text-xs font-mono break-all">
+                {{ currentInspection.transactionHash }}
+              </div>
+              <el-button
+                type="primary"
+                link
+                size="small"
+                class="ml-2 flex-shrink-0"
+                @click="copyToClipboard(currentInspection.transactionHash)"
+              >
+                <el-icon class="mr-1"><DocumentCopy /></el-icon>复制
+              </el-button>
+            </div>
+          </div>
+          <span v-else class="text-gray-400">无</span>
+        </el-descriptions-item>
         <el-descriptions-item label="监察凭证">
           <div v-if="currentInspection.imagePath" class="mt-2">
             <el-image
@@ -198,7 +217,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Search, List, Refresh, View, Picture } from '@element-plus/icons-vue'
+import { Search, List, Refresh, View, Picture, DocumentCopy } from '@element-plus/icons-vue'
 import { useInspectionApi } from '@/api/inspection'
 import { useMenuApi } from '@/api/menu'
 import { useUserStore } from '@/stores/user'
@@ -675,6 +694,15 @@ const getImageUrl = (path) => {
   if (!path) return ''
   if (path.startsWith('http')) return path
   return `${import.meta.env.VITE_API_BASE_URL}${path}`
+}
+
+// 复制交易哈希到剪贴板
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text).then(() => {
+    ElMessage.success('交易哈希已复制到剪贴板')
+  }).catch(() => {
+    ElMessage.error('复制失败，请手动复制')
+  })
 }
 </script>
 
