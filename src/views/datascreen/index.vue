@@ -86,19 +86,20 @@
             <el-icon><User /></el-icon>
             <span>员工信息</span>
           </div>
-          <el-carousel :interval="5000" arrow="never" indicator-position="none" height="120px">
-            <el-carousel-item v-for="group in staffGroups" :key="group[0].id">
-              <div class="staff-group">
-                <div class="staff-card" v-for="staff in group" :key="staff.id">
+          <div class="staff-scroll-container">
+            <div class="staff-scroll-inner" ref="staffScrollRef">
+              <div class="staff-item" v-for="staff in staffList" :key="staff.id">
+                <div class="staff-avatar">
                   <el-avatar icon="UserFilled" size="small"></el-avatar>
-                  <div class="staff-info">
-                    <div class="staff-name">{{ staff.realName || staff.username }}</div>
-                    <el-tag size="small" type="success">健康状态: 健康</el-tag>
-                  </div>
+                </div>
+                <div class="staff-info">
+                  <div class="staff-name">{{ staff.realName || staff.username }}</div>
+                  <div class="staff-phone">{{ staff.phone || '暂无电话' }}</div>
+                  <el-tag size="small" type="success">健康状态: 健康</el-tag>
                 </div>
               </div>
-            </el-carousel-item>
-          </el-carousel>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -202,6 +203,7 @@ const mealSupplyChart = ref(null)
 const inventoryAlertChart = ref(null)
 const processingStatChart = ref(null)
 const inspectionResultChart = ref(null)
+const staffScrollRef = ref(null)
 
 // 全屏
 const fullScreenRef = ref(null)
@@ -1053,10 +1055,47 @@ async function fetchStaffData() {
   try {
     const response = await getAllStaff()
     staffList.value = response.records || []
+
+    // 初始化员工信息滚动效果
+    setTimeout(() => {
+      initStaffScroll()
+    }, 1000)
   } catch (error) {
     console.error('获取员工数据失败:', error)
     staffList.value = []
   }
+}
+
+// 初始化员工信息滚动
+function initStaffScroll() {
+  if (!staffScrollRef.value || staffList.value.length === 0) return
+
+  const scrollContainer = staffScrollRef.value
+  const staffItems = scrollContainer.querySelectorAll('.staff-item')
+  const itemHeight = staffItems[0]?.offsetHeight || 0
+  
+  if (itemHeight === 0) return
+  
+  let currentIndex = 0
+  const scrollStep = () => {
+    // 计算滚动位置
+    scrollContainer.style.transform = `translateY(-${currentIndex * itemHeight}px)`
+    scrollContainer.style.transition = 'transform 0.5s'
+    
+    // 增加索引
+    currentIndex = (currentIndex + 1) % staffList.value.length
+    
+    // 当滚动到末尾时，重置位置（无过渡动画）
+    if (currentIndex === 0) {
+      setTimeout(() => {
+        scrollContainer.style.transition = 'none'
+        scrollContainer.style.transform = 'translateY(0)'
+      }, 500)
+    }
+  }
+  
+  // 设置定时器
+  staffScrollInterval = setInterval(scrollStep, 3000)
 }
 
 // 定时器
@@ -1064,6 +1103,7 @@ let timeInterval = null
 let dataInterval = null
 let blockchainDataUpdateInterval = null
 let inventoryAlertInterval = null
+let staffScrollInterval = null
 
 onMounted(() => {
   // 更新时间
@@ -1126,12 +1166,12 @@ onUnmounted(() => {
   if (timeInterval) clearInterval(timeInterval)
   if (dataInterval) clearInterval(dataInterval)
   if (blockchainDataUpdateInterval) clearInterval(blockchainDataUpdateInterval)
+  if (inventoryAlertInterval) clearInterval(inventoryAlertInterval)
+  if (staffScrollInterval) clearInterval(staffScrollInterval)
   
   if (webRtcServer) {
     webRtcServer.disconnect()
   }
-  
-  if (inventoryAlertInterval) clearInterval(inventoryAlertInterval)
 })
 </script>
 
@@ -1416,21 +1456,31 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-.staff-group {
-  display: flex;
-  height: 100%;
-  padding: 10px;
-  justify-content: space-around;
+.staff-scroll-container {
+  height: calc(100% - 36px);
+  overflow: hidden;
+  padding: 5px;
 }
 
-.staff-card {
+.staff-scroll-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.staff-item {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px;
   background-color: rgba(33, 87, 168, 0.5);
   border-radius: 4px;
-  height: fit-content;
+  border-left: 3px solid #54e7ff;
+}
+
+.staff-avatar {
+  display: flex;
+  align-items: center;
 }
 
 .staff-info {
@@ -1442,6 +1492,11 @@ onUnmounted(() => {
 .staff-name {
   font-size: 14px;
   font-weight: bold;
+}
+
+.staff-phone {
+  font-size: 12px;
+  color: #c0c4cc;
 }
 
 /* 适应不同大小的显示器 */
