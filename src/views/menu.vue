@@ -76,7 +76,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="dishes" label="菜品列表" min-width="250" show-overflow-tooltip />
+        <el-table-column prop="dishes" label="菜品名称" min-width="250" show-overflow-tooltip />
         <el-table-column label="使用食品" width="150">
           <template #default="{ row }">
             <div v-if="row.processIds">
@@ -89,6 +89,24 @@
               >查看详情</el-button>
             </div>
             <span v-else class="text-gray-400">无</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="交易哈希" width="180">
+          <template #default="{ row }">
+            <div v-if="row.transactionHash">
+              <el-tooltip :content="row.transactionHash" placement="top" :show-after="500">
+                <span class="text-xs font-mono truncate block w-36">{{ row.transactionHash.substring(0, 18) + '...' }}</span>
+              </el-tooltip>
+              <el-button 
+                link 
+                type="primary" 
+                size="small" 
+                @click="copyToClipboard(row.transactionHash)"
+              >
+                <el-icon class="mr-1"><DocumentCopy /></el-icon>复制
+              </el-button>
+            </div>
+            <span v-else class="text-gray-400">暂无</span>
           </template>
         </el-table-column>
         <el-table-column label="菜单图片" width="120">
@@ -185,12 +203,12 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="菜品列表" prop="dishes">
+        <el-form-item label="菜品名称" prop="dishes">
           <el-input
             v-model="menuForm.dishes"
             type="textarea"
             :rows="4"
-            placeholder="请输入菜品列表，多个菜品请用逗号或换行分隔"
+            placeholder="请输入菜品名称，多个菜品请用逗号或换行分隔"
           />
         </el-form-item>
 
@@ -383,6 +401,18 @@
                       </el-tag>
                     </span>
                   </div>
+                  <div class="col-span-2 mt-2 bg-gray-50 p-3 rounded-md">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-gray-500 font-medium">交易哈希:</span>
+                      <el-button v-if="item.transactionHash" type="primary" link size="small" @click="copyToClipboard(item.transactionHash)">
+                        <el-icon class="mr-1"><DocumentCopy /></el-icon>复制
+                      </el-button>
+                    </div>
+                    <div v-if="item.transactionHash" class="text-xs bg-white p-2 rounded border border-gray-200 break-all font-mono">
+                      {{ item.transactionHash }}
+                    </div>
+                    <div v-else class="text-gray-400 text-center py-1">暂无交易哈希</div>
+                  </div>
                 </div>
               </div>
               <div class="w-24 h-24 flex-shrink-0">
@@ -408,7 +438,7 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Memo, Plus, Edit, Delete, Search, Refresh, Picture } from '@element-plus/icons-vue'
+import { Memo, Plus, Edit, Delete, Search, Refresh, Picture, DocumentCopy } from '@element-plus/icons-vue'
 import { useMenuApi } from '@/api/menu'
 import { useGradeApi } from '@/api/grade'
 import { useProcessingApi } from '@/api/processing'
@@ -510,7 +540,7 @@ const rules = {
     { required: true, message: '请选择餐次', trigger: 'change' }
   ],
   dishes: [
-    { required: true, message: '请输入菜品列表', trigger: 'blur' }
+    { required: true, message: '请输名称', trigger: 'blur' }
   ]
 }
 
@@ -986,6 +1016,15 @@ const getHygieneTag = (condition) => {
 const getProcessingName = (id) => {
   const processing = processingList.value.find(item => item.id === id)
   return processing ? `${processing.method} (批次: ${processing.batchNumber})` : `加工ID: ${id}`
+}
+
+// 复制交易哈希到剪贴板
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text).then(() => {
+    ElMessage.success('交易哈希已复制到剪贴板')
+  }).catch(() => {
+    ElMessage.error('复制失败，请手动复制')
+  })
 }
 </script> 
 
