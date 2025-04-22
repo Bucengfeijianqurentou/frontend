@@ -1,8 +1,21 @@
 <template>
   <div class="dashboard-container">
     <div class="welcome-section animate__animated animate__fadeIn">
-    <h2>欢迎使用中小学食堂监管平台</h2>
-      <p class="subtitle">{{ welcomeMessage }}</p>
+      <div class="flex justify-between items-center relative">
+        <div>
+          <h2>欢迎使用中小学食堂监管平台</h2>
+          <p class="subtitle">{{ welcomeMessage }}</p>
+        </div>
+        <el-button 
+          type="primary" 
+          size="large"
+          @click="navigateToDataScreen" 
+          class="flex items-center data-screen-btn relative z-10"
+        >
+          <el-icon class="mr-2"><DataLine /></el-icon>
+          数据大屏
+        </el-button>
+      </div>
       <div class="welcome-decoration"></div>
     </div>
 
@@ -373,6 +386,11 @@ const notificationIcons = {
 // 路由跳转方法
 const navigateTo = (path) => {
   router.push(path)
+}
+
+// 跳转到数据大屏页面
+const navigateToDataScreen = () => {
+  router.push('/datascreen')
 }
 
 // 初始化图表
@@ -938,7 +956,8 @@ h2 {
   height: 200px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
-  z-index: 0;
+  z-index: 1;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -954,5 +973,24 @@ h2 {
     font-size: 1.75rem;
     padding: 0.75rem;
   }
+}
+
+.data-screen-btn {
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: all 0.3s;
+  pointer-events: auto;
+}
+
+.data-screen-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 </style> 

@@ -197,6 +197,23 @@
                             </template>
                           </div>
                         </el-descriptions-item>
+                        <el-descriptions-item label="交易哈希">
+                          <div v-if="purchase.transactionHash" class="flex items-center justify-between">
+                            <div class="bg-gray-50 p-2 rounded text-xs font-mono truncate w-64">
+                              {{ purchase.transactionHash }}
+                            </div>
+                            <el-button
+                              type="primary"
+                              link
+                              size="small"
+                              class="ml-2 flex-shrink-0"
+                              @click="copyToClipboard(purchase.transactionHash)"
+                            >
+                              <el-icon class="mr-1"><DocumentCopy /></el-icon>复制
+                            </el-button>
+                          </div>
+                          <span v-else class="text-gray-400">暂无</span>
+                        </el-descriptions-item>
                         <el-descriptions-item label="采购凭证" v-if="purchase.imagePath">
                           <el-image
                             :src="getImageUrl(purchase.imagePath)"
@@ -243,6 +260,23 @@
                         <el-descriptions-item label="加工时间">{{ formatDateTime(processing.processingTime) }}</el-descriptions-item>
                         <el-descriptions-item label="加工数量">{{ processing.quantity }}</el-descriptions-item>
                         <el-descriptions-item label="加工人员">{{ processing.processorName }}</el-descriptions-item>
+                        <el-descriptions-item label="交易哈希">
+                          <div v-if="processing.transactionHash" class="flex items-center justify-between">
+                            <div class="bg-gray-50 p-2 rounded text-xs font-mono truncate w-64">
+                              {{ processing.transactionHash }}
+                            </div>
+                            <el-button
+                              type="primary"
+                              link
+                              size="small"
+                              class="ml-2 flex-shrink-0"
+                              @click="copyToClipboard(processing.transactionHash)"
+                            >
+                              <el-icon class="mr-1"><DocumentCopy /></el-icon>复制
+                            </el-button>
+                          </div>
+                          <span v-else class="text-gray-400">暂无</span>
+                        </el-descriptions-item>
                         <el-descriptions-item label="联系方式">{{ processing.processorPhone }}</el-descriptions-item>
                         <el-descriptions-item label="卫生条件">
                           <el-tag :type="getHygieneConditionTag(processing.hygieneCondition)">
@@ -316,6 +350,23 @@
                           ID: {{ tracingResult.inspection.inspectorId }}
                         </div>
                       </el-descriptions-item>
+                      <el-descriptions-item label="交易哈希">
+                        <div v-if="tracingResult.inspection.transactionHash" class="flex items-center justify-between">
+                          <div class="bg-gray-50 p-2 rounded text-xs font-mono truncate w-64">
+                            {{ tracingResult.inspection.transactionHash }}
+                          </div>
+                          <el-button
+                            type="primary"
+                            link
+                            size="small"
+                            class="ml-2 flex-shrink-0"
+                            @click="copyToClipboard(tracingResult.inspection.transactionHash)"
+                          >
+                            <el-icon class="mr-1"><DocumentCopy /></el-icon>复制
+                          </el-button>
+                        </div>
+                        <span v-else class="text-gray-400">暂无</span>
+                      </el-descriptions-item>
                       <el-descriptions-item label="监察凭证" v-if="tracingResult.inspection.imagePath">
                         <el-image
                           :src="getImageUrl(tracingResult.inspection.imagePath)"
@@ -340,7 +391,7 @@
 <script setup>
 import { ref, reactive, h, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Link, Search, Refresh, Calendar, ShoppingCart, Box, Check, WarningFilled, Document } from '@element-plus/icons-vue'
+import { Link, Search, Refresh, Calendar, ShoppingCart, Box, Check, WarningFilled, Document, DocumentCopy } from '@element-plus/icons-vue'
 import { useTracingApi } from '@/api/tracing'
 import html2pdf from 'html2pdf.js'
 
@@ -719,6 +770,15 @@ const getPDFTitle = () => {
 const getCurrentDateTime = () => {
   const now = new Date()
   return now.toLocaleString()
+}
+
+// 复制交易哈希到剪贴板
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text).then(() => {
+    ElMessage.success('交易哈希已复制到剪贴板')
+  }).catch(() => {
+    ElMessage.error('复制失败，请手动复制')
+  })
 }
 </script>
 

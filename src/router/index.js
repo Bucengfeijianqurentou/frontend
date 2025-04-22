@@ -168,6 +168,13 @@ const routes = [
         component: () => import('@/views/inventory/index.vue'),
         meta: { requiresAuth: true, role: 'STAFF' }
       },
+      // 数据大屏路由
+      {
+        path: 'datascreen',
+        name: 'DataScreen',
+        component: () => import('@/views/datascreen/index.vue'),
+        meta: { requiresAuth: true }
+      },
     ]
   }
 ]
