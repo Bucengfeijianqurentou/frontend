@@ -212,6 +212,23 @@
             <div v-else class="no-image">无图片</div>
           </div>
         </div>
+
+        <div class="mt-4" v-if="processingDetail.transactionHash">
+          <div class="font-bold mb-2">交易哈希:</div>
+          <div class="transaction-hash-container">
+            <el-input
+              v-model="processingDetail.transactionHash"
+              readonly
+              class="hash-input"
+            >
+              <template #append>
+                <el-button @click="copyTransactionHash">
+                  <el-icon><Document /></el-icon>
+                </el-button>
+              </template>
+            </el-input>
+          </div>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -220,7 +237,7 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { KnifeFork, Plus } from '@element-plus/icons-vue'
+import { KnifeFork, Plus, Document } from '@element-plus/icons-vue'
 import { useProcessingApi } from '@/api/processing'
 import { useInventoryApi } from '@/api/inventory'
 import { useUserStore } from '@/stores/user'
@@ -555,6 +572,20 @@ const getImageUrl = (path) => {
   if (path.startsWith('http')) return path
   return `${import.meta.env.VITE_API_BASE_URL}${path}`
 }
+
+// 复制交易哈希
+const copyTransactionHash = () => {
+  if (!processingDetail.value?.transactionHash) return;
+  
+  navigator.clipboard.writeText(processingDetail.value.transactionHash)
+    .then(() => {
+      ElMessage.success('交易哈希已复制到剪贴板');
+    })
+    .catch(err => {
+      console.error('无法复制交易哈希:', err);
+      ElMessage.error('复制失败');
+    });
+}
 </script>
 
 <style scoped>
@@ -616,5 +647,14 @@ const getImageUrl = (path) => {
 .no-image {
   color: #909399;
   font-size: 14px;
+}
+
+.transaction-hash-container {
+  display: flex;
+  align-items: center;
+}
+
+.hash-input {
+  flex: 1;
 }
 </style> 

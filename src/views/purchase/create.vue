@@ -96,6 +96,21 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column label="交易哈希" min-width="200" align="center">
+          <template #default="scope">
+            <el-tooltip
+              v-if="scope.row.transactionHash"
+              :content="scope.row.transactionHash"
+              placement="top"
+              :show-after="500"
+            >
+              <div class="truncate max-w-full">
+                {{ formatTransactionHash(scope.row.transactionHash) }}
+              </div>
+            </el-tooltip>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="scope">
             <el-button link type="primary" size="small" @click="handleView(scope.row)" class="text-blue-500 hover:text-blue-700 font-medium">
@@ -299,6 +314,29 @@
           <el-descriptions-item label="保质期(天)" label-align="center" align="center">{{ currentRecord.shelfLife }}</el-descriptions-item>
           <el-descriptions-item label="采购人员" label-align="center" align="center">{{ purchaserName }}</el-descriptions-item>
           <el-descriptions-item label="联系电话" label-align="center" align="center">{{ purchaserPhone || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="交易哈希" label-align="center" align="center" :span="4">
+            <div class="flex items-center justify-center">
+              <el-tooltip
+                :content="currentRecord.transactionHash || '暂无交易哈希'"
+                placement="top"
+                :show-after="500"
+                :disabled="!currentRecord.transactionHash"
+              >
+                <div class="truncate max-w-full text-center">
+                  {{ currentRecord.transactionHash || '暂无交易哈希' }}
+                </div>
+              </el-tooltip>
+              <el-button 
+                v-if="currentRecord.transactionHash" 
+                link 
+                type="primary" 
+                @click="copyTransactionHash" 
+                class="ml-2"
+              >
+                <el-icon><Document /></el-icon>
+              </el-button>
+            </div>
+          </el-descriptions-item>
         </el-descriptions>
         
         <div class="mt-6" v-if="currentRecord.imagePath">
@@ -323,7 +361,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ShoppingCart, Plus, Search, Refresh, View, Delete, Check, Upload, Picture, InfoFilled, Food, CircleCheck, Phone } from '@element-plus/icons-vue'
+import { ShoppingCart, Plus, Search, Refresh, View, Delete, Check, Upload, Picture, InfoFilled, Food, CircleCheck, Phone, Document } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 import { usePurchaseApi } from '@/api/purchase'
 import { useSupplierApi } from '@/api/supplier'
@@ -669,6 +707,28 @@ function resetForm() {
   form.batchNumber = generateBatchNumber() // 重新生成批次号
   form.purchaseDate = new Date().toISOString().split('T')[0] // 重置采购日期为当天
   fileList.value = [] // 清空文件列表
+}
+
+// 复制交易哈希
+function copyTransactionHash() {
+  if (!currentRecord.value?.transactionHash) return;
+  
+  // 使用navigator.clipboard API复制到剪贴板
+  navigator.clipboard.writeText(currentRecord.value.transactionHash)
+    .then(() => {
+      ElMessage.success('交易哈希已复制到剪贴板');
+    })
+    .catch(err => {
+      console.error('无法复制交易哈希:', err);
+      ElMessage.error('复制失败');
+    });
+}
+
+// 格式化交易哈希，显示前10个和后10个字符，中间使用省略号
+function formatTransactionHash(hash) {
+  if (!hash) return '';
+  if (hash.length <= 25) return hash;
+  return `${hash.substring(0, 10)}...${hash.substring(hash.length - 10)}`;
 }
 
 // 初始化
