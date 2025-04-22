@@ -60,16 +60,24 @@
           <div class="blockchain-item">
             <el-icon><Connection /></el-icon>
             <div class="info-content">
-              <div class="info-label">区块高度</div>
-              <div class="info-value">{{ blockNumber }}</div>
+              <div class="info-label">
+                <span>区块高度</span>
+                <span class="block-hash">#{{ displayBlockNumber.toString(16).padStart(8, '0') }}</span>
+              </div>
+              <div class="info-value count-animation">{{ displayBlockNumber }}</div>
             </div>
+            <div class="blockchain-pulse"></div>
           </div>
           <div class="blockchain-item">
             <el-icon><Histogram /></el-icon>
             <div class="info-content">
-              <div class="info-label">交易总数</div>
-              <div class="info-value">{{ transactionTotal }}</div>
+              <div class="info-label">
+                <span>交易总数</span>
+                <span class="tx-indicator" :class="{'active': txIndicator}"></span>
+              </div>
+              <div class="info-value count-animation">{{ displayTransactionTotal }}</div>
             </div>
+            <div class="blockchain-pulse"></div>
           </div>
         </div>
 
@@ -157,6 +165,9 @@ const currentTime = ref('')
 // 区块链数据
 const blockNumber = ref(0)
 const transactionTotal = ref(0)
+const displayBlockNumber = ref(0)
+const displayTransactionTotal = ref(0)
+const txIndicator = ref(false)
 
 // 监控相关
 const mainVideoRef = ref(null)
@@ -261,20 +272,20 @@ function initSafetyIndexChart() {
         width: 20,
         offsetCenter: [0, '-60%'],
         itemStyle: {
-          color: 'auto'
+          color: 'inherit'
         }
       },
       axisTick: {
         length: 12,
         lineStyle: {
-          color: 'auto',
+          color: 'inherit',
           width: 2
         }
       },
       splitLine: {
         length: 20,
         lineStyle: {
-          color: 'auto',
+          color: 'inherit',
           width: 5
         }
       },
@@ -300,7 +311,7 @@ function initSafetyIndexChart() {
         formatter: function (value) {
           return Math.round(value) + '分'
         },
-        color: 'auto'
+        color: 'inherit'
       },
       data: [{
         value: 92,
@@ -607,9 +618,53 @@ async function fetchBlockchainData() {
     
     blockNumber.value = blockNumberRes
     transactionTotal.value = transactionTotalRes
+    
+    // 添加数字递增动画效果
+    animateBlockchainNumbers(blockNumberRes, transactionTotalRes)
   } catch (error) {
     console.error('获取区块链数据失败:', error)
   }
+}
+
+// 数字递增动画效果
+function animateBlockchainNumbers(targetBlockNumber, targetTransactionTotal) {
+  // 先设置为0，然后慢慢递增到目标值
+  displayBlockNumber.value = 0
+  displayTransactionTotal.value = 0
+  
+  const duration = 2000 // 动画持续时间(ms)
+  const frames = 60 // 总帧数
+  const blockStep = Math.ceil(targetBlockNumber / frames)
+  const transactionStep = Math.ceil(targetTransactionTotal / frames)
+  
+  let currentFrame = 0
+  
+  const animateFrame = () => {
+    currentFrame++
+    
+    if (displayBlockNumber.value < targetBlockNumber) {
+      displayBlockNumber.value = Math.min(
+        displayBlockNumber.value + blockStep, 
+        targetBlockNumber
+      )
+    }
+    
+    if (displayTransactionTotal.value < targetTransactionTotal) {
+      displayTransactionTotal.value = Math.min(
+        displayTransactionTotal.value + transactionStep,
+        targetTransactionTotal
+      )
+    }
+    
+    if (currentFrame < frames && 
+       (displayBlockNumber.value < targetBlockNumber || 
+        displayTransactionTotal.value < targetTransactionTotal)) {
+      setTimeout(animateFrame, duration / frames)
+    }
+  }
+  
+  // 开始动画
+  animateFrame()
 }
 
 // 获取员工数据
@@ -626,6 +681,7 @@ async function fetchStaffData() {
 // 定时器
 let timeInterval = null
 let dataInterval = null
+let blockchainDataUpdateInterval = null
 
 onMounted(() => {
   // 更新时间
@@ -638,6 +694,32 @@ onMounted(() => {
   dataInterval = setInterval(() => {
     fetchBlockchainData()
   }, 60000)
+  
+  // 模拟区块链数据微小变化，增强动态效果
+  blockchainDataUpdateInterval = setInterval(() => {
+    // 随机决定是否增加区块高度(10%概率)
+    if (Math.random() < 0.1) {
+      const newBlockNumber = blockNumber.value + 1
+      // 直接赋值，不使用动画
+      blockNumber.value = newBlockNumber
+      displayBlockNumber.value = newBlockNumber
+    }
+    
+    // 随机增加交易数量(30%概率)
+    if (Math.random() < 0.3) {
+      const increment = Math.floor(Math.random() * 5) + 1
+      const newTransactionTotal = transactionTotal.value + increment
+      // 直接赋值，不使用动画
+      transactionTotal.value = newTransactionTotal
+      displayTransactionTotal.value = newTransactionTotal
+      
+      // 触发交易指示器闪烁
+      txIndicator.value = true
+      setTimeout(() => {
+        txIndicator.value = false
+      }, 1000)
+    }
+  }, 5000)
   
   // 连接监控流
   connectMonitorStream()
@@ -661,6 +743,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (timeInterval) clearInterval(timeInterval)
   if (dataInterval) clearInterval(dataInterval)
+  if (blockchainDataUpdateInterval) clearInterval(blockchainDataUpdateInterval)
   
   if (webRtcServer) {
     webRtcServer.disconnect()
@@ -818,6 +901,31 @@ onUnmounted(() => {
   gap: 15px;
   border: 1px solid rgba(84, 231, 255, 0.3);
   box-shadow: 0 0 15px rgba(18, 69, 145, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.blockchain-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #54e7ff, transparent);
+  animation: scanLine 3s infinite;
+}
+
+@keyframes scanLine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: -100%;
+  }
 }
 
 .blockchain-item .el-icon {
@@ -833,12 +941,86 @@ onUnmounted(() => {
 .info-label {
   font-size: 14px;
   color: #c0c4cc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.block-hash {
+  font-family: monospace;
+  font-size: 12px;
+  color: #76d0ff;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin-left: 8px;
+}
+
+.tx-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #505050;
+  transition: all 0.3s;
+  margin-left: 8px;
+}
+
+.tx-indicator.active {
+  background-color: #67C23A;
+  box-shadow: 0 0 10px #67C23A;
 }
 
 .info-value {
   font-size: 24px;
   font-weight: bold;
   color: #54e7ff;
+}
+
+.count-animation {
+  position: relative;
+  text-shadow: 0 0 10px rgba(84, 231, 255, 0.7);
+  animation: pulseNumber 2s infinite;
+}
+
+@keyframes pulseNumber {
+  0% {
+    text-shadow: 0 0 5px rgba(84, 231, 255, 0.7);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(84, 231, 255, 1);
+  }
+  100% {
+    text-shadow: 0 0 5px rgba(84, 231, 255, 0.7);
+  }
+}
+
+.blockchain-pulse {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #54e7ff;
+  box-shadow: 0 0 15px #54e7ff;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0.7;
+  }
 }
 
 .staff-carousel {
