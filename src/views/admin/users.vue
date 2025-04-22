@@ -244,11 +244,14 @@ const loadUserList = async () => {
     }
     
     const res = await getUserList(params)
-    if (res.code === 200) {
+    if (res.records) {
+      userList.value = res.records
+      total.value = res.total
+    } else if (res.code === 200 && res.data) {
       userList.value = res.data.records
       total.value = res.data.total
     } else {
-      ElMessage.error(res.message || '获取用户列表失败')
+      ElMessage.error('获取用户列表失败')
     }
   } catch (error) {
     console.error('加载用户列表失败:', error)
@@ -286,11 +289,13 @@ const handleToggleStatus = (row) => {
   ).then(async () => {
     try {
       const res = await toggleUserStatus(row.id, newStatus)
-      if (res.code === 200 && res.data) {
+      if ((typeof res === 'boolean' && res) || 
+          (res.code === 200 && res.data)) {
         ElMessage.success(`${statusText}成功`)
         row.status = newStatus
       } else {
-        ElMessage.error(res.message || `${statusText}失败`)
+        const errorMsg = res.message || `${statusText}失败`
+        ElMessage.error(errorMsg)
       }
     } catch (error) {
       console.error(`${statusText}用户失败:`, error)
@@ -316,12 +321,14 @@ const submitUserForm = async () => {
     try {
       if (dialogType.value === 'edit') {
         const res = await updateUser(userForm.value.id, userForm.value)
-        if (res.code === 200 && res.data) {
+        if ((typeof res === 'boolean' && res) || 
+            (res.code === 200 && res.data)) {
           ElMessage.success('更新成功')
           loadUserList()
           dialogVisible.value = false
         } else {
-          ElMessage.error(res.message || '更新失败')
+          const errorMsg = res.message || '更新失败'
+          ElMessage.error(errorMsg)
         }
       }
     } catch (error) {
