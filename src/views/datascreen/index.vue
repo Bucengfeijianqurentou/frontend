@@ -106,9 +106,9 @@
         <div class="panel-item">
           <div class="panel-header">
             <el-icon><PieChartIcon /></el-icon>
-            <span>库存分布</span>
+            <span>库存预警</span>
           </div>
-          <div class="panel-content" ref="inventoryDistributionChart"></div>
+          <div class="panel-content" ref="inventoryAlertChart"></div>
         </div>
         <div class="panel-item">
           <div class="panel-header">
@@ -199,7 +199,7 @@ const staffGroups = computed(() => {
 const safetyIndexChart = ref(null)
 const purchaseTrendChart = ref(null)
 const mealSupplyChart = ref(null)
-const inventoryDistributionChart = ref(null)
+const inventoryAlertChart = ref(null)
 const processingStatChart = ref(null)
 const inspectionResultChart = ref(null)
 
@@ -466,42 +466,185 @@ function initMealSupplyChart() {
   window.addEventListener('resize', () => chart.resize())
 }
 
-// 初始化库存分布图表
-function initInventoryDistributionChart() {
-  if (!inventoryDistributionChart.value) return
+// 初始化库存预警图表
+function initInventoryAlertChart() {
+  if (!inventoryAlertChart.value) return
   
-  const chart = echarts.init(inventoryDistributionChart.value)
+  const chart = echarts.init(inventoryAlertChart.value)
   const option = {
     tooltip: {
-      trigger: 'item'
-    },
-    legend: {
-      top: 'bottom',
-      left: 'center',
-      textStyle: {
-        color: '#eee'
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      formatter: function(params) {
+        const stockItem = params[0];
+        const expiryItem = params[1];
+        return `<div style="font-weight:bold;margin-bottom:5px;">${stockItem.name}</div>
+                <div>库存量: ${stockItem.value} kg ${stockItem.value < 10 ? '<span style="color:#ff6464">⚠️</span>' : ''}</div>
+                <div>有效期: ${expiryItem.value} 天 ${expiryItem.value < 3 ? '<span style="color:#ff6464">⚠️</span>' : ''}</div>`;
       }
     },
+    grid: {
+      top: '10%',
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      containLabel: true
+    },
+    legend: {
+      bottom: '0%',
+      textStyle: {
+        color: '#eee'
+      },
+      data: ['库存量(kg)', '有效期(天)']
+    },
+    xAxis: {
+      type: 'category',
+      data: ['大米', '面粉', '食用油', '猪肉', '青菜'],
+      axisLabel: {
+        color: '#eee',
+        interval: 0,
+        rotate: 30
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#eee'
+        }
+      }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '库存量(kg)',
+        nameTextStyle: {
+          color: '#eee'
+        },
+        axisLabel: {
+          color: '#eee'
+        },
+        axisLine: {
+          lineStyle: {
+            color: '#eee'
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        }
+      },
+      {
+        type: 'value',
+        name: '有效期(天)',
+        nameTextStyle: {
+          color: '#eee'
+        },
+        axisLabel: {
+          color: '#eee',
+          formatter: '{value} 天'
+        },
+        axisLine: {
+          lineStyle: {
+            color: '#eee'
+          }
+        }
+      }
+    ],
     series: [
       {
-        name: '库存占比',
-        type: 'pie',
-        radius: '55%',
-        center: ['50%', '45%'],
+        name: '库存量(kg)',
+        type: 'bar',
         data: [
-          { value: 35, name: '蔬菜' },
-          { value: 20, name: '肉类' },
-          { value: 15, name: '调味品' },
-          { value: 15, name: '米面' },
-          { value: 15, name: '其他' }
+          {value: 10, itemStyle: {color: '#ff6464'}}, 
+          {value: 8, itemStyle: {color: '#ff6464'}}, 
+          {value: 15, itemStyle: {color: '#3aa0ff'}}, 
+          {value: 6, itemStyle: {color: '#ff6464'}}, 
+          {value: 5, itemStyle: {color: '#ff6464'}}
         ],
-        roseType: 'radius',
-        itemStyle: {
-          borderRadius: 8
-        }
+        barWidth: '30%',
+        label: {
+          show: true,
+          position: 'top',
+          color: '#fff'
+        },
+        markLine: {
+          silent: true,
+          lineStyle: {
+            color: '#ff6464'
+          },
+          data: [
+            {
+              yAxis: 10,
+              label: {
+                formatter: '库存警戒线',
+                position: 'start'
+              }
+            }
+          ]
+        },
+        z: 10
+      },
+      {
+        name: '有效期(天)',
+        type: 'line',
+        yAxisIndex: 1,
+        data: [
+          {value: 30, symbol: 'circle', symbolSize: 8, itemStyle: {color: '#67C23A'}},
+          {value: 5, symbol: 'circle', symbolSize: 8, itemStyle: {color: '#E6A23C'}},
+          {value: 15, symbol: 'circle', symbolSize: 8, itemStyle: {color: '#67C23A'}},
+          {value: 2, symbol: 'circle', symbolSize: 10, itemStyle: {color: '#F56C6C'}, symbolBlink: true},
+          {value: 1, symbol: 'circle', symbolSize: 10, itemStyle: {color: '#F56C6C'}, symbolBlink: true}
+        ],
+        lineStyle: {
+          width: 3,
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {offset: 0, color: '#f56c6c'},
+            {offset: 0.5, color: '#e6a23c'},
+            {offset: 1, color: '#67c23a'}
+          ])
+        },
+        markLine: {
+          silent: true,
+          lineStyle: {
+            color: '#E6A23C'
+          },
+          data: [
+            {
+              yAxis: 3,
+              label: {
+                formatter: '过期警戒线',
+                position: 'start'
+              }
+            }
+          ]
+        },
+        z: 11
       }
     ]
   }
+  
+  // 添加过期警告闪烁效果
+  let blinking = false;
+  inventoryAlertInterval = setInterval(() => {
+    if (!chart) return;
+    
+    const series1 = option.series[1];
+    series1.data.forEach((item, index) => {
+      if (item.symbolBlink) {
+        if (blinking) {
+          item.symbolSize = 12;
+          item.itemStyle.borderWidth = 2;
+          item.itemStyle.borderColor = '#fff';
+        } else {
+          item.symbolSize = 10;
+          item.itemStyle.borderWidth = 0;
+        }
+      }
+    });
+    blinking = !blinking;
+    chart.setOption(option, true);
+  }, 500);
   
   chart.setOption(option)
   window.addEventListener('resize', () => chart.resize())
@@ -682,6 +825,7 @@ async function fetchStaffData() {
 let timeInterval = null
 let dataInterval = null
 let blockchainDataUpdateInterval = null
+let inventoryAlertInterval = null
 
 onMounted(() => {
   // 更新时间
@@ -729,7 +873,7 @@ onMounted(() => {
     initSafetyIndexChart()
     initPurchaseTrendChart()
     initMealSupplyChart()
-    initInventoryDistributionChart()
+    initInventoryAlertChart()
     initProcessingStatChart()
     initInspectionResultChart()
   })
@@ -748,6 +892,8 @@ onUnmounted(() => {
   if (webRtcServer) {
     webRtcServer.disconnect()
   }
+  
+  if (inventoryAlertInterval) clearInterval(inventoryAlertInterval)
 })
 </script>
 
