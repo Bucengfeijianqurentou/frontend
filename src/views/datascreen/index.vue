@@ -247,77 +247,315 @@ function initSafetyIndexChart() {
   
   const chart = echarts.init(safetyIndexChart.value)
   const option = {
-    series: [{
-      type: 'gauge',
-      startAngle: 180,
-      endAngle: 0,
-      center: ['50%', '75%'],
-      radius: '90%',
-      min: 0,
-      max: 100,
-      splitNumber: 10,
-      axisLine: {
-        lineStyle: {
-          width: 6,
-          color: [
-            [0.3, '#FF6E76'],
-            [0.7, '#FDDD60'],
-            [1, '#7CFFB2']
-          ]
-        }
+    tooltip: {
+      formatter: '{a} <br/>{b} : {c}分'
+    },
+    grid: {
+      top: 40,
+      bottom: 30,
+      left: '10%',
+      right: '10%'
+    },
+    title: {
+      text: '92',
+      subtext: '分',
+      left: 'center',
+      top: 'center',
+      textStyle: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: '#7CFFB2'
       },
-      pointer: {
-        icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
-        length: '12%',
-        width: 20,
-        offsetCenter: [0, '-60%'],
-        itemStyle: {
-          color: 'inherit'
-        }
-      },
-      axisTick: {
-        length: 12,
-        lineStyle: {
-          color: 'inherit',
-          width: 2
-        }
-      },
-      splitLine: {
-        length: 20,
-        lineStyle: {
-          color: 'inherit',
-          width: 5
-        }
-      },
-      axisLabel: {
-        color: '#464646',
-        fontSize: 20,
-        distance: -60,
-        formatter: function (value) {
-          if (value === 0 || value === 100) {
-            return value
+      subtextStyle: {
+        fontSize: 16,
+        color: '#7CFFB2'
+      }
+    },
+    series: [
+      {
+        name: '食品安全评分',
+        type: 'gauge',
+        radius: '95%',
+        splitNumber: 10,
+        axisLine: {
+          lineStyle: {
+            width: 20,
+            color: [
+              [0.3, '#FF6E76'],
+              [0.7, '#FDDD60'],
+              [1, '#7CFFB2']
+            ]
           }
-          return ''
+        },
+        pointer: {
+          icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+          length: '60%',
+          width: 8,
+          itemStyle: {
+            color: 'auto'
+          }
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          length: 6,
+          distance: -20,
+          lineStyle: {
+            width: 2,
+            color: '#fff'
+          }
+        },
+        axisLabel: {
+          distance: -35,
+          color: '#999',
+          fontSize: 14
+        },
+        detail: {
+          show: false
+        },
+        data: [
+          {
+            value: 92
+          }
+        ],
+        // 添加细节元素
+        markPoint: {
+          silent: true,
+          symbolSize: 0,
+          data: [
+            {
+              x: '15%',
+              y: '60%',
+              label: {
+                fontSize: 12,
+                formatter: [
+                  '{a|合格率}',
+                  '{b|98%}',
+                ].join('\n'),
+                rich: {
+                  a: {
+                    color: '#999',
+                    lineHeight: 20
+                  },
+                  b: {
+                    color: '#7CFFB2',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    lineHeight: 20
+                  }
+                }
+              }
+            },
+            {
+              x: '85%',
+              y: '60%',
+              label: {
+                fontSize: 12,
+                formatter: [
+                  '{a|监察得分}',
+                  '{b|96分}',
+                ].join('\n'),
+                rich: {
+                  a: {
+                    color: '#999',
+                    lineHeight: 20
+                  },
+                  b: {
+                    color: '#7CFFB2',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    lineHeight: 20
+                  }
+                }
+              }
+            },
+            {
+              x: '50%',
+              y: '85%',
+              label: {
+                fontSize: 12,
+                formatter: [
+                  '{c|整体安全评级}',
+                  '{d|优}',
+                ].join('\n'),
+                rich: {
+                  c: {
+                    color: '#eee',
+                    lineHeight: 20
+                  },
+                  d: {
+                    color: '#7CFFB2',
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    lineHeight: 20
+                  }
+                }
+              }
+            }
+          ]
+        },
+        // 添加超过阈值的警告动画
+        animationDuration: 2000,
+        detail: {
+          show: false
         }
       },
-      title: {
-        offsetCenter: [0, '-20%'],
-        fontSize: 20
-      },
-      detail: {
-        fontSize: 30,
-        offsetCenter: [0, '0%'],
-        valueAnimation: true,
-        formatter: function (value) {
-          return Math.round(value) + '分'
+      // 添加环形进度条显示子指标
+      {
+        name: '卫生状况',
+        type: 'gauge',
+        center: ['20%', '25%'],
+        radius: '25%',
+        min: 0,
+        max: 100,
+        startAngle: 0,
+        endAngle: 360,
+        splitNumber: 8,
+        axisLine: {
+          lineStyle: {
+            width: 6,
+            color: [
+              [0.94, '#7CFFB2'],
+              [1, '#eee']
+            ]
+          }
         },
-        color: 'inherit'
+        pointer: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          show: false
+        },
+        title: {
+          show: true,
+          fontSize: 12,
+          color: '#eee',
+          offsetCenter: [0, '30%']
+        },
+        detail: {
+          show: true,
+          fontSize: 14,
+          color: '#7CFFB2',
+          offsetCenter: [0, 0],
+          formatter: '{value}%'
+        },
+        data: [
+          {
+            value: 94,
+            name: '卫生状况'
+          }
+        ]
       },
-      data: [{
-        value: 92,
-        name: '安全指数'
-      }]
-    }]
+      {
+        name: '食材新鲜度',
+        type: 'gauge',
+        center: ['50%', '25%'],
+        radius: '25%',
+        min: 0,
+        max: 100,
+        startAngle: 0,
+        endAngle: 360,
+        splitNumber: 8,
+        axisLine: {
+          lineStyle: {
+            width: 6,
+            color: [
+              [0.89, '#FDDD60'],
+              [1, '#eee']
+            ]
+          }
+        },
+        pointer: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          show: false
+        },
+        title: {
+          show: true,
+          fontSize: 12,
+          color: '#eee',
+          offsetCenter: [0, '30%']
+        },
+        detail: {
+          show: true,
+          fontSize: 14,
+          color: '#FDDD60',
+          offsetCenter: [0, 0],
+          formatter: '{value}%'
+        },
+        data: [
+          {
+            value: 89,
+            name: '食材新鲜度'
+          }
+        ]
+      },
+      {
+        name: '供餐安全',
+        type: 'gauge',
+        center: ['80%', '25%'],
+        radius: '25%',
+        min: 0,
+        max: 100,
+        startAngle: 0,
+        endAngle: 360,
+        splitNumber: 8,
+        axisLine: {
+          lineStyle: {
+            width: 6,
+            color: [
+              [0.96, '#7CFFB2'],
+              [1, '#eee']
+            ]
+          }
+        },
+        pointer: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          show: false
+        },
+        title: {
+          show: true,
+          fontSize: 12,
+          color: '#eee',
+          offsetCenter: [0, '30%']
+        },
+        detail: {
+          show: true,
+          fontSize: 14,
+          color: '#7CFFB2',
+          offsetCenter: [0, 0],
+          formatter: '{value}%'
+        },
+        data: [
+          {
+            value: 96,
+            name: '供餐安全'
+          }
+        ]
+      }
+    ]
   }
   
   chart.setOption(option)
