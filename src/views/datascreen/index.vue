@@ -230,8 +230,8 @@ function connectMonitorStream() {
     }
     
     // 使用与监控页面相同的WebRTC实现方式
-    webRtcServer = new WebRtcStreamer(mainVideoRef.value, 'http://localhost:8000')
-    webRtcServer.connect('rtsp://admin:123456@192.168.62.104:554/cam/realmonitor?channel=1&subtype=0')
+    webRtcServer = new WebRtcStreamer(mainVideoRef.value, import.meta.env.VITE_WEBRTC_SERVER_URL)
+    webRtcServer.connect(import.meta.env.VITE_RTSP_STREAM_URL)
   } catch (error) {
     console.error('连接监控视频流失败:', error)
   }
