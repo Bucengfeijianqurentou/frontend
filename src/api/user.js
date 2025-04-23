@@ -43,6 +43,14 @@ export function getUserList(params) {
   })
 }
 
+// 获取用户总数
+export function getUserCount() {
+  return request({
+    url: '/api/user/count',
+    method: 'get'
+  })
+}
+
 // 切换用户状态（启用/禁用）
 export function toggleUserStatus(id, status) {
   return request({

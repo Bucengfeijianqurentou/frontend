@@ -185,7 +185,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import * as echarts from 'echarts/core'
@@ -222,6 +222,7 @@ import {
   Check
 } from '@element-plus/icons-vue'
 import 'animate.css'
+import { getUserCount } from '@/api/user'
 
 // 添加 CSS 变量计算
 document.documentElement.style.setProperty('--primary-color-rgb', '30, 58, 138')
@@ -277,11 +278,46 @@ const issueTypeChartRef = ref(null)
 const popularityChartRef = ref(null)
 const inventoryChartRef = ref(null)
 
+// 用户数据相关的响应式变量
+const userCount = ref(0)
+const userCountChange = ref(0)
+const prevUserCount = ref(0)
+
+// 在onMounted钩子中调用
+const userCountTimer = ref(null)
+
+// 获取用户数量的方法
+const fetchUserCount = async () => {
+  try {
+    const res = await getUserCount()
+    if (res.data) {
+      // 保存上一次的用户数量用于计算变化率
+      prevUserCount.value = userCount.value
+      
+      // 更新当前用户数量
+      userCount.value = res.data.count
+      
+      // 计算变化率（如果有历史数据）
+      if (prevUserCount.value > 0) {
+        const diff = userCount.value - prevUserCount.value
+        userCountChange.value = Math.round((diff / prevUserCount.value) * 100)
+      } else {
+        userCountChange.value = 0
+      }
+    }
+  } catch (error) {
+    console.error('获取用户数量失败:', error)
+    // 使用默认值
+    userCount.value = 0
+    userCountChange.value = 0
+  }
+}
+
 // 统计卡片数据 - 根据角色展示不同数据
 const statCards = computed(() => {
   if (userStore.isAdmin) {
     return [
-      { label: '系统用户数', value: '68', icon: 'UserFilled', color: '#409EFF', change: 5 },
+      { label: '系统用户数', value: userCount.value.toString(), icon: 'UserFilled', color: '#409EFF', change: userCountChange.value },
       { label: '活跃学校', value: '12', icon: 'School', color: '#67C23A', change: 0 },
       { label: '本周检查次数', value: '24', icon: 'Search', color: '#E6A23C', change: 12 },
       { label: '本月食品安全事故', value: '0', icon: 'WarningFilled', color: '#F56C6C', change: -2 }
@@ -551,34 +587,57 @@ const initCharts = () => {
 }
 
 onMounted(() => {
+  // 获取用户数量
+  fetchUserCount()
+  
   // 初始化所有图表
   setTimeout(() => {
     initCharts()
   }, 200)
   
   // 窗口大小变化时重新调整图表大小
-  window.addEventListener('resize', () => {
-    const charts = []
-    
-    if (userStore.isAdmin) {
-      if (purchaseChartRef.value) charts.push(echarts.getInstanceByDom(purchaseChartRef.value))
-      if (nutritionChartRef.value) charts.push(echarts.getInstanceByDom(nutritionChartRef.value))
-    }
-    
-    if (userStore.isInspector) {
-      if (inspectionChartRef.value) charts.push(echarts.getInstanceByDom(inspectionChartRef.value))
-      if (issueTypeChartRef.value) charts.push(echarts.getInstanceByDom(issueTypeChartRef.value))
-    }
-    
-    if (userStore.isStaff) {
-      if (popularityChartRef.value) charts.push(echarts.getInstanceByDom(popularityChartRef.value))
-      if (inventoryChartRef.value) charts.push(echarts.getInstanceByDom(inventoryChartRef.value))
-    }
-    
-    charts.forEach(chart => {
-      if (chart) chart.resize()
-    })
+  window.addEventListener('resize', handleResize)
+  
+  // 设置定时刷新用户数量（可选，每5分钟刷新一次）
+  userCountTimer.value = setInterval(() => {
+    fetchUserCount()
+  }, 5 * 60 * 1000)
+})
+
+// 处理窗口大小变化
+const handleResize = () => {
+  const charts = []
+  
+  if (userStore.isAdmin) {
+    if (purchaseChartRef.value) charts.push(echarts.getInstanceByDom(purchaseChartRef.value))
+    if (nutritionChartRef.value) charts.push(echarts.getInstanceByDom(nutritionChartRef.value))
+  }
+  
+  if (userStore.isInspector) {
+    if (inspectionChartRef.value) charts.push(echarts.getInstanceByDom(inspectionChartRef.value))
+    if (issueTypeChartRef.value) charts.push(echarts.getInstanceByDom(issueTypeChartRef.value))
+  }
+  
+  if (userStore.isStaff) {
+    if (popularityChartRef.value) charts.push(echarts.getInstanceByDom(popularityChartRef.value))
+    if (inventoryChartRef.value) charts.push(echarts.getInstanceByDom(inventoryChartRef.value))
+  }
+  
+  charts.forEach(chart => {
+    if (chart) chart.resize()
   })
+}
+
+// 组件卸载时清理
+onUnmounted(() => {
+  // 移除窗口大小变化监听器
+  window.removeEventListener('resize', handleResize)
+  
+  // 清除定时器
+  if (userCountTimer.value) {
+    clearInterval(userCountTimer.value)
+    userCountTimer.value = null
+  }
 })
 </script>
 
