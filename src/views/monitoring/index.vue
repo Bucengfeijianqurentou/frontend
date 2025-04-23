@@ -426,7 +426,7 @@ function setActiveQuad(area) {
 function connectMainStream() {
   const videoElement = document.getElementById('main-video');
   if (videoElement) {
-    mainWebRtcServer = new WebRtcStreamer(videoElement, import.meta.env.VITE_API_BASE_URL+':8000');
+    mainWebRtcServer = new WebRtcStreamer(videoElement, 'http://localhost:8000');
     mainWebRtcServer.connect('rtsp://admin:123456@192.168.62.104:554/cam/realmonitor?channel=1&subtype=0');
     webRtcServers['main'] = mainWebRtcServer;
   }
@@ -439,7 +439,7 @@ function connectQuadStreams() {
   areas.forEach((area, index) => {
     const videoElement = document.getElementById(`quad-video-${index + 1}`);
     if (videoElement) {
-      const server = new WebRtcStreamer(videoElement, import.meta.env.VITE_API_BASE_URL + ':8000');
+      const server = new WebRtcStreamer(videoElement, 'http://localhost:8000');
       server.connect('rtsp://admin:123456@192.168.62.104:554/cam/realmonitor?channel=1&subtype=0');
       webRtcServers[area] = server;
     }
