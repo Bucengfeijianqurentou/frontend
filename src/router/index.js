@@ -126,7 +126,7 @@ const routes = [
       {
         path: 'analysis',
         name: 'Analysis',
-        component: () => import('@/views/analysis.vue'),
+        component: () => import('@/views/admin/analysis.vue'),
         meta: { requiresAuth: true, role: 'INSPECTOR' }
       },
       // 实时监控路由 - 监管方可访问
