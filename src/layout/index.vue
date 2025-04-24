@@ -183,6 +183,13 @@
                 </template>
               </el-menu-item>
 
+              <el-menu-item index="/menu/recommend" class="menu-item">
+                <el-icon><MagicStick /></el-icon>
+                <template #title>
+                  <span>智能菜单推荐</span>
+                </template>
+              </el-menu-item>
+
               <el-menu-item index="/distribution" class="menu-item">
                 <el-icon><Box /></el-icon>
                 <template #title>
@@ -321,7 +328,8 @@ import {
   Refresh,
   ArrowDown,
   SwitchButton,
-  Menu
+  Menu,
+  MagicStick
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

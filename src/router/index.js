@@ -163,6 +163,12 @@ const routes = [
         meta: { requiresAuth: true, role: 'STAFF' }
       },
       {
+        path: 'menu/recommend',
+        name: 'MenuRecommend',
+        component: () => import('@/views/menu/recommend.vue'),
+        meta: { requiresAuth: true, role: 'STAFF', title: '智能菜单推荐' }
+      },
+      {
         path: 'inventory',
         name: 'Inventory',
         component: () => import('@/views/inventory/index.vue'),
