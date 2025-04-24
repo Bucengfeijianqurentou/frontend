@@ -1,20 +1,30 @@
 <template>
   <div class="menu-recommend-container">
-    <h1 class="text-2xl font-bold mb-6">基于大数据分析与AI大模型的智能菜单推荐及营养雷达图展示</h1>
+    <div class="header-section">
+      <h1 class="page-title">
+        <span class="title-icon">🍽️</span>
+        <span class="title-text">基于大数据分析与AI大模型的智能菜单推荐</span>
+      </h1>
+      <div class="subtitle">科学搭配膳食，促进健康成长</div>
+    </div>
     
     <!-- 输入参数区域 -->
-    <el-card class="mb-6">
+    <el-card class="param-card mb-6 animate__animated animate__fadeIn">
       <template #header>
         <div class="card-header">
-          <span class="font-bold">菜单推荐参数设置</span>
+          <div class="header-left">
+            <el-icon class="header-icon"><IconSetting /></el-icon>
+            <span class="font-bold">菜单推荐参数设置</span>
+          </div>
+          <el-tag effect="dark" type="info" size="small" class="header-tag">个性化定制</el-tag>
         </div>
       </template>
       
-      <el-form :model="formData" label-position="top">
-        <el-row :gutter="20">
+      <el-form :model="formData" label-position="top" class="param-form">
+        <el-row :gutter="24">
           <el-col :span="8">
             <el-form-item label="学校类型">
-              <el-select v-model="formData.schoolType" placeholder="请选择学校类型">
+              <el-select v-model="formData.schoolType" placeholder="请选择学校类型" class="custom-select">
                 <el-option label="小学" value="primary" />
                 <el-option label="初中" value="junior" />
                 <el-option label="高中" value="senior" />
@@ -23,7 +33,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="学生年龄段">
-              <el-select v-model="formData.ageRange" placeholder="请选择年龄段">
+              <el-select v-model="formData.ageRange" placeholder="请选择年龄段" class="custom-select">
                 <el-option label="6-9岁" value="6-9" />
                 <el-option label="10-12岁" value="10-12" />
                 <el-option label="13-15岁" value="13-15" />
@@ -33,42 +43,112 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="季节">
-              <el-select v-model="formData.season" placeholder="请选择季节">
-                <el-option label="春季" value="spring" />
-                <el-option label="夏季" value="summer" />
-                <el-option label="秋季" value="autumn" />
-                <el-option label="冬季" value="winter" />
+              <el-select v-model="formData.season" placeholder="请选择季节" class="custom-select">
+                <el-option label="春季" value="spring">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">🌱</span>
+                    <span>春季</span>
+                  </div>
+                </el-option>
+                <el-option label="夏季" value="summer">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">☀️</span>
+                    <span>夏季</span>
+                  </div>
+                </el-option>
+                <el-option label="秋季" value="autumn">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">🍂</span>
+                    <span>秋季</span>
+                  </div>
+                </el-option>
+                <el-option label="冬季" value="winter">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">❄️</span>
+                    <span>冬季</span>
+                  </div>
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         
-        <el-row :gutter="20">
+        <el-row :gutter="24">
           <el-col :span="8">
             <el-form-item label="特殊膳食需求">
-              <el-checkbox-group v-model="formData.dietaryRequirements">
-                <el-checkbox label="清真" value="halal" />
-                <el-checkbox label="素食" value="vegetarian" />
-                <el-checkbox label="低糖" value="lowSugar" />
-                <el-checkbox label="低盐" value="lowSalt" />
+              <el-checkbox-group v-model="formData.dietaryRequirements" class="checkbox-group-vertical">
+                <el-checkbox label="清真" value="halal">
+                  <span class="checkbox-with-icon">
+                    <span class="checkbox-icon">🕌</span>
+                    <span>清真</span>
+                  </span>
+                </el-checkbox>
+                <el-checkbox label="素食" value="vegetarian">
+                  <span class="checkbox-with-icon">
+                    <span class="checkbox-icon">🥬</span>
+                    <span>素食</span>
+                  </span>
+                </el-checkbox>
+                <el-checkbox label="低糖" value="lowSugar">
+                  <span class="checkbox-with-icon">
+                    <span class="checkbox-icon">🍯</span>
+                    <span>低糖</span>
+                  </span>
+                </el-checkbox>
+                <el-checkbox label="低盐" value="lowSalt">
+                  <span class="checkbox-with-icon">
+                    <span class="checkbox-icon">🧂</span>
+                    <span>低盐</span>
+                  </span>
+                </el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="推荐周期">
-              <el-radio-group v-model="formData.period">
-                <el-radio value="day">单日菜单</el-radio>
-                <el-radio value="week">一周菜单</el-radio>
+              <el-radio-group v-model="formData.period" class="custom-radio-group">
+                <el-radio value="day" class="custom-radio">
+                  <div class="radio-with-icon">
+                    <span class="radio-icon">📅</span>
+                    <span>单日菜单</span>
+                  </div>
+                </el-radio>
+                <el-radio value="week" class="custom-radio">
+                  <div class="radio-with-icon">
+                    <span class="radio-icon">📆</span>
+                    <span>一周菜单</span>
+                  </div>
+                </el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="营养偏好">
-              <el-select v-model="formData.nutritionFocus" placeholder="请选择营养偏好">
-                <el-option label="均衡营养" value="balanced" />
-                <el-option label="增强免疫" value="immune" />
-                <el-option label="促进发育" value="growth" />
-                <el-option label="预防肥胖" value="obesity" />
+              <el-select v-model="formData.nutritionFocus" placeholder="请选择营养偏好" class="custom-select">
+                <el-option label="均衡营养" value="balanced">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">⚖️</span>
+                    <span>均衡营养</span>
+                  </div>
+                </el-option>
+                <el-option label="增强免疫" value="immune">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">🛡️</span>
+                    <span>增强免疫</span>
+                  </div>
+                </el-option>
+                <el-option label="促进发育" value="growth">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">📏</span>
+                    <span>促进发育</span>
+                  </div>
+                </el-option>
+                <el-option label="预防肥胖" value="obesity">
+                  <div class="select-option-with-icon">
+                    <span class="option-icon">🏃</span>
+                    <span>预防肥胖</span>
+                  </div>
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -76,8 +156,15 @@
         
         <el-row>
           <el-col :span="24" class="flex justify-center">
-            <el-button type="primary" @click="generateMenu" :loading="loading">
-              生成智能推荐菜单
+            <el-button 
+              type="primary" 
+              @click="generateMenu" 
+              :loading="loading"
+              class="generate-btn"
+              :disabled="loading"
+            >
+              <span class="btn-icon">{{ loading ? '⏳' : '✨' }}</span>
+              <span>{{ loading ? '生成中...' : '生成智能推荐菜单' }}</span>
             </el-button>
           </el-col>
         </el-row>
@@ -85,110 +172,113 @@
     </el-card>
     
     <!-- 分析过程展示 -->
-    <div v-if="processingSteps.length > 0">
-      <el-card class="mb-6">
-        <template #header>
-          <div class="card-header">
-            <span class="font-bold">数据分析处理过程</span>
-          </div>
-        </template>
-        
-        <el-timeline>
-          <el-timeline-item
-            v-for="(step, index) in processingSteps"
-            :key="index"
-            :timestamp="step.time"
-            :type="step.type"
-            :hollow="step.hollow"
-          >
-            <div class="step-content">
-              <h4 class="font-bold mb-2">{{ step.title }}</h4>
-              <p>{{ step.description }}</p>
-              <div v-if="step.progress !== undefined" class="mt-2">
-                <el-progress 
-                  :percentage="step.progress" 
-                  :status="step.progress === 100 ? 'success' : ''"
-                  :striped="step.progress < 100"
-                  :striped-flow="step.progress < 100"
-                ></el-progress>
+    <transition-group name="fade-up" tag="div">
+      <div v-if="processingSteps.length > 0" :key="'process-section'" class="mb-6">
+        <el-card class="process-card animate__animated animate__fadeIn">
+          <template #header>
+            <div class="card-header">
+              <div class="header-left">
+                <el-icon class="header-icon"><IconDataAnalysis /></el-icon>
+                <span class="font-bold">数据分析处理过程</span>
+              </div>
+              <div class="processing-badge" v-if="loading">
+                <span class="badge-dot"></span>
+                <span>处理中</span>
               </div>
             </div>
-          </el-timeline-item>
-        </el-timeline>
-      </el-card>
-    </div>
+          </template>
+          
+          <el-timeline class="custom-timeline">
+            <el-timeline-item
+              v-for="(step, index) in processingSteps"
+              :key="index"
+              :timestamp="step.time"
+              :type="step.type"
+              :hollow="step.hollow"
+              class="animate__animated animate__fadeInUp"
+              :style="{ animationDelay: index * 0.2 + 's' }"
+            >
+              <div class="step-content">
+                <h4 class="step-title">
+                  <span class="step-number">{{ index + 1 }}</span>
+                  {{ step.title }}
+                </h4>
+                <p class="step-description">{{ step.description }}</p>
+                <div v-if="step.progress !== undefined" class="mt-3">
+                  <el-progress 
+                    :percentage="step.progress" 
+                    :status="step.progress === 100 ? 'success' : ''"
+                    :striped="step.progress < 100"
+                    :striped-flow="step.progress < 100"
+                    class="custom-progress"
+                  ></el-progress>
+                </div>
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+        </el-card>
+      </div>
+    </transition-group>
     
     <!-- 推荐菜单展示 -->
-    <div v-if="menuGenerated">
-      <!-- 菜单选项卡 -->
-      <el-card class="mb-6">
-        <template #header>
-          <div class="card-header">
-            <span class="font-bold">{{ formData.period === 'day' ? '每日' : '每周' }}推荐菜单</span>
-            <el-button type="success" size="small">
-              <el-icon><component is="IconDownload" /></el-icon>
-              导出菜单
-            </el-button>
-          </div>
-        </template>
-        
-        <div v-if="formData.period === 'day'">
-          <!-- 单日菜单展示 -->
-          <div class="day-menu">
-            <h3 class="text-lg font-bold mb-4">{{ currentDate }} 推荐菜单</h3>
-            
-            <el-row :gutter="20">
-              <el-col v-for="(meal, index) in dayMenu" :key="index" :span="8">
-                <el-card class="meal-card mb-4">
-                  <template #header>
-                    <div class="meal-header">
-                      <span class="font-bold">{{ meal.title }}</span>
-                      <el-tag size="small" :type="meal.type">{{ meal.time }}</el-tag>
-                    </div>
-                  </template>
-                  <div class="meal-content">
-                    <div v-for="(dish, dishIndex) in meal.dishes" :key="dishIndex" class="dish-item">
-                      <div class="dish-icon" :style="{ backgroundColor: getDishColor(dish.category) }">
-                        {{ dish.emoji }}
-                      </div>
-                      <div class="dish-details">
-                        <div class="dish-name">{{ dish.name }}</div>
-                        <div class="dish-nutrition">
-                          <el-tag size="small" effect="plain">{{ dish.nutrition }}</el-tag>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </el-card>
-              </el-col>
-            </el-row>
-          </div>
-        </div>
-        
-        <div v-else>
-          <!-- 一周菜单展示 -->
-          <el-tabs v-model="activeDay" tab-position="left" class="week-menu-tabs">
-            <el-tab-pane v-for="(day, index) in weekMenu" :key="index" :label="day.day" :name="day.key">
-              <h3 class="text-lg font-bold mb-4">{{ day.date }} 推荐菜单</h3>
+    <transition-group name="fade-up" tag="div">
+      <div v-if="menuGenerated" :key="'menu-section'" class="menu-section">
+        <!-- 菜单选项卡 -->
+        <el-card class="menu-card mb-6 animate__animated animate__fadeIn">
+          <template #header>
+            <div class="card-header">
+              <div class="header-left">
+                <el-icon class="header-icon"><IconFood /></el-icon>
+                <span class="font-bold">{{ formData.period === 'day' ? '每日' : '每周' }}推荐菜单</span>
+              </div>
+              <el-button type="success" size="small" class="export-btn">
+                <el-icon><IconDownload /></el-icon>
+                <span>导出菜单</span>
+              </el-button>
+            </div>
+          </template>
+          
+          <div v-if="formData.period === 'day'">
+            <!-- 单日菜单展示 -->
+            <div class="day-menu animate__animated animate__fadeIn">
+              <div class="menu-date-header">
+                <div class="date-icon">📅</div>
+                <h3 class="menu-date">{{ currentDate }} 推荐菜单</h3>
+              </div>
               
-              <el-row :gutter="20">
-                <el-col v-for="(meal, mealIndex) in day.meals" :key="mealIndex" :span="8">
-                  <el-card class="meal-card mb-4">
+              <el-row :gutter="24" class="menu-content">
+                <el-col v-for="(meal, index) in dayMenu" :key="index" :span="8">
+                  <el-card 
+                    class="meal-card mb-4 animate__animated animate__zoomIn" 
+                    :style="{ animationDelay: index * 0.15 + 's' }"
+                    :body-style="{ padding: '0px' }"
+                  >
+                    <div class="meal-card-bg" :style="{ backgroundColor: getMealBgColor(meal.type) }"></div>
                     <template #header>
                       <div class="meal-header">
-                        <span class="font-bold">{{ meal.title }}</span>
-                        <el-tag size="small" :type="meal.type">{{ meal.time }}</el-tag>
+                        <div class="meal-title">
+                          <span class="meal-icon">{{ getMealIcon(meal.title) }}</span>
+                          <span class="font-bold">{{ meal.title }}</span>
+                        </div>
+                        <el-tag size="small" :type="meal.type" effect="dark" class="meal-time-tag">
+                          {{ meal.time }}
+                        </el-tag>
                       </div>
                     </template>
                     <div class="meal-content">
-                      <div v-for="(dish, dishIndex) in meal.dishes" :key="dishIndex" class="dish-item">
-                        <div class="dish-icon" :style="{ backgroundColor: getDishColor(dish.category) }">
-                          {{ dish.emoji }}
+                      <div 
+                        v-for="(dish, dishIndex) in meal.dishes" 
+                        :key="dishIndex" 
+                        class="dish-item animate__animated animate__fadeInRight"
+                        :style="{ animationDelay: (index * 0.15 + dishIndex * 0.1) + 's' }"
+                      >
+                        <div class="dish-icon-wrapper" :style="{ backgroundColor: getDishColor(dish.category) }">
+                          <div class="dish-icon">{{ dish.emoji }}</div>
                         </div>
                         <div class="dish-details">
                           <div class="dish-name">{{ dish.name }}</div>
                           <div class="dish-nutrition">
-                            <el-tag size="small" effect="plain">{{ dish.nutrition }}</el-tag>
+                            <el-tag size="small" effect="light" class="nutrition-tag">{{ dish.nutrition }}</el-tag>
                           </div>
                         </div>
                       </div>
@@ -196,104 +286,278 @@
                   </el-card>
                 </el-col>
               </el-row>
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </el-card>
-      
-      <!-- 营养分析 -->
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-card class="mb-6">
-            <template #header>
-              <div class="card-header">
-                <span class="font-bold">营养雷达图分析</span>
-              </div>
-            </template>
-            <div class="chart-container">
-              <div id="nutritionRadarChart" style="width: 100%; height: 400px;"></div>
             </div>
-          </el-card>
-        </el-col>
-        
-        <el-col :span="12">
-          <el-card class="mb-6">
-            <template #header>
-              <div class="card-header">
-                <span class="font-bold">营养摄入评估</span>
-              </div>
-            </template>
-            <div class="nutrition-assessment">
-              <div v-for="(item, index) in nutritionAssessment" :key="index" class="nutrition-item">
-                <div class="nutrition-header">
-                  <span class="nutrition-name">{{ item.name }}</span>
-                  <el-tag :type="item.status === '适宜' ? 'success' : item.status === '偏低' ? 'warning' : 'danger'" size="small">
-                    {{ item.status }}
-                  </el-tag>
-                </div>
-                <el-progress 
-                  :percentage="item.percentage" 
-                  :color="getProgressColor(item.percentage, item.status)"
-                  :format="(percentage) => `${percentage}%`"
-                  :stroke-width="12"
-                ></el-progress>
-                <div class="nutrition-description">
-                  {{ item.description }}
-                </div>
-              </div>
-              
-              <div class="mt-4">
-                <h4 class="font-bold mb-2">AI营养建议</h4>
-                <div class="ai-suggestion">
-                  <p>{{ aiSuggestion }}</p>
-                  <div class="mt-2">
-                    <el-button type="primary" size="small" @click="adjustNutrition">
-                      <el-icon><component is="IconRefreshRight" /></el-icon>
-                      调整营养配比
-                    </el-button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-      
-      <!-- 学生反馈预测 -->
-      <el-card class="mb-6">
-        <template #header>
-          <div class="card-header">
-            <span class="font-bold">学生接受度预测</span>
           </div>
-        </template>
-        <div class="feedback-prediction">
-          <el-row :gutter="20">
-            <el-col :span="8">
-              <div id="satisfactionChart" style="width: 100%; height: 300px;"></div>
-            </el-col>
-            <el-col :span="8">
-              <div id="wasteRateChart" style="width: 100%; height: 300px;"></div>
-            </el-col>
-            <el-col :span="8">
-              <div class="prediction-summary">
-                <h4 class="font-bold mb-2">AI预测总结</h4>
-                <div class="prediction-item" v-for="(item, index) in predictionSummary" :key="index">
-                  <el-icon><component is="IconDataAnalysis" /></el-icon>
-                  <span>{{ item }}</span>
-                </div>
-                <div class="history-comparison mt-4">
-                  <div class="comparison-header">
-                    <span>与历史推荐对比</span>
-                    <el-tag type="success">提升8.7%</el-tag>
+          
+          <div v-else>
+            <!-- 一周菜单展示 -->
+            <div class="week-menu animate__animated animate__fadeIn">
+              <el-tabs v-model="activeDay" tab-position="left" class="week-menu-tabs">
+                <el-tab-pane 
+                  v-for="(day, index) in weekMenu" 
+                  :key="index" 
+                  :label="day.day" 
+                  :name="day.key"
+                  class="week-tab-pane"
+                >
+                  <template #label>
+                    <div class="week-tab-label">
+                      <span class="day-icon">{{ getWeekdayIcon(day.key) }}</span>
+                      <span>{{ day.day }}</span>
+                    </div>
+                  </template>
+                  
+                  <div class="menu-date-header">
+                    <div class="date-icon">📅</div>
+                    <h3 class="menu-date">{{ day.date }} 推荐菜单</h3>
                   </div>
-                  <p class="comparison-text">当前菜单较上周菜单预测满意度提升8.7%，较上月平均提升12.3%。</p>
+                  
+                  <el-row :gutter="24" class="menu-content">
+                    <el-col v-for="(meal, mealIndex) in day.meals" :key="mealIndex" :span="8">
+                      <el-card 
+                        class="meal-card mb-4 animate__animated animate__zoomIn" 
+                        :style="{ animationDelay: mealIndex * 0.15 + 's' }"
+                        :body-style="{ padding: '0px' }"
+                      >
+                        <div class="meal-card-bg" :style="{ backgroundColor: getMealBgColor(meal.type) }"></div>
+                        <template #header>
+                          <div class="meal-header">
+                            <div class="meal-title">
+                              <span class="meal-icon">{{ getMealIcon(meal.title) }}</span>
+                              <span class="font-bold">{{ meal.title }}</span>
+                            </div>
+                            <el-tag size="small" :type="meal.type" effect="dark" class="meal-time-tag">
+                              {{ meal.time }}
+                            </el-tag>
+                          </div>
+                        </template>
+                        <div class="meal-content">
+                          <div 
+                            v-for="(dish, dishIndex) in meal.dishes" 
+                            :key="dishIndex" 
+                            class="dish-item animate__animated animate__fadeInRight"
+                            :style="{ animationDelay: (mealIndex * 0.15 + dishIndex * 0.1) + 's' }"
+                          >
+                            <div class="dish-icon-wrapper" :style="{ backgroundColor: getDishColor(dish.category) }">
+                              <div class="dish-icon">{{ dish.emoji }}</div>
+                            </div>
+                            <div class="dish-details">
+                              <div class="dish-name">{{ dish.name }}</div>
+                              <div class="dish-nutrition">
+                                <el-tag size="small" effect="light" class="nutrition-tag">{{ dish.nutrition }}</el-tag>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </el-card>
+                    </el-col>
+                  </el-row>
+                </el-tab-pane>
+              </el-tabs>
+            </div>
+          </div>
+        </el-card>
+      </div>
+    </transition-group>
+    
+    <!-- 营养分析 -->
+    <transition-group name="fade-up" tag="div">
+      <div v-if="menuGenerated" :key="'nutrition-section'" class="nutrition-section">
+        <el-row :gutter="24">
+          <el-col :span="12">
+            <el-card class="chart-card mb-6 animate__animated animate__fadeInLeft">
+              <template #header>
+                <div class="card-header">
+                  <div class="header-left">
+                    <el-icon class="header-icon"><IconDataLine /></el-icon>
+                    <span class="font-bold">营养雷达图分析</span>
+                  </div>
+                  <el-badge value="AI" type="success" class="ai-badge" />
+                </div>
+              </template>
+              <div class="chart-container">
+                <div class="chart-info">
+                  <div class="info-item">
+                    <div class="info-icon">📊</div>
+                    <div class="info-text">六大营养素平衡分析</div>
+                  </div>
+                  <div class="info-divider"></div>
+                  <div class="legend-container">
+                    <div class="legend-item">
+                      <div class="legend-color" style="background-color: rgba(58, 162, 254, 0.3);"></div>
+                      <div class="legend-label">当前菜单</div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-color legend-dashed"></div>
+                      <div class="legend-label">推荐标准</div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-color legend-dotted"></div>
+                      <div class="legend-label">上周菜单</div>
+                    </div>
+                  </div>
+                </div>
+                <div id="nutritionRadarChart" style="width: 100%; height: 400px;" class="radar-chart"></div>
+              </div>
+            </el-card>
+          </el-col>
+          
+          <el-col :span="12">
+            <el-card class="nutrition-assessment-card mb-6 animate__animated animate__fadeInRight">
+              <template #header>
+                <div class="card-header">
+                  <div class="header-left">
+                    <el-icon class="header-icon"><IconGobletFull /></el-icon>
+                    <span class="font-bold">营养摄入评估</span>
+                  </div>
+                  <div class="assessment-score">
+                    <span class="score-label">综合评分</span>
+                    <span class="score-value">86</span>
+                  </div>
+                </div>
+              </template>
+              <div class="nutrition-assessment">
+                <div 
+                  v-for="(item, index) in nutritionAssessment" 
+                  :key="index" 
+                  class="nutrition-item animate__animated animate__fadeInUp"
+                  :style="{ animationDelay: index * 0.1 + 's' }"
+                >
+                  <div class="nutrition-header">
+                    <div class="nutrition-name-wrapper">
+                      <span class="nutrition-icon">{{ getNutritionIcon(item.name) }}</span>
+                      <span class="nutrition-name">{{ item.name }}</span>
+                    </div>
+                    <el-tag 
+                      :type="item.status === '适宜' ? 'success' : item.status === '偏低' ? 'warning' : 'danger'" 
+                      size="small"
+                      effect="dark"
+                      class="status-tag"
+                    >
+                      {{ item.status }}
+                    </el-tag>
+                  </div>
+                  <el-progress 
+                    :percentage="item.percentage" 
+                    :color="getProgressColor(item.percentage, item.status)"
+                    :format="(percentage) => `${percentage}%`"
+                    :stroke-width="12"
+                    class="nutrition-progress"
+                    :show-text="false"
+                  ></el-progress>
+                  <div class="progress-info">
+                    <span class="progress-value">{{ item.percentage }}%</span>
+                    <span class="progress-label">{{ getProgressLabel(item.percentage) }}</span>
+                  </div>
+                  <div class="nutrition-description">
+                    {{ item.description }}
+                  </div>
+                </div>
+                
+                <div class="mt-4 animate__animated animate__fadeInUp" style="animation-delay: 0.6s;">
+                  <div class="ai-suggestion-header">
+                    <div class="ai-icon">🤖</div>
+                    <h4 class="font-bold">AI营养建议</h4>
+                  </div>
+                  <div class="ai-suggestion">
+                    <p>{{ aiSuggestion }}</p>
+                    <div class="mt-4 adjust-btn-container">
+                      <el-button type="primary" size="small" @click="adjustNutrition" class="adjust-btn">
+                        <el-icon><IconRefreshRight /></el-icon>
+                        <span>调整营养配比</span>
+                      </el-button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </el-col>
-          </el-row>
-        </div>
-      </el-card>
-    </div>
+            </el-card>
+          </el-col>
+        </el-row>
+        
+        <!-- 学生反馈预测 -->
+        <el-card class="feedback-card mb-6 animate__animated animate__fadeInUp">
+          <template #header>
+            <div class="card-header">
+              <div class="header-left">
+                <el-icon class="header-icon"><IconUser /></el-icon>
+                <span class="font-bold">学生接受度预测</span>
+              </div>
+              <el-tag type="info" effect="dark" class="header-tag">AI预测结果</el-tag>
+            </div>
+          </template>
+          <div class="feedback-prediction">
+            <el-row :gutter="24">
+              <el-col :span="8">
+                <div class="chart-wrapper animate__animated animate__fadeInLeft" style="animation-delay: 0.2s;">
+                  <div class="chart-title">
+                    <div class="chart-icon">📊</div>
+                    <h4>预测满意度分布</h4>
+                  </div>
+                  <div id="satisfactionChart" style="width: 100%; height: 300px;"></div>
+                </div>
+              </el-col>
+              <el-col :span="8">
+                <div class="chart-wrapper animate__animated animate__fadeInLeft" style="animation-delay: 0.4s;">
+                  <div class="chart-title">
+                    <div class="chart-icon">📉</div>
+                    <h4>食物剩余率预测</h4>
+                  </div>
+                  <div id="wasteRateChart" style="width: 100%; height: 300px;"></div>
+                </div>
+              </el-col>
+              <el-col :span="8">
+                <div class="prediction-summary animate__animated animate__fadeInRight" style="animation-delay: 0.6s;">
+                  <div class="summary-header">
+                    <div class="summary-icon">🔍</div>
+                    <h4 class="font-bold">AI预测总结</h4>
+                  </div>
+                  <div class="prediction-items">
+                    <div 
+                      class="prediction-item" 
+                      v-for="(item, index) in predictionSummary" 
+                      :key="index"
+                      :style="{ animationDelay: (0.6 + index * 0.1) + 's' }"
+                    >
+                      <el-icon><component :is="IconDataAnalysis" /></el-icon>
+                      <span>{{ item }}</span>
+                    </div>
+                  </div>
+                  <div class="history-comparison mt-4">
+                    <div class="comparison-header">
+                      <span>与历史推荐对比</span>
+                      <el-tag type="success" effect="dark" class="improvement-tag">提升8.7%</el-tag>
+                    </div>
+                    <div class="improvement-chart">
+                      <div class="chart-bar-container">
+                        <div class="chart-label">本周</div>
+                        <div class="chart-bar current" style="width: 92.5%;">
+                          <span class="bar-value">92.5%</span>
+                        </div>
+                      </div>
+                      <div class="chart-bar-container">
+                        <div class="chart-label">上周</div>
+                        <div class="chart-bar previous" style="width: 83.8%;">
+                          <span class="bar-value">83.8%</span>
+                        </div>
+                      </div>
+                      <div class="chart-bar-container">
+                        <div class="chart-label">月均</div>
+                        <div class="chart-bar average" style="width: 80.2%;">
+                          <span class="bar-value">80.2%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="comparison-text">
+                      当前菜单较上周菜单预测满意度提升8.7%，较上月平均提升12.3%。
+                    </p>
+                  </div>
+                </div>
+              </el-col>
+            </el-row>
+          </div>
+        </el-card>
+      </div>
+    </transition-group>
   </div>
 </template>
 
@@ -303,8 +567,14 @@ import * as echarts from 'echarts'
 import { 
   Download as IconDownload, 
   DataAnalysis as IconDataAnalysis, 
-  RefreshRight as IconRefreshRight 
+  RefreshRight as IconRefreshRight, 
+  Setting as IconSetting,
+  DataLine as IconDataLine,
+  Food as IconFood,
+  GobletFull as IconGobletFull,
+  User as IconUser
 } from '@element-plus/icons-vue'
+import 'animate.css'
 
 // 表单数据
 const formData = reactive({
@@ -397,6 +667,60 @@ const getProgressColor = (percentage, status) => {
   if (status === '适宜') return '#67C23A'
   if (status === '偏低') return '#E6A23C'
   return '#F56C6C'
+}
+
+// 获取进度评价
+const getProgressLabel = (percentage) => {
+  if (percentage >= 90) return '优秀'
+  if (percentage >= 80) return '良好'
+  if (percentage >= 70) return '适中'
+  if (percentage >= 60) return '一般'
+  return '不足'
+}
+
+// 获取周几图标
+const getWeekdayIcon = (day) => {
+  const icons = {
+    monday: '🌞',
+    tuesday: '🌟',
+    wednesday: '🌈',
+    thursday: '🌻',
+    friday: '🌹'
+  }
+  return icons[day] || '📅'
+}
+
+// 获取餐次图标
+const getMealIcon = (mealTitle) => {
+  const icons = {
+    '早餐': '🍳',
+    '午餐': '🍲',
+    '晚餐': '🍽️'
+  }
+  return icons[mealTitle] || '🍴'
+}
+
+// 获取营养素图标
+const getNutritionIcon = (nutritionName) => {
+  const icons = {
+    '蛋白质': '🥩',
+    '碳水化合物': '🍚',
+    '脂肪': '🧈',
+    '维生素': '🥗',
+    '矿物质': '🧂',
+    '膳食纤维': '🌾'
+  }
+  return icons[nutritionName] || '🍎'
+}
+
+// 获取餐次背景色
+const getMealBgColor = (type) => {
+  const colors = {
+    'success': 'rgba(103, 194, 58, 0.05)',
+    'warning': 'rgba(230, 162, 60, 0.05)',
+    'danger': 'rgba(245, 108, 108, 0.05)'
+  }
+  return colors[type] || 'rgba(144, 147, 153, 0.05)'
 }
 
 // 调整营养配比
@@ -914,55 +1238,332 @@ const initWasteRateChart = () => {
 </script>
 
 <style scoped>
+/* 引入过渡动画 */
+@import 'animate.css';
+
 .menu-recommend-container {
-  padding: 20px;
-  max-width: 1200px;
+  padding: 30px;
+  max-width: 1280px;
   margin: 0 auto;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f9fafc;
+  min-height: 100vh;
 }
 
+/* 页面标题样式 */
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: fadeInDown 1s ease;
+}
+
+.page-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.title-icon {
+  font-size: 2.5rem;
+  margin-right: 15px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #5d6778;
+  font-weight: 400;
+}
+
+/* 卡片样式优化 */
+.param-card, .process-card, .menu-card, .chart-card, .nutrition-assessment-card, .feedback-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
+  transition: all 0.3s ease;
+  border: none;
+  overflow: hidden;
+}
+
+.param-card:hover, .process-card:hover, .menu-card:hover, .chart-card:hover, 
+.nutrition-assessment-card:hover, .feedback-card:hover {
+  box-shadow: 0 12px 30px rgba(149, 157, 165, 0.25);
+  transform: translateY(-3px);
+}
+
+/* 卡片头部样式 */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #42b983 0%, #3eaf7c 100%);
+  color: white;
 }
 
-.step-content {
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-icon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.header-tag {
+  font-weight: 500;
+}
+
+/* 参数表单样式 */
+.param-form {
   padding: 10px;
 }
 
-.week-menu-tabs {
-  min-height: 400px;
+.custom-select {
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.custom-select:hover {
+  transform: translateY(-2px);
+}
+
+.select-option-with-icon,
+.checkbox-with-icon,
+.radio-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-icon,
+.checkbox-icon,
+.radio-icon {
+  font-size: 1.2rem;
+}
+
+.checkbox-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.custom-radio {
+  margin-right: 0 !important;
+  margin-bottom: 10px;
+}
+
+/* 生成按钮样式 */
+.generate-btn {
+  padding: 12px 30px;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 15px;
+  background: linear-gradient(135deg, #1a6fc7 0%, #2a81d7 100%);
+  border: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.generate-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.2);
+}
+
+.generate-btn:active {
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* 处理步骤样式 */
+.processing-badge {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 5px 10px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #fff;
+  margin-right: 6px;
+  animation: pulse 1.5s infinite;
+}
+
+.custom-timeline {
+  padding: 20px;
+}
+
+.step-content {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.step-content:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.step-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #2a81d7;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.step-description {
+  color: #5d6778;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.custom-progress {
+  height: 10px;
+  border-radius: 5px;
+}
+
+/* 菜单展示样式 */
+.menu-section {
+  margin-top: 30px;
+}
+
+.menu-date-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 15px;
+}
+
+.date-icon {
+  font-size: 1.8rem;
+  margin-right: 10px;
+}
+
+.menu-date {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .meal-card {
-  height: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.meal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.meal-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  opacity: 0.5;
 }
 
 .meal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.meal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meal-icon {
+  font-size: 1.3rem;
+}
+
+.meal-time-tag {
+  font-weight: 500;
 }
 
 .meal-content {
-  padding: 10px 0;
+  padding: 15px;
+  position: relative;
+  z-index: 1;
 }
 
 .dish-item {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.dish-icon {
-  width: 36px;
-  height: 36px;
+.dish-item:hover {
+  transform: translateX(5px);
+  background-color: white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dish-icon-wrapper {
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-right: 12px;
-  font-size: 20px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dish-icon {
+  font-size: 24px;
 }
 
 .dish-details {
@@ -970,86 +1571,431 @@ const initWasteRateChart = () => {
 }
 
 .dish-name {
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+  font-size: 0.95rem;
 }
 
-.dish-nutrition {
-  font-size: 12px;
+.nutrition-tag {
+  border-radius: 12px;
+  padding: 0 8px;
+  font-size: 0.75rem;
+}
+
+.week-menu-tabs {
+  min-height: 450px;
+}
+
+.week-tab-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.day-icon {
+  font-size: 1.2rem;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 500;
+}
+
+/* 营养雷达图分析样式 */
+.nutrition-section {
+  margin-top: 30px;
+}
+
+.chart-card, .nutrition-assessment-card {
+  height: 100%;
+}
+
+.ai-badge {
+  padding: 3px 6px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .chart-container {
-  width: 100%;
-  height: 400px;
+  padding: 20px;
+}
+
+.chart-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 0 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-icon {
+  font-size: 1.2rem;
+}
+
+.info-text {
+  font-weight: 600;
+  color: #5d6778;
+}
+
+.info-divider {
+  width: 1px;
+  height: 30px;
+  background-color: #e0e0e0;
+}
+
+.legend-container {
+  display: flex;
+  gap: 15px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-color {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  background-color: rgba(58, 162, 254, 0.3);
+}
+
+.legend-dashed {
+  border: 2px dashed #5470c6;
+  background-color: transparent;
+}
+
+.legend-dotted {
+  border: 2px dotted #91cc75;
+  background-color: transparent;
+}
+
+.legend-label {
+  font-size: 0.8rem;
+  color: #606266;
+}
+
+.radar-chart {
+  margin-top: 15px;
+}
+
+.assessment-score {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 5px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-label {
+  font-size: 0.8rem;
+}
+
+.score-value {
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .nutrition-assessment {
-  padding: 0 10px;
+  padding: 20px;
 }
 
 .nutrition-item {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.nutrition-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .nutrition-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.nutrition-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nutrition-icon {
+  font-size: 1.2rem;
 }
 
 .nutrition-name {
-  font-weight: bold;
+  font-weight: 600;
+  color: #333;
+}
+
+.status-tag {
+  font-weight: 500;
+}
+
+.nutrition-progress {
+  margin-bottom: 5px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.progress-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.progress-label {
+  color: #909399;
+  font-size: 0.85rem;
 }
 
 .nutrition-description {
-  font-size: 12px;
+  font-size: 0.85rem;
   color: #606266;
-  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.ai-suggestion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ai-icon {
+  font-size: 1.5rem;
 }
 
 .ai-suggestion {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
+  background-color: #f0f9eb;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 0.95rem;
+  color: #5d6778;
+  line-height: 1.6;
+  border-left: 4px solid #67c23a;
+}
+
+.adjust-btn-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.adjust-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+/* 学生反馈预测样式 */
+.feedback-prediction {
+  padding: 20px;
+}
+
+.chart-wrapper {
+  height: 100%;
+  padding: 15px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chart-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.chart-icon {
+  font-size: 1.3rem;
+}
+
+.chart-title h4 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
 }
 
 .prediction-summary {
+  height: 100%;
   padding: 20px;
-  height: 300px;
   background-color: #f9f9f9;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.summary-icon {
+  font-size: 1.3rem;
+}
+
+.prediction-items {
+  margin-bottom: 20px;
 }
 
 .prediction-item {
   display: flex;
   align-items: flex-start;
+  gap: 10px;
   margin-bottom: 12px;
-  font-size: 14px;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  animation: fadeInRight 0.6s ease;
+}
+
+.prediction-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .prediction-item i {
-  margin-right: 8px;
   color: #409EFF;
   margin-top: 3px;
 }
 
 .history-comparison {
   border-top: 1px dashed #dcdfe6;
-  padding-top: 12px;
+  padding-top: 15px;
 }
 
 .comparison-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  font-weight: bold;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.improvement-tag {
+  font-weight: 500;
+}
+
+.improvement-chart {
+  margin-bottom: 15px;
+}
+
+.chart-bar-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.chart-label {
+  width: 50px;
+  font-size: 0.85rem;
+  color: #606266;
+}
+
+.chart-bar {
+  height: 24px;
+  border-radius: 12px;
+  position: relative;
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: white;
+  transition: width 1s ease;
+  animation: growWidth 1.2s ease;
+}
+
+.current {
+  background: linear-gradient(90deg, #42b983 0%, #67c23a 100%);
+}
+
+.previous {
+  background: linear-gradient(90deg, #409eff 0%, #66b1ff 100%);
+}
+
+.average {
+  background: linear-gradient(90deg, #909399 0%, #c0c4cc 100%);
+}
+
+.bar-value {
+  white-space: nowrap;
 }
 
 .comparison-text {
-  font-size: 14px;
+  font-size: 0.9rem;
   color: #606266;
+  line-height: 1.5;
+}
+
+/* 过渡动画 */
+.fade-up-enter-active,
+.fade-up-leave-active {
+  transition: all 0.5s ease-out;
+}
+
+.fade-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-up-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+/* 宽度增长动画 */
+@keyframes growWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--width, 100%);
+  }
 }
 </style>
