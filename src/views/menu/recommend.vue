@@ -18,8 +18,8 @@
           </div>
           <el-tag effect="dark" type="info" size="small" class="header-tag">个性化定制</el-tag>
         </div>
-      </template>
-      
+</template>
+
       <el-form :model="formData" label-position="top" class="param-form">
         <el-row :gutter="24">
           <el-col :span="8">
@@ -399,6 +399,20 @@
                 </div>
                 <div id="nutritionRadarChart" style="width: 100%; height: 400px;" class="radar-chart"></div>
               </div>
+              
+              <!-- 新增营养素趋势图 -->
+              <div class="nutrition-trend-container">
+                <div class="trend-header">
+                  <div class="info-item">
+                    <div class="info-icon">📈</div>
+                    <div class="info-text">营养素趋势分析（近30天）</div>
+                  </div>
+                  <el-tooltip content="营养素摄入变化趋势分析，展示菜单优化效果" placement="top">
+                    <el-icon class="trend-info-icon"><IconInfoFilled /></el-icon>
+                  </el-tooltip>
+                </div>
+                <div id="nutritionTrendChart" style="width: 100%; height: 250px;" class="trend-chart"></div>
+              </div>
             </el-card>
           </el-col>
           
@@ -572,7 +586,8 @@ import {
   DataLine as IconDataLine,
   Food as IconFood,
   GobletFull as IconGobletFull,
-  User as IconUser
+  User as IconUser,
+  InfoFilled as IconInfoFilled
 } from '@element-plus/icons-vue'
 import 'animate.css'
 
@@ -939,6 +954,7 @@ const showResults = () => {
   // 初始化图表
   nextTick(() => {
     initNutritionRadarChart()
+    initNutritionTrendChart() // 新增营养趋势图初始化
     initSatisfactionChart()
     initWasteRateChart()
   })
@@ -1235,6 +1251,138 @@ const initWasteRateChart = () => {
     myChart.resize()
   })
 }
+
+// 添加初始化营养趋势图的函数
+// 初始化营养趋势图
+const initNutritionTrendChart = () => {
+  const chartDom = document.getElementById('nutritionTrendChart')
+  if (!chartDom) return
+  
+  const myChart = echarts.init(chartDom)
+  
+  const option = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    legend: {
+      data: ['蛋白质', '碳水化合物', '脂肪', '维生素', '矿物质', '膳食纤维'],
+      top: 'top',
+      textStyle: {
+        fontSize: 12
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: ['一月前', '三周前', '两周前', '上周', '本周'],
+      axisLabel: {
+        fontSize: 11
+      }
+    },
+    yAxis: {
+      type: 'value',
+      min: 40,
+      max: 100,
+      axisLabel: {
+        formatter: '{value}%'
+      }
+    },
+    series: [
+      {
+        name: '蛋白质',
+        type: 'line',
+        smooth: true,
+        emphasis: {
+          focus: 'series'
+        },
+        data: [75, 72, 78, 80, 85],
+        lineStyle: {
+          width: 3
+        },
+        symbolSize: 8
+      },
+      {
+        name: '碳水化合物',
+        type: 'line',
+        smooth: true,
+        emphasis: {
+          focus: 'series'
+        },
+        data: [85, 87, 90, 88, 92],
+        lineStyle: {
+          width: 3
+        },
+        symbolSize: 8
+      },
+      {
+        name: '脂肪',
+        type: 'line',
+        smooth: true,
+        emphasis: {
+          focus: 'series'
+        },
+        data: [65, 68, 70, 74, 78],
+        lineStyle: {
+          width: 3
+        },
+        symbolSize: 8
+      },
+      {
+        name: '维生素',
+        type: 'line',
+        smooth: true,
+        emphasis: {
+          focus: 'series'
+        },
+        data: [55, 58, 60, 64, 68],
+        lineStyle: {
+          width: 3
+        },
+        symbolSize: 8
+      },
+      {
+        name: '矿物质',
+        type: 'line',
+        smooth: true,
+        emphasis: {
+          focus: 'series'
+        },
+        data: [62, 65, 68, 72, 75],
+        lineStyle: {
+          width: 3
+        },
+        symbolSize: 8
+      },
+      {
+        name: '膳食纤维',
+        type: 'line',
+        smooth: true,
+        emphasis: {
+          focus: 'series'
+        },
+        data: [50, 52, 55, 58, 62],
+        lineStyle: {
+          width: 3
+        },
+        symbolSize: 8
+      }
+    ]
+  }
+  
+  myChart.setOption(option)
+  
+  window.addEventListener('resize', () => {
+    myChart.resize()
+  })
+}
 </script>
 
 <style scoped>
@@ -1243,18 +1391,51 @@ const initWasteRateChart = () => {
 
 .menu-recommend-container {
   padding: 30px;
-  max-width: 1280px;
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: #f9fafc;
   min-height: 100vh;
+  box-sizing: border-box;
 }
 
 /* 页面标题样式 */
 .header-section {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   animation: fadeInDown 1s ease;
+  padding: 30px 20px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(66, 185, 131, 0.1) 0%, rgba(62, 175, 124, 0.2) 100%);
+  box-shadow: 0 10px 30px rgba(62, 175, 124, 0.1);
+}
+
+.header-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 75%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  animation: shimmer 5s infinite linear;
+  z-index: 1;
+}
+
+.page-title, .subtitle {
+  position: relative;
+  z-index: 2;
 }
 
 .page-title {
@@ -1281,11 +1462,13 @@ const initWasteRateChart = () => {
 
 /* 卡片样式优化 */
 .param-card, .process-card, .menu-card, .chart-card, .nutrition-assessment-card, .feedback-card {
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border: none;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .param-card:hover, .process-card:hover, .menu-card:hover, .chart-card:hover, 
@@ -1299,19 +1482,35 @@ const initWasteRateChart = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
+  padding: 18px 20px;
   background: linear-gradient(135deg, #42b983 0%, #3eaf7c 100%);
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="0" y="0" width="50" height="50" fill="rgba(255,255,255,0.03)"/><rect x="50" y="50" width="50" height="50" fill="rgba(255,255,255,0.03)"/></svg>');
+  opacity: 0.3;
 }
 
 .header-left {
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .header-icon {
   margin-right: 10px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
 }
 
 .header-tag {
@@ -1365,26 +1564,57 @@ const initWasteRateChart = () => {
 
 /* 生成按钮样式 */
 .generate-btn {
-  padding: 12px 30px;
-  font-size: 1rem;
-  border-radius: 8px;
-  margin-top: 15px;
+  padding: 14px 35px;
+  font-size: 1.05rem;
+  border-radius: 50px;
+  margin-top: 20px;
   background: linear-gradient(135deg, #1a6fc7 0%, #2a81d7 100%);
   border: none;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(42, 129, 215, 0.25);
+}
+
+.generate-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+  opacity: 0;
 }
 
 .generate-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.2);
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 15px 30px rgba(42, 129, 215, 0.3);
 }
 
-.generate-btn:active {
-  transform: translateY(-1px);
+.generate-btn:hover::after {
+  animation: button-shimmer 1.5s infinite;
+  opacity: 1;
+}
+
+@keyframes button-shimmer {
+  0% {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  100% {
+    transform: translate(50%, 50%) rotate(45deg);
+  }
 }
 
 .btn-icon {
@@ -1457,8 +1687,10 @@ const initWasteRateChart = () => {
 }
 
 .custom-progress {
-  height: 10px;
-  border-radius: 5px;
+  height: 12px;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 /* 菜单展示样式 */
@@ -1486,15 +1718,17 @@ const initWasteRateChart = () => {
 
 .meal-card {
   overflow: hidden;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
+  border: 1px solid rgba(230, 230, 230, 0.5);
+  backdrop-filter: blur(5px);
 }
 
 .meal-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .meal-card-bg {
@@ -1539,31 +1773,40 @@ const initWasteRateChart = () => {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
-  padding: 8px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
   transition: all 0.3s ease;
+  border: 1px solid rgba(240, 240, 240, 0.8);
 }
 
 .dish-item:hover {
-  transform: translateX(5px);
+  transform: translateX(8px);
   background-color: white;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-color: rgba(220, 220, 220, 0.8);
 }
 
 .dish-icon-wrapper {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 12px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  margin-right: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: rotate(-5deg);
+  transition: all 0.3s ease;
+}
+
+.dish-item:hover .dish-icon-wrapper {
+  transform: rotate(0) scale(1.1);
 }
 
 .dish-icon {
-  font-size: 24px;
+  font-size: 28px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
 }
 
 .dish-details {
@@ -1710,6 +1953,38 @@ const initWasteRateChart = () => {
 
 .nutrition-assessment {
   padding: 20px;
+}
+
+.nutrition-trend-container {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fb;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.trend-info-icon {
+  color: #909399;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trend-info-icon:hover {
+  color: #409EFF;
+}
+
+.trend-chart {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
 }
 
 .nutrition-item {
@@ -1996,6 +2271,15 @@ const initWasteRateChart = () => {
   }
   to {
     width: var(--width, 100%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  100% {
+    transform: translate(50%, 50%) rotate(45deg);
   }
 }
 </style>
