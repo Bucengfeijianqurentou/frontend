@@ -459,38 +459,68 @@ function initCharts() {
       xAxis: {
         type: 'category',
         boundaryGap: false,
-        data: times
+        data: times,
+        axisLine: {
+          lineStyle: {
+            color: '#6a7985',
+            width: 2
+          }
+        },
+        axisLabel: {
+          textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+        }
       },
       yAxis: {
         type: 'value',
         min: 0,
         max: 100,
-        interval: 20
+        interval: 20,
+        axisLine: {
+          lineStyle: {
+            color: '#6a7985',
+            width: 2
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(106, 121, 133, 0.1)',
+            type: 'dashed'
+          }
+        }
       },
       series: [
         {
           name: 'CPU使用率',
           type: 'line',
-          stack: '总量',
+          smooth: true,
+          symbolSize: 8,
+          itemStyle: {
+            color: '#409eff',
+            borderWidth: 2,
+            shadowColor: 'rgba(64, 158, 255, 0.5)',
+            shadowBlur: 10
+          },
           areaStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [{
-                  offset: 0, color: 'rgba(65,129,255,0.5)'
-              }, {
-                  offset: 1, color: 'rgba(65,129,255,0.05)'
-              }]
-            }
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(64, 158, 255, 0.7)' },
+              { offset: 0.5, color: 'rgba(64, 158, 255, 0.3)' },
+              { offset: 1, color: 'rgba(64, 158, 255, 0.1)' }
+            ]),
+            shadowColor: 'rgba(64, 158, 255, 0.2)',
+            shadowBlur: 20
           },
           emphasis: {
-            focus: 'series'
+            itemStyle: {
+              borderWidth: 3,
+              shadowBlur: 20
+            }
           },
-          itemStyle: {
-            color: '#409eff'
+          lineStyle: {
+            width: 4,
+            shadowColor: 'rgba(64, 158, 255, 0.5)',
+            shadowBlur: 5,
+            shadowOffsetY: 5,
+            cap: 'round'
           },
           data: data
         }
@@ -524,38 +554,68 @@ function initCharts() {
       xAxis: {
         type: 'category',
         boundaryGap: false,
-        data: times
+        data: times,
+        axisLine: {
+          lineStyle: {
+            color: '#6a7985',
+            width: 2
+          }
+        },
+        axisLabel: {
+          textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+        }
       },
       yAxis: {
         type: 'value',
         min: 0,
         max: 100,
-        interval: 20
+        interval: 20,
+        axisLine: {
+          lineStyle: {
+            color: '#6a7985',
+            width: 2
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(106, 121, 133, 0.1)',
+            type: 'dashed'
+          }
+        }
       },
       series: [
         {
           name: '内存使用率',
           type: 'line',
-          stack: '总量',
+          smooth: true,
+          symbolSize: 8,
+          itemStyle: {
+            color: '#e6a23c',
+            borderWidth: 2,
+            shadowColor: 'rgba(230, 162, 60, 0.5)',
+            shadowBlur: 10
+          },
           areaStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [{
-                  offset: 0, color: 'rgba(238,177,83,0.5)'
-              }, {
-                  offset: 1, color: 'rgba(238,177,83,0.05)'
-              }]
-            }
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(230, 162, 60, 0.7)' },
+              { offset: 0.5, color: 'rgba(230, 162, 60, 0.3)' },
+              { offset: 1, color: 'rgba(230, 162, 60, 0.1)' }
+            ]),
+            shadowColor: 'rgba(230, 162, 60, 0.2)',
+            shadowBlur: 20
           },
           emphasis: {
-            focus: 'series'
+            itemStyle: {
+              borderWidth: 3,
+              shadowBlur: 20
+            }
           },
-          itemStyle: {
-            color: '#e6a23c'
+          lineStyle: {
+            width: 4,
+            shadowColor: 'rgba(230, 162, 60, 0.5)',
+            shadowBlur: 5,
+            shadowOffsetY: 5,
+            cap: 'round'
           },
           data: data
         }
@@ -707,26 +767,36 @@ function handleCurrentChange(page) {
 <style scoped>
 .stat-card {
   transition: all 0.3s;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .chart-card {
   transition: all 0.3s;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .chart-title {
   color: #606266;
-  font-size: 14px;
-  font-weight: 500;
-  padding-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 0;
+  margin-bottom: 8px;
   border-bottom: 1px solid #ebeef5;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.05);
 }
 </style> 
