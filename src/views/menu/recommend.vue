@@ -987,7 +987,7 @@ const generateMenu = () => {
       setTimeout(() => {
         addProcessingStep({
           title: 'AI大模型分析',
-          description: `基于Grok 3大模型对多维数据进行深度分析，针对${formData.ageRange}岁${formData.dietaryRequirements.length > 0 ? '且有' + formData.dietaryRequirements.map(r => r === 'halal' ? '清真' : r === 'vegetarian' ? '素食' : r === 'lowSugar' ? '低糖' : '低盐').join('、') + '需求' : ''}的学生群体预测菜品接受度...`,
+          description: `基于QWen 3大模型对多维数据进行深度分析，针对${formData.ageRange}岁${formData.dietaryRequirements.length > 0 ? '且有' + formData.dietaryRequirements.map(r => r === 'halal' ? '清真' : r === 'vegetarian' ? '素食' : r === 'lowSugar' ? '低糖' : '低盐').join('、') + '需求' : ''}的学生群体预测菜品接受度...`,
           type: 'success',
           hollow: true,
           progress: 0
