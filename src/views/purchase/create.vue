@@ -79,6 +79,7 @@
         <el-table-column prop="supplier" label="供应商" min-width="150" align="center" />
         <el-table-column prop="batchNumber" label="批次号" min-width="180" align="center" />
         <el-table-column prop="quantity" label="数量" width="100" align="center" />
+        <el-table-column prop="specification" label="规格" width="100" align="center" />
         <el-table-column label="采购日期" min-width="120" align="center">
           <template #default="scope">
             {{ scope.row.purchaseDate }}
@@ -220,6 +221,23 @@
                 </el-form-item>
               </el-col>
               <el-col :span="12">
+                <el-form-item label="采购规格" prop="specification">
+                  <el-select v-model="form.specification" placeholder="请选择采购规格" class="w-full" @change="handleSpecificationChange">
+                    <el-option
+                      v-for="item in specificationOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item v-if="showCustomSpecification" label="自定义规格" prop="customSpecification">
+                  <el-input v-model="customSpecification" placeholder="请输入自定义规格"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
                 <el-form-item label="采购日期" prop="purchaseDate">
                   <el-date-picker
                     v-model="form.purchaseDate"
@@ -230,8 +248,6 @@
                   ></el-date-picker>
                 </el-form-item>
               </el-col>
-            </el-row>
-            <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="生产日期" prop="productionDate">
                   <el-date-picker
@@ -243,10 +259,15 @@
                   ></el-date-picker>
                 </el-form-item>
               </el-col>
+            </el-row>
+            <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="保质期(天)" prop="shelfLife">
                   <el-input-number v-model="form.shelfLife" :min="1" class="w-full"></el-input-number>
                 </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <!-- 此处可以添加其他字段 -->
               </el-col>
             </el-row>
           </div>
@@ -309,6 +330,7 @@
           <el-descriptions-item label="供应商" label-align="center" align="center">{{ currentRecord.supplier }}</el-descriptions-item>
           <el-descriptions-item label="批次号" label-align="center" align="center">{{ currentRecord.batchNumber }}</el-descriptions-item>
           <el-descriptions-item label="采购数量" label-align="center" align="center">{{ currentRecord.quantity }}</el-descriptions-item>
+          <el-descriptions-item label="采购规格" label-align="center" align="center">{{ currentRecord.specification || '-' }}</el-descriptions-item>
           <el-descriptions-item label="采购日期" label-align="center" align="center">{{ currentRecord.purchaseDate }}</el-descriptions-item>
           <el-descriptions-item label="生产日期" label-align="center" align="center">{{ currentRecord.productionDate }}</el-descriptions-item>
           <el-descriptions-item label="保质期(天)" label-align="center" align="center">{{ currentRecord.shelfLife }}</el-descriptions-item>
@@ -403,6 +425,45 @@ const currentImage = ref('')
 // 供应商选项
 const supplierOptions = ref([])
 
+// 规格选项
+const specificationOptions = [
+  { value: '斤', label: '斤' },
+  { value: '公斤', label: '公斤' },
+  { value: '克', label: '克' },
+  { value: '吨', label: '吨' },
+  { value: '箱', label: '箱' },
+  { value: '瓶', label: '瓶' },
+  { value: '袋', label: '袋' },
+  { value: '桶', label: '桶' },
+  { value: '盒', label: '盒' },
+  { value: '包', label: '包' },
+  { value: '罐', label: '罐' },
+  { value: '杯', label: '杯' },
+  { value: '片', label: '片' },
+  { value: '个', label: '个' },
+  { value: '块', label: '块' },
+  { value: '捆', label: '捆' },
+  { value: '支', label: '支' },
+  { value: '托盘', label: '托盘' },
+  { value: '打', label: '打(12个)' },
+  { value: '件', label: '件' },
+  { value: '其他', label: '其他' }
+]
+
+// 是否显示自定义规格输入框
+const showCustomSpecification = ref(false)
+
+// 自定义规格
+const customSpecification = ref('')
+
+// 处理规格变化
+function handleSpecificationChange(value) {
+  showCustomSpecification.value = value === '其他'
+  if (value !== '其他') {
+    customSpecification.value = ''
+  }
+}
+
 // 表单引用
 const formRef = ref(null)
 const submitLoading = ref(false)
@@ -420,6 +481,7 @@ const form = reactive({
   supplier: '',
   batchNumber: generateBatchNumber(),
   quantity: 1,
+  specification: '',
   purchaseDate: new Date().toISOString().split('T')[0],
   productionDate: '',
   shelfLife: 30,
@@ -442,6 +504,9 @@ const rules = {
   quantity: [
     { required: true, message: '请输入采购数量', trigger: 'change' },
     { type: 'number', min: 1, message: '数量必须大于0', trigger: 'change' }
+  ],
+  specification: [
+    { required: true, message: '请输入采购规格', trigger: 'blur' }
   ],
   purchaseDate: [
     { required: true, message: '请选择采购日期', trigger: 'change' }
@@ -676,12 +741,25 @@ async function submitForm() {
       return
     }
   }
+
+  // 如果选择了"其他"规格但未填写自定义规格
+  if (form.specification === '其他' && !customSpecification.value) {
+    ElMessage.error('请输入自定义采购规格')
+    return
+  }
   
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
         submitLoading.value = true
-        const res = await purchaseApi.createPurchase(form)
+
+        // 如果选择了"其他"规格，使用自定义规格值
+        const submitData = { ...form }
+        if (submitData.specification === '其他') {
+          submitData.specification = customSpecification.value
+        }
+
+        const res = await purchaseApi.createPurchase(submitData)
         if (res.code === 200) {
           ElMessage.success('采购单创建成功')
           dialogVisible.value = false
@@ -707,6 +785,8 @@ function resetForm() {
   form.batchNumber = generateBatchNumber() // 重新生成批次号
   form.purchaseDate = new Date().toISOString().split('T')[0] // 重置采购日期为当天
   fileList.value = [] // 清空文件列表
+  customSpecification.value = '' // 清空自定义规格
+  showCustomSpecification.value = false // 隐藏自定义规格输入框
 }
 
 // 复制交易哈希
