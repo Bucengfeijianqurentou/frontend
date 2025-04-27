@@ -196,6 +196,13 @@
                   <span>食品发放</span>
                 </template>
               </el-menu-item>
+
+              <el-menu-item index="/feedback" class="menu-item">
+                <el-icon><ChatLineSquare /></el-icon>
+                <template #title>
+                  <span>家长反馈</span>
+                </template>
+              </el-menu-item>
             </template>
 
             <!-- 共用菜单分隔符 -->
@@ -329,7 +336,8 @@ import {
   ArrowDown,
   SwitchButton,
   Menu,
-  MagicStick
+  MagicStick,
+  ChatLineSquare
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

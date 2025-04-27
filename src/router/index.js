@@ -174,6 +174,12 @@ const routes = [
         component: () => import('@/views/inventory/index.vue'),
         meta: { requiresAuth: true, role: 'STAFF' }
       },
+      {
+        path: 'feedback',
+        name: 'CanteenFeedback',
+        component: () => import('@/views/feedback/index.vue'),
+        meta: { requiresAuth: true, role: 'STAFF' }
+      },
       // 数据大屏路由
       {
         path: 'datascreen',
