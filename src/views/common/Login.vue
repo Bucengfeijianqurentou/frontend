@@ -1,88 +1,118 @@
 <template>
   <div class="login-container">
-    <div class="animated-background">
-      <div class="shape shape1"></div>
-      <div class="shape shape2"></div>
-      <div class="shape shape3"></div>
-    </div>
-    <div class="login-box glass-effect animate__animated animate__fadeIn">
-      <div class="title">
-        <div class="icon-wrapper animate__animated animate__bounceIn">
-          <el-icon class="platform-icon"><School /></el-icon>
+    <div class="food-pattern-bg"></div>
+
+    <div class="content-wrapper">
+      <!-- 左侧部分内容 -->
+      <div class="illustration-pane">
+        <div class="illustration-content">
+          <img src="/public/undraw_breakfast_rgx5.svg" alt="中小学食堂监管平台插画"
+            class="main-illustration animate__animated animate__fadeInUp" />
+
+          <div class="features-icons">
+            <div class="feature-icon animate__animated animate__fadeIn animate__delay-1s">
+              <el-icon>
+                <Monitor />
+              </el-icon>
+              <span>实时监控</span>
+            </div>
+            <div class="feature-icon animate__animated animate__fadeIn animate__delay-1s">
+              <el-icon>
+                <DataAnalysis />
+              </el-icon>
+              <span>数据分析</span>
+            </div>
+            <div class="feature-icon animate__animated animate__fadeIn animate__delay-1s">
+              <el-icon>
+                <Bell />
+              </el-icon>
+              <span>预警提醒</span>
+            </div>
+          </div>
+
+          <div class="illustration-text animate__animated animate__fadeInUp animate__delay-1s">
+            <h3>智慧监管，食安护航</h3>
+            <p>科技赋能中小学食堂安全管理新篇章</p>
+          </div>
         </div>
-        <h2 class="animate__animated animate__fadeInUp">中小学食堂监管平台</h2>
-        <p class="subtitle animate__animated animate__fadeIn animate__delay-1s">安全、规范、智能化的食堂管理系统</p>
       </div>
-      <el-form
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="loginRules"
-        class="login-form"
-      >
-        <el-form-item prop="username">
-          <el-input
-            v-model="loginForm.username"
-            placeholder="用户名"
-            :prefix-icon="User"
-            class="hover-scale"
-          />
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="密码"
-            :prefix-icon="Lock"
-            show-password
-            class="hover-scale"
-          />
-        </el-form-item>
-        <el-form-item prop="role">
-          <el-select
-            v-model="loginForm.role"
-            placeholder="请选择角色"
-            class="w-full hover-scale"
-          >
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            type="primary"
-            class="w-full hover-scale login-button"
-            :loading="loading"
-            @click="handleLogin"
-          >
-            <el-icon class="mr-2"><Right /></el-icon>
-            登录
-          </el-button>
-        </el-form-item>
-        <div class="flex justify-between items-center">
-          <el-link type="primary" @click="$router.push('/register')" class="hover-scale register-link">
-            <el-icon class="mr-1"><Plus /></el-icon>
-            注册账号
-          </el-link>
-          <el-link type="info" class="hover-scale forgot-link">
-            <el-icon class="mr-1"><QuestionFilled /></el-icon>
-            忘记密码
-          </el-link>
+
+      <!-- 右侧表单部分 -->
+      <div class="form-pane">
+        <div class="themed-login-box animate__animated animate__fadeInRight">
+          <div class="title-section">
+            <div class="icon-container">
+              <el-icon class="platform-logo">
+                <School />
+              </el-icon>
+            </div>
+            <h2 class="main-title">中小学食堂监管平台</h2>
+          </div>
+
+          <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form-content"
+            label-position="top" @submit.prevent="handleLogin">
+            <el-form-item prop="username" label="用户名">
+              <el-input v-model="loginForm.username" placeholder="请输入用户名" :prefix-icon="User" size="large" clearable />
+            </el-form-item>
+            <el-form-item prop="password" label="密码">
+              <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password
+                size="large" clearable />
+            </el-form-item>
+            <el-form-item prop="role" label="角色">
+              <el-select v-model="loginForm.role" placeholder="请选择您的角色" class="w-full" size="large">
+                <el-option v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" class="w-full login-submit-button" :loading="loading" native-type="submit"
+                size="large">
+                <el-icon class="mr-1">
+                  <Right />
+                </el-icon>
+                登 录
+              </el-button>
+            </el-form-item>
+            <div class="form-links">
+              <el-link type="primary" @click="$router.push('/register')">
+                <el-icon class="mr-1">
+                  <Plus />
+                </el-icon>
+                注册新账号
+              </el-link>
+              <el-link type="info">
+                <el-icon class="mr-1">
+                  <QuestionFilled />
+                </el-icon>
+                忘记密码?
+              </el-link>
+            </div>
+          </el-form>
+          <footer class="page-footer-form">
+            © {{ new Date().getFullYear() }} 中小学食堂监管平台
+          </footer>
         </div>
-      </el-form>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+// --- Script 部分 ---
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import { User, Lock, School, Right, Plus, QuestionFilled } from '@element-plus/icons-vue'
+import {
+  User,
+  Lock,
+  School,
+  Right,
+  Plus,
+  QuestionFilled,
+  Monitor,
+  DataAnalysis,
+  Bell
+} from '@element-plus/icons-vue'
 import 'animate.css'
 
 const router = useRouter()
@@ -116,209 +146,378 @@ const loginRules = {
 }
 
 const handleLogin = async () => {
-  if (!loginFormRef.value) return
-  
-  await loginFormRef.value.validate(async (valid, fields) => {
+  if (!loginFormRef.value) return;
+  await loginFormRef.value.validate(async (valid) => {
     if (valid) {
-      loading.value = true
+      loading.value = true;
       try {
-        const success = await userStore.userLogin(loginForm)
+        const success = await userStore.userLogin(loginForm);
         if (success) {
-          ElMessage.success('登录成功')
-          router.push('/')
+          ElMessage.success('登录成功');
+          router.push('/');
         }
+      } catch (error) {
+        console.error('Login failed:', error);
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    } else {
-      console.log('error submit!', fields)
     }
-  })
-}
+  });
+};
+// --- Script 部分结束 ---
 </script>
 
 <style scoped>
+/* --- 主题颜色变量 --- */
+:root {
+  --primary-color: #F9A825;
+  /* 主色调：金黄色 */
+  --primary-light: #FFF8E1;
+  /* 浅色调 */
+  --primary-dark: #F57F17;
+  /* 深色调 */
+  --accent-color: #6C63FF;
+  /* 强调色：紫色 */
+  --text-primary: #333333;
+  /* 主要文字颜色 */
+  --text-secondary: #666666;
+  /* 次要文字颜色 */
+  --background-light: #FFFFFF;
+  /* 轻背景 */
+  --background-gradient-start: #FFF8E1;
+  /* 渐变起始色 */
+  --background-gradient-end: #FFFFFF;
+  /* 渐变结束色 */
+  --shadow-color: rgba(249, 168, 37, 0.15);
+  /* 阴影颜色 */
+}
+
+/* --- 全局容器样式 --- */
 .login-container {
+  position: relative;
   min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(120deg, var(--background-gradient-start), var(--background-gradient-end));
+}
+
+.food-pattern-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(249, 168, 37, 0.05) 0%, transparent 8%),
+    radial-gradient(circle at 90% 30%, rgba(108, 99, 255, 0.07) 0%, transparent 8%),
+    radial-gradient(circle at 30% 70%, rgba(249, 168, 37, 0.05) 0%, transparent 8%),
+    radial-gradient(circle at 70% 80%, rgba(108, 99, 255, 0.07) 0%, transparent 8%);
+  z-index: 0;
+  opacity: 0.8;
+}
+
+.content-wrapper {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  z-index: 1;
+}
+
+/* --- 左侧插图区域样式 --- */
+.illustration-pane {
+  flex: 1.2;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0f172a;
   position: relative;
   overflow: hidden;
+  padding: 3rem;
 }
 
-.animated-background {
-  position: absolute;
+.illustration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 90%;
+}
+
+.main-illustration {
+  max-width: 80%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 2.5rem;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+  transform-origin: center;
+  transition: transform 0.5s ease;
+}
+
+.main-illustration:hover {
+  transform: scale(1.02);
+}
+
+.features-icons {
+  display: flex;
+  justify-content: space-between;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.shape {
-  position: absolute;
-  filter: blur(90px);
-  opacity: 0.4;
-  animation: float 10s infinite;
-}
-
-.shape1 {
-  background: #60a5fa;
-  width: 500px;
-  height: 500px;
-  top: -250px;
-  right: -100px;
-}
-
-.shape2 {
-  background: #8b5cf6;
-  width: 400px;
-  height: 400px;
-  bottom: -200px;
-  left: -100px;
-  animation-delay: -2s;
-}
-
-.shape3 {
-  background: #34d399;
-  width: 300px;
-  height: 300px;
-  bottom: 50%;
-  right: 20%;
-  animation-delay: -5s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-20px) scale(1.05);
-  }
-}
-
-.login-box {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  padding: 2.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  width: 24rem;
-  position: relative;
-  z-index: 1;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.title {
-  text-align: center;
+  max-width: 400px;
   margin-bottom: 2rem;
 }
 
-.icon-wrapper {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1rem;
+.feature-icon {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(139, 92, 246, 0.2));
-  border-radius: 1rem;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.platform-icon {
-  font-size: 2rem;
-  color: #fff;
+.feature-icon:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px var(--shadow-color);
 }
 
-h2 {
-  font-size: 1.75rem;
-  font-weight: bold;
-  color: #fff;
+.feature-icon .el-icon {
+  font-size: 28px;
+  color: var(--primary-color);
   margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.subtitle {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.875rem;
+.feature-icon span {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.illustration-text {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 450px;
+}
+
+.illustration-text h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
   margin-bottom: 1rem;
 }
 
-.login-form {
+.illustration-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* --- 右侧表单区域样式 --- */
+.form-pane {
+  flex: 0.8;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
 }
 
-:deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: none;
+.themed-login-box {
+  width: 100%;
+  max-width: 400px;
+  animation-duration: 0.6s;
 }
 
-:deep(.el-input__wrapper:hover) {
-  border-color: rgba(96, 165, 250, 0.5);
-  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.1);
+.title-section {
+  text-align: center;
+  margin-bottom: 2.5rem;
 }
 
-:deep(.el-input__inner) {
-  color: #fff;
-}
-
-:deep(.el-input__inner::placeholder) {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-:deep(.el-select .el-input__inner) {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-:deep(.el-icon) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.login-button {
-  border-radius: 0.75rem;
-  height: 2.75rem;
-  font-weight: 500;
-  letter-spacing: 0.025em;
-  background: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
-  border: none;
-  transition: all 0.3s ease;
-}
-
-.login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
-}
-
-.register-link, .forgot-link {
-  font-size: 0.875rem;
+.icon-container {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 1.5rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  border: 2px solid var(--primary-color);
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(249, 168, 37, 0.15);
+  transform-origin: center;
+  transition: transform 0.3s ease;
 }
 
-:deep(.el-select-dropdown) {
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.icon-container:hover {
+  transform: rotate(5deg);
 }
 
-:deep(.el-select-dropdown__item) {
-  color: rgba(255, 255, 255, 0.9);
+.platform-logo {
+  font-size: 32px;
+  color: var(--primary-color);
 }
 
-:deep(.el-select-dropdown__item.hover),
-:deep(.el-select-dropdown__item:hover) {
-  background: rgba(96, 165, 250, 0.1);
+.main-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
 }
 
-:deep(.el-select-dropdown__item.selected) {
-  background: rgba(96, 165, 250, 0.2);
-  color: #60a5fa;
+/* 表单样式 */
+.login-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
 }
-</style> 
+
+:deep(.el-form-item__label) {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+:deep(.el-input__wrapper),
+:deep(.el-select .el-input__wrapper) {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.25s ease;
+  padding: 5px 12px;
+}
+
+:deep(.el-input__wrapper.is-focus),
+:deep(.el-select .el-input__wrapper.is-focus) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(249, 168, 37, 0.2);
+}
+
+:deep(.el-input__icon) {
+  color: var(--primary-color);
+}
+
+/* 按钮样式 */
+.login-submit-button {
+  border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
+  border: none;
+  box-shadow: 0 4px 12px rgba(249, 168, 37, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-submit-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(249, 168, 37, 0.4);
+}
+
+.login-submit-button:active {
+  transform: translateY(0);
+}
+
+.form-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.2rem;
+}
+
+.form-links .el-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-links .el-link--primary {
+  color: var(--primary-color);
+}
+
+.form-links .el-link--primary:hover {
+  color: var(--primary-dark);
+}
+
+.form-links .el-link--info {
+  color: var(--text-secondary);
+}
+
+.form-links .el-link--info:hover {
+  color: var(--text-primary);
+}
+
+.page-footer-form {
+  text-align: center;
+  margin-top: 3rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* 响应式设计 */
+@media (max-width: 1100px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+
+  .illustration-pane {
+    flex: initial;
+    padding: 3rem 1.5rem;
+    min-height: auto;
+  }
+
+  .features-icons {
+    max-width: 350px;
+  }
+
+  .form-pane {
+    flex: initial;
+    width: 100%;
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .illustration-pane {
+    padding: 2rem 1rem;
+  }
+
+  .main-illustration {
+    max-width: 85%;
+  }
+
+  .features-icons {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .feature-icon {
+    width: 80%;
+  }
+
+  .illustration-text {
+    padding: 1.5rem;
+  }
+
+  .illustration-text h3 {
+    font-size: 1.5rem;
+  }
+
+  .form-pane {
+    padding: 2rem 1rem;
+  }
+
+  .main-title {
+    font-size: 1.6rem;
+  }
+}</style>
