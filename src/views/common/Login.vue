@@ -182,14 +182,14 @@ const handleLogin = async () => {
   /* 主要文字颜色 */
   --text-secondary: #666666;
   /* 次要文字颜色 */
-  --background-light: #FFFFFF;
-  /* 轻背景 */
-  --background-gradient-start: #FFF8E1;
-  /* 渐变起始色 */
-  --background-gradient-end: #FFFFFF;
-  /* 渐变结束色 */
-  --shadow-color: rgba(249, 168, 37, 0.15);
-  /* 阴影颜色 */
+  --background-light: #F5F1E6;
+  /* 轻背景：更暖和的象牙色 */
+  --background-gradient-start: #F0E5CA;
+  /* 渐变起始色：温暖的米色 */
+  --background-gradient-end: #FBF0E4;
+  /* 渐变结束色：淡桃色 */
+  --shadow-color: rgba(249, 168, 37, 0.2);
+  /* 阴影颜色：稍微加深 */
 }
 
 /* --- 全局容器样式 --- */
@@ -208,12 +208,12 @@ const handleLogin = async () => {
   width: 100%;
   height: 100%;
   background-image:
-    radial-gradient(circle at 10% 20%, rgba(249, 168, 37, 0.05) 0%, transparent 8%),
-    radial-gradient(circle at 90% 30%, rgba(108, 99, 255, 0.07) 0%, transparent 8%),
-    radial-gradient(circle at 30% 70%, rgba(249, 168, 37, 0.05) 0%, transparent 8%),
-    radial-gradient(circle at 70% 80%, rgba(108, 99, 255, 0.07) 0%, transparent 8%);
+    radial-gradient(circle at 10% 20%, rgba(249, 168, 37, 0.1) 0%, transparent 8%),
+    radial-gradient(circle at 90% 30%, rgba(108, 99, 255, 0.1) 0%, transparent 8%),
+    radial-gradient(circle at 30% 70%, rgba(249, 168, 37, 0.1) 0%, transparent 8%),
+    radial-gradient(circle at 70% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 8%);
   z-index: 0;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .content-wrapper {
@@ -232,6 +232,7 @@ const handleLogin = async () => {
   position: relative;
   overflow: hidden;
   padding: 3rem;
+  background-color: rgba(240, 229, 202, 0.5);
 }
 
 .illustration-content {
@@ -268,7 +269,7 @@ const handleLogin = async () => {
   flex-direction: column;
   align-items: center;
   padding: 1rem;
-  background-color: white;
+  background-color: rgba(255, 253, 245, 0.85);
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow-color);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -294,12 +295,13 @@ const handleLogin = async () => {
 .illustration-text {
   text-align: center;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 253, 245, 0.7);
   backdrop-filter: blur(10px);
   border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   width: 100%;
   max-width: 450px;
+  border: 1px solid rgba(249, 168, 37, 0.2);
 }
 
 .illustration-text h3 {
@@ -323,8 +325,8 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   padding: 3rem 2rem;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  background-color: #F4E9D6;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 2;
 }
@@ -333,6 +335,10 @@ const handleLogin = async () => {
   width: 100%;
   max-width: 400px;
   animation-duration: 0.6s;
+  background-color: rgba(255, 253, 245, 0.8);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
 .title-section {
@@ -350,7 +356,7 @@ const handleLogin = async () => {
   background: var(--primary-light);
   border: 2px solid var(--primary-color);
   border-radius: 16px;
-  box-shadow: 0 6px 12px rgba(249, 168, 37, 0.15);
+  box-shadow: 0 6px 12px rgba(249, 168, 37, 0.2);
   transform-origin: center;
   transition: transform 0.3s ease;
 }
@@ -388,10 +394,10 @@ const handleLogin = async () => {
 
 :deep(.el-input__wrapper),
 :deep(.el-select .el-input__wrapper) {
-  background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e0e0e0;
   transition: all 0.25s ease;
   padding: 5px 12px;
 }
