@@ -22,6 +22,41 @@
       </div>
     </el-card>
 
+    <!-- 新增：数据分析图表部分 -->
+    <el-card class="feedback-charts-card">
+      <div class="charts-header">
+        <h3>反馈数据分析</h3>
+        <el-select v-model="chartTimeRange" class="chart-time-select">
+          <el-option label="近一周" value="week" />
+          <el-option label="近一月" value="month" />
+          <el-option label="近三月" value="quarter" />
+          <el-option label="今年" value="year" />
+        </el-select>
+      </div>
+      <div class="charts-container">
+        <div class="chart-row">
+          <div class="chart-item">
+            <h4>反馈类型分布</h4>
+            <div ref="typeChartRef" class="chart"></div>
+          </div>
+          <div class="chart-item">
+            <h4>反馈处理状态</h4>
+            <div ref="statusChartRef" class="chart"></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-item">
+            <h4>每日反馈数量趋势</h4>
+            <div ref="trendChartRef" class="chart"></div>
+          </div>
+          <div class="chart-item">
+            <h4>满意度评分分布</h4>
+            <div ref="satisfactionChartRef" class="chart"></div>
+          </div>
+        </div>
+      </div>
+    </el-card>
+
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <el-skeleton :rows="3" animated />
@@ -127,10 +162,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick, watch, onBeforeUnmount } from 'vue'
 import { Search, ChatLineRound, ChatDotRound } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getFeedbackList, getFeedbackDetail } from '@/api/feedback'
+import * as echarts from 'echarts'
 
 // 状态数据
 const loading = ref(true)
@@ -142,6 +178,17 @@ const searchKeyword = ref('')
 const filterStatus = ref('')
 const dialogVisible = ref(false)
 const currentFeedback = ref(null)
+
+// 图表相关
+const chartTimeRange = ref('month')
+const typeChartRef = ref(null)
+const statusChartRef = ref(null)
+const trendChartRef = ref(null)
+const satisfactionChartRef = ref(null)
+let typeChart = null
+let statusChart = null
+let trendChart = null
+let satisfactionChart = null
 
 // 获取反馈列表
 const fetchFeedbackList = async () => {
@@ -281,9 +328,294 @@ const sortFeedbacksByDate = (list) => {
   })
 }
 
+// 初始化图表
+const initCharts = () => {
+  nextTick(() => {
+    // 初始化反馈类型分布图表
+    typeChart = echarts.init(typeChartRef.value)
+    typeChart.setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'horizontal',
+        bottom: 10,
+        data: ['饭菜质量', '就餐环境', '服务态度', '价格建议', '其他']
+      },
+      series: [
+        {
+          name: '反馈类型',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 16,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: [
+            { value: 35, name: '饭菜质量' },
+            { value: 20, name: '就餐环境' },
+            { value: 18, name: '服务态度' },
+            { value: 15, name: '价格建议' },
+            { value: 12, name: '其他' }
+          ]
+        }
+      ]
+    })
+
+    // 初始化反馈处理状态图表
+    statusChart = echarts.init(statusChartRef.value)
+    statusChart.setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'horizontal',
+        bottom: 10,
+        data: ['待处理', '处理中', '已处理']
+      },
+      series: [
+        {
+          name: '处理状态',
+          type: 'pie',
+          radius: '70%',
+          center: ['50%', '45%'],
+          data: [
+            { value: 18, name: '待处理', itemStyle: { color: '#E6A23C' } },
+            { value: 24, name: '处理中', itemStyle: { color: '#409EFF' } },
+            { value: 58, name: '已处理', itemStyle: { color: '#67C23A' } }
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }
+      ]
+    })
+
+    // 初始化每日反馈数量趋势图表
+    trendChart = echarts.init(trendChartRef.value)
+    
+    // 生成最近14天的日期数据
+    const getDaysData = () => {
+      const today = new Date()
+      const dates = []
+      const data = []
+      
+      // 生成最近14天的日期（包括今天）
+      for (let i = 13; i >= 0; i--) {
+        const date = new Date(today)
+        date.setDate(today.getDate() - i)
+        
+        // 格式化为 M/D 格式
+        const month = date.getMonth() + 1
+        const day = date.getDate()
+        dates.push(`${month}/${day}`)
+        
+        // 生成随机数据，今天的数据特殊处理
+        const isToday = i === 0
+        // 今天的数据稍微大一些，看起来更逼真
+        const value = isToday ? Math.floor(Math.random() * 5) + 8 : Math.floor(Math.random() * 10) + 3
+        data.push(value)
+      }
+      
+      return { dates, data }
+    }
+    
+    const { dates, data } = getDaysData()
+    
+    trendChart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        },
+        formatter: function(params) {
+          const dataIndex = params[0].dataIndex
+          const date = dates[dataIndex]
+          const value = params[0].value
+          
+          // 如果是最后一个日期（今天），特殊显示
+          if (dataIndex === dates.length - 1) {
+            return `${date}（今天）<br/>反馈数量：${value}`
+          }
+          return `${date}<br/>反馈数量：${value}`
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: {
+          formatter: function(value, index) {
+            // 对于最后一天（今天）特殊显示
+            if (index === dates.length - 1) {
+              return value + '\n(今天)'
+            }
+            return value
+          },
+          color: function(value, index) {
+            // 今天的日期标签颜色突出显示
+            return index === dates.length - 1 ? '#F56C6C' : '#666'
+          }
+        }
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '反馈数量',
+          type: 'bar',
+          data: data,
+          itemStyle: {
+            color: function(params) {
+              // 今天的数据柱状特殊颜色
+              if (params.dataIndex === dates.length - 1) {
+                return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#f78989' },
+                  { offset: 0.5, color: '#f56c6c' },
+                  { offset: 1, color: '#e64747' }
+                ])
+              }
+              return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#83bff6' },
+                { offset: 0.5, color: '#188df0' },
+                { offset: 1, color: '#188df0' }
+              ])
+            }
+          },
+          emphasis: {
+            itemStyle: {
+              color: function(params) {
+                // 今天的高亮颜色
+                if (params.dataIndex === dates.length - 1) {
+                  return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#ff9797' },
+                    { offset: 0.7, color: '#f56c6c' },
+                    { offset: 1, color: '#ff6565' }
+                  ])
+                }
+                return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#2378f7' },
+                  { offset: 0.7, color: '#2378f7' },
+                  { offset: 1, color: '#83bff6' }
+                ])
+              }
+            }
+          },
+          markPoint: {
+            data: [
+              { type: 'max', name: '最大值' },
+              { type: 'min', name: '最小值' }
+            ]
+          }
+        }
+      ]
+    })
+
+    // 初始化满意度评分分布图表
+    satisfactionChart = echarts.init(satisfactionChartRef.value)
+    satisfactionChart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: ['1分', '2分', '3分', '4分', '5分']
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '评分人数',
+          type: 'bar',
+          data: [3, 5, 15, 28, 49],
+          itemStyle: {
+            color: function(params) {
+              const colorList = ['#F56C6C', '#F56C6C', '#E6A23C', '#67C23A', '#67C23A']
+              return colorList[params.dataIndex]
+            }
+          }
+        }
+      ]
+    })
+
+    // 监听窗口大小变化，重新调整图表大小
+    window.addEventListener('resize', handleResize)
+  })
+}
+
+// 处理窗口大小变化
+const handleResize = () => {
+  typeChart?.resize()
+  statusChart?.resize()
+  trendChart?.resize()
+  satisfactionChart?.resize()
+}
+
+// 监听时间范围变化，更新图表数据
+const handleTimeRangeChange = () => {
+  // 在实际应用中，这里应该根据选择的时间范围重新获取数据并更新图表
+  // 当前是静态图表，所以只是模拟数据变化
+  ElMessage.success(`已切换为${chartTimeRange.value === 'week' ? '近一周' : 
+    chartTimeRange.value === 'month' ? '近一月' : 
+    chartTimeRange.value === 'quarter' ? '近三月' : '今年'}的数据`)
+}
+
+// 监听时间范围变化
+watch(chartTimeRange, () => {
+  handleTimeRangeChange()
+})
+
 // 生命周期
 onMounted(() => {
   fetchFeedbackList()
+  initCharts()
+})
+
+// 组件卸载前移除事件监听
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  typeChart?.dispose()
+  statusChart?.dispose()
+  trendChart?.dispose()
+  satisfactionChart?.dispose()
 })
 </script>
 
@@ -421,6 +753,66 @@ onMounted(() => {
 .empty-icon {
   font-size: 60px;
   color: var(--el-color-primary);
+}
+
+/* 新增：图表样式 */
+.feedback-charts-card {
+  margin-bottom: 20px;
+}
+
+.charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.charts-header h3 {
+  margin: 0;
+  color: var(--el-color-primary);
+  font-size: 1.2rem;
+}
+
+.chart-time-select {
+  width: 120px;
+}
+
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-item {
+  background-color: var(--el-fill-color-blank);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chart-item h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--el-text-color-primary);
+  font-size: 16px;
+  text-align: center;
+}
+
+.chart {
+  height: 300px;
+  width: 100%;
 }
 
 /* 详情对话框样式 */
