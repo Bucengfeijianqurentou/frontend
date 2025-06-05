@@ -422,12 +422,22 @@ function setActiveQuad(area) {
   ElMessage.success(`已切换到${getAreaName(area)}监控画面`);
 }
 
+// 获取摄像头地址
+function getCameraUrl(area) {
+  // 根据区域选择不同的摄像头地址
+  // 一半区域使用第一个摄像头，一半区域使用第二个摄像头
+  const useSecondCamera = ['processing', 'storage', 'distribution', 'washing'].includes(area);
+  return useSecondCamera ? 
+    import.meta.env.VITE_RTSP_STREAM_URL_2 : 
+    import.meta.env.VITE_RTSP_STREAM_URL;
+}
+
 // 连接主画面流
 function connectMainStream() {
   const videoElement = document.getElementById('main-video');
   if (videoElement) {
     mainWebRtcServer = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
-    mainWebRtcServer.connect(import.meta.env.VITE_RTSP_STREAM_URL);
+    mainWebRtcServer.connect(getCameraUrl(currentArea.value));
     webRtcServers['main'] = mainWebRtcServer;
   }
 }
@@ -440,7 +450,7 @@ function connectQuadStreams() {
     const videoElement = document.getElementById(`quad-video-${index + 1}`);
     if (videoElement) {
       const server = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
-      server.connect(import.meta.env.VITE_RTSP_STREAM_URL);
+      server.connect(getCameraUrl(area));
       webRtcServers[area] = server;
     }
   });
@@ -452,7 +462,7 @@ function connectGridStreams() {
     const videoElement = document.getElementById(`grid-video-${index + 1}`);
     if (videoElement) {
       const server = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
-      server.connect(import.meta.env.VITE_RTSP_STREAM_URL);
+      server.connect(getCameraUrl(area.value));
       webRtcServers[area.value] = server;
     }
   });
