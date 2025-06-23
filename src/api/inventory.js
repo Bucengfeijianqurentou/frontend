@@ -67,6 +67,15 @@ export function useInventoryApi() {
         url: '/api/inventory/available',
         method: 'get'
       })
+    },
+
+    // 扫码入库接口
+    scanInventory(batchNumber) {
+      return request({
+        url: '/api/inventory/scan',
+        method: 'post',
+        data: { batchNumber }
+      })
     }
   }
-} 
+}

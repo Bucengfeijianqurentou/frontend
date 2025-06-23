@@ -7,8 +7,32 @@
             <el-icon class="text-blue-500 mr-2 text-xl"><Goods /></el-icon>
             <span class="text-xl font-medium">库存管理</span>
           </div>
+          <!-- 扫码入库提示区域 -->
+          <div class="flex items-center gap-4">
+            <div class="scan-status-indicator" :class="{ 'scanning': isScanning }">
+              <el-icon class="text-green-500 mr-1"><Camera /></el-icon>
+              <span class="text-sm text-gray-600">{{ scanStatusText }}</span>
+            </div>
+            <el-button type="success" size="large" @click="toggleScanMode" :icon="isScanning ? 'VideoPause' : 'VideoPlay'">
+              {{ isScanning ? '停止扫码' : '开启扫码' }}
+            </el-button>
+          </div>
         </div>
       </template>
+
+      <!-- 扫码提示区域 -->
+      <div v-if="isScanning" class="scan-notice mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex items-center">
+          <el-icon class="text-green-500 mr-2 text-xl animate-pulse"><Camera /></el-icon>
+          <div>
+            <p class="text-green-700 font-medium mb-1">扫码入库模式已开启</p>
+            <p class="text-green-600 text-sm">请直接使用扫码枪扫描商品条码，无需点击任何输入框。扫码完成后会自动处理入库。</p>
+          </div>
+        </div>
+        <div v-if="lastScannedBarcode" class="mt-2 text-sm text-gray-600">
+          最近扫描：{{ lastScannedBarcode }}
+        </div>
+      </div>
 
       <!-- 搜索区域 -->
       <div class="mb-5 flex gap-4 flex-wrap bg-gray-50 p-4 rounded-md shadow-sm">
@@ -237,9 +261,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Goods, Search, Refresh, View, Edit, DataLine, InfoFilled, Document } from '@element-plus/icons-vue'
+import { Goods, Search, Refresh, View, Edit, DataLine, InfoFilled, Document, Camera, VideoPlay, VideoPause } from '@element-plus/icons-vue'
 import { useInventoryApi } from '@/api/inventory'
 import { useFoodApi } from '@/api/food'
 
@@ -273,6 +297,75 @@ const updateForm = reactive({
   quantity: 0,
   remark: ''
 })
+
+// 扫码相关状态
+const isScanning = ref(false)
+const lastScannedBarcode = ref('')
+const scanStatusText = ref('扫码模式已关闭')
+let scannedData = '' // 用于存储连续扫描的字符
+let lastScanTime = 0 // 用于判断扫描间隔
+
+// 扫码枪监听函数
+function handleKeyDown(event) {
+  if (!isScanning.value) return
+  
+  const currentTime = new Date().getTime()
+  
+  // 判断是否是扫码枪的快速输入
+  // 如果上一次按键时间与当前时间间隔超过50毫秒，则认为是一次新的扫码开始
+  if (currentTime - lastScanTime > 50) {
+    scannedData = ''
+  }
+  lastScanTime = currentTime
+  
+  // 检查是否是回车键
+  if (event.key === 'Enter') {
+    event.preventDefault() // 阻止回车键的默认行为
+    processBarcode(scannedData) // 处理收集到的条码数据
+    scannedData = '' // 清空数据，准备下一次扫描
+  } else if (event.key.length === 1) { // 收集单个字符
+    scannedData += event.key
+  }
+}
+
+// 处理扫码结果
+async function processBarcode(barcode) {
+  const trimmedBarcode = barcode.trim()
+  
+  if (!trimmedBarcode) {
+    ElMessage.warning('未扫描到有效条码，请重试！')
+    return
+  }
+  
+  lastScannedBarcode.value = trimmedBarcode
+  
+  try {
+    const res = await inventoryApi.scanInventory(trimmedBarcode)
+    if (res.code === 200) {
+      ElMessage.success(`入库成功！批次号：${trimmedBarcode}`)
+      // 刷新库存列表
+      loadInventoryList()
+    } else {
+      ElMessage.error(res.message || '入库失败')
+    }
+  } catch (error) {
+    console.error('扫码入库失败', error)
+    ElMessage.error('扫码入库失败，请检查网络或服务器')
+  }
+}
+
+// 切换扫码模式
+function toggleScanMode() {
+  isScanning.value = !isScanning.value
+  scanStatusText.value = isScanning.value ? '扫码模式已开启，等待扫码...' : '扫码模式已关闭'
+  
+  if (isScanning.value) {
+    ElMessage.success('扫码模式已开启，请使用扫码枪扫描条码')
+  } else {
+    ElMessage.info('扫码模式已关闭')
+    lastScannedBarcode.value = ''
+  }
+}
 
 // 加载库存列表
 async function loadInventoryList() {
@@ -443,6 +536,14 @@ function formatTransactionHash(hash) {
 // 初始化
 onMounted(() => {
   loadInventoryList()
+  // 添加键盘事件监听
+  document.addEventListener('keydown', handleKeyDown)
+})
+
+// 清理
+onUnmounted(() => {
+  // 移除键盘事件监听
+  document.removeEventListener('keydown', handleKeyDown)
 })
 </script>
 
@@ -469,4 +570,47 @@ onMounted(() => {
 :deep(.el-table th) {
   background-color: #f5f7fa !important;
 }
-</style> 
+
+/* 扫码状态指示器样式 */
+.scan-status-indicator {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #f5f7fa;
+  transition: all 0.3s ease;
+}
+
+.scan-status-indicator.scanning {
+  background-color: #f0f9ff;
+  border: 1px solid #e0f2fe;
+}
+
+.scan-notice {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+</style>
