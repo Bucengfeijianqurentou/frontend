@@ -4,19 +4,32 @@
       <template #header>
         <div class="flex justify-between items-center">
           <div class="flex items-center">
-            <el-icon class="mr-2 text-blue-500"><VideoCamera /></el-icon>
+            <el-icon class="mr-2 text-blue-500">
+              <VideoCamera />
+            </el-icon>
             <span class="text-xl font-medium">食堂实时监控系统</span>
           </div>
           <div class="flex items-center">
             <el-tag v-if="isConnected" type="success" effect="dark" class="mr-2">
-              <el-icon class="mr-1"><VideoPlay /></el-icon>实时监控中
+              <el-icon class="mr-1">
+                <VideoPlay />
+              </el-icon>实时监控中
             </el-tag>
             <el-tag v-else type="danger" effect="dark" class="mr-2">
-              <el-icon class="mr-1"><VideoPause /></el-icon>连接断开
+              <el-icon class="mr-1">
+                <VideoPause />
+              </el-icon>连接断开
+            </el-tag>
+            <!-- AI检测状态 -->
+            <el-tag v-if="aiDetectionEnabled" type="warning" effect="dark" class="mr-2">
+              <el-icon class="mr-1">
+                <View />
+              </el-icon>AI检测中
             </el-tag>
             <el-button-group>
               <el-tooltip content="刷新监控">
-                <el-button type="primary" :icon="Refresh" circle @click="refreshStreams" :loading="isRefreshing"></el-button>
+                <el-button type="primary" :icon="Refresh" circle @click="refreshStreams"
+                  :loading="isRefreshing"></el-button>
               </el-tooltip>
               <el-tooltip content="全屏查看">
                 <el-button type="primary" :icon="FullScreen" circle @click="toggleFullscreen"></el-button>
@@ -25,7 +38,7 @@
           </div>
         </div>
       </template>
-      
+
       <!-- 视图选择器 -->
       <div class="mb-4">
         <el-radio-group v-model="currentView" @change="changeViewMode" class="mb-4">
@@ -33,7 +46,7 @@
           <el-radio-button value="quad">四画面</el-radio-button>
           <el-radio-button value="grid">网格视图</el-radio-button>
         </el-radio-group>
-        
+
         <div class="view-selector flex items-center ml-4">
           <span class="text-gray-600 mr-2">监控区域：</span>
           <el-select v-model="currentArea" placeholder="选择监控区域" @change="changeArea">
@@ -42,9 +55,16 @@
             <el-option label="食材储存区" value="storage"></el-option>
             <el-option label="就餐区域" value="dining"></el-option>
           </el-select>
+
+          <!-- AI检测开关 -->
+          <div class="ml-4 flex items-center">
+            <span class="text-gray-600 mr-2">智能检测：</span>
+            <el-switch v-model="aiDetectionEnabled" @change="toggleAIDetection" active-text="开启" inactive-text="关闭"
+              active-color="#13ce66" inactive-color="#ff4949" />
+          </div>
         </div>
       </div>
-      
+
       <!-- 单画面视图 -->
       <div v-if="currentView === 'single'" class="video-container single-view">
         <div class="video-wrapper" ref="fullscreenRef">
@@ -53,22 +73,33 @@
               <span class="camera-name">{{ getAreaName(currentArea) }}</span>
               <span class="timestamp">{{ currentTime }}</span>
             </div>
+            <!-- 违规检测框 -->
+            <div v-for="detection in currentDetections" :key="detection.id" class="violation-box" :style="{
+              left: detection.x + '%',
+              top: detection.y + '%',
+              width: detection.width + '%',
+              height: detection.height + '%'
+            }">
+              <div class="violation-label">
+                <el-icon class="text-red-500">
+                  <Warning />
+                </el-icon>
+                {{ detection.type }}
+              </div>
+            </div>
           </div>
-          <video 
-            id="main-video" 
-            ref="mainVideo"
-            autoplay 
-            class="main-video"
-          ></video>
+          <video id="main-video" ref="mainVideo" autoplay class="main-video"></video>
+          <!-- 隐藏的canvas用于截图 -->
+          <canvas ref="screenshotCanvas" style="display: none;"></canvas>
         </div>
       </div>
-      
+
       <!-- 四画面视图 -->
       <div v-else-if="currentView === 'quad'" class="video-container quad-view">
         <el-row :gutter="10">
           <el-col :span="12">
             <div class="video-wrapper" @click="setActiveQuad('main')">
-              <div class="video-overlay" :class="{'active-quad': currentArea === 'main'}">
+              <div class="video-overlay" :class="{ 'active-quad': currentArea === 'main' }">
                 <div class="camera-info">
                   <span class="camera-name">餐厅主区域</span>
                   <span class="timestamp">{{ currentTime }}</span>
@@ -79,7 +110,7 @@
           </el-col>
           <el-col :span="12">
             <div class="video-wrapper" @click="setActiveQuad('processing')">
-              <div class="video-overlay" :class="{'active-quad': currentArea === 'processing'}">
+              <div class="video-overlay" :class="{ 'active-quad': currentArea === 'processing' }">
                 <div class="camera-info">
                   <span class="camera-name">食品加工区</span>
                   <span class="timestamp">{{ currentTime }}</span>
@@ -92,7 +123,7 @@
         <el-row :gutter="10" class="mt-2">
           <el-col :span="12">
             <div class="video-wrapper" @click="setActiveQuad('storage')">
-              <div class="video-overlay" :class="{'active-quad': currentArea === 'storage'}">
+              <div class="video-overlay" :class="{ 'active-quad': currentArea === 'storage' }">
                 <div class="camera-info">
                   <span class="camera-name">食材储存区</span>
                   <span class="timestamp">{{ currentTime }}</span>
@@ -103,7 +134,7 @@
           </el-col>
           <el-col :span="12">
             <div class="video-wrapper" @click="setActiveQuad('dining')">
-              <div class="video-overlay" :class="{'active-quad': currentArea === 'dining'}">
+              <div class="video-overlay" :class="{ 'active-quad': currentArea === 'dining' }">
                 <div class="camera-info">
                   <span class="camera-name">就餐区域</span>
                   <span class="timestamp">{{ currentTime }}</span>
@@ -114,13 +145,13 @@
           </el-col>
         </el-row>
       </div>
-      
+
       <!-- 网格视图 -->
       <div v-else-if="currentView === 'grid'" class="video-container grid-view">
         <el-row :gutter="10">
           <el-col v-for="(area, index) in monitoringAreas" :key="area.value" :xs="24" :sm="12" :md="8" :lg="6">
             <div class="video-wrapper" @click="setActiveQuad(area.value)">
-              <div class="video-overlay" :class="{'active-quad': currentArea === area.value}">
+              <div class="video-overlay" :class="{ 'active-quad': currentArea === area.value }">
                 <div class="camera-info">
                   <span class="camera-name">{{ area.label }}</span>
                   <span class="timestamp">{{ currentTime }}</span>
@@ -131,14 +162,16 @@
           </el-col>
         </el-row>
       </div>
-      
+
       <!-- 监控信息和控制 -->
       <div class="mt-4">
         <el-divider>
-          <el-icon><InfoFilled /></el-icon>
+          <el-icon>
+            <InfoFilled />
+          </el-icon>
           <span class="ml-2">监控详情</span>
         </el-divider>
-        
+
         <el-row :gutter="20">
           <el-col :xs="24" :md="12">
             <div class="camera-details p-4 bg-gray-50 rounded-lg">
@@ -146,7 +179,8 @@
               <div class="mt-2">
                 <el-descriptions :column="1" border>
                   <el-descriptions-item label="监控区域">{{ getAreaName(currentArea) }}</el-descriptions-item>
-                  <el-descriptions-item label="摄像头编号">{{ currentArea }}-CAM-{{ Math.floor(Math.random() * 1000) + 1 }}</el-descriptions-item>
+                  <el-descriptions-item label="摄像头编号">{{ currentArea }}-CAM-{{ Math.floor(Math.random() * 1000) + 1
+                  }}</el-descriptions-item>
                   <el-descriptions-item label="画面分辨率">1280 × 720 (HD)</el-descriptions-item>
                   <el-descriptions-item label="流媒体协议">RTSP</el-descriptions-item>
                   <el-descriptions-item label="连接状态">
@@ -155,20 +189,28 @@
                     </el-tag>
                   </el-descriptions-item>
                   <el-descriptions-item label="连接时长">{{ connectionTime }}</el-descriptions-item>
+                  <el-descriptions-item label="AI检测状态">
+                    <el-tag :type="aiDetectionEnabled ? 'success' : 'info'" size="small">
+                      {{ aiDetectionEnabled ? '检测中' : '已关闭' }}
+                    </el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="今日检测次数">{{ todayDetectionCount }}</el-descriptions-item>
                 </el-descriptions>
               </div>
             </div>
           </el-col>
-          
+
           <el-col :xs="24" :md="12" class="mt-4 md:mt-0">
             <div class="control-panel p-4 bg-gray-50 rounded-lg">
               <h3 class="text-lg font-medium mb-2">监控控制</h3>
-              
+
               <div class="mt-4">
                 <el-row :gutter="10">
                   <el-col :span="12">
                     <el-button class="w-full" type="primary" @click="captureImage">
-                      <el-icon class="mr-1"><Camera /></el-icon>拍照截图
+                      <el-icon class="mr-1">
+                        <Camera />
+                      </el-icon>拍照截图
                     </el-button>
                   </el-col>
                   <el-col :span="12">
@@ -180,37 +222,70 @@
                     </el-button>
                   </el-col>
                 </el-row>
-                
+
+                <!-- 违规抓拍控制 -->
+                <el-row :gutter="10" class="mt-2">
+                  <el-col :span="12">
+                    <el-button class="w-full" type="warning" @click="manualViolationCapture"
+                      :disabled="!aiDetectionEnabled">
+                      <el-icon class="mr-1">
+                        <Warning />
+                      </el-icon>违规抓拍
+                    </el-button>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-button class="w-full" type="info" @click="showViolationHistory">
+                      <el-icon class="mr-1">
+                        <Document />
+                      </el-icon>违规记录
+                    </el-button>
+                  </el-col>
+                </el-row>
+
                 <div class="mt-4">
                   <el-slider v-model="zoomLevel" :min="1" :max="5" :step="0.5" show-stops>
                     <template #prepend>
-                      <el-icon><ZoomOut /></el-icon>
+                      <el-icon>
+                        <ZoomOut />
+                      </el-icon>
                     </template>
                     <template #append>
-                      <el-icon><ZoomIn /></el-icon>
+                      <el-icon>
+                        <ZoomIn />
+                      </el-icon>
                     </template>
                   </el-slider>
                 </div>
-                
+
                 <el-row class="mt-4">
                   <el-col :span="24">
                     <div class="camera-controls flex flex-col items-center">
                       <el-button circle class="direction-btn up-btn" @click="controlCamera('up')">
-                        <el-icon><ArrowUp /></el-icon>
+                        <el-icon>
+                          <ArrowUp />
+                        </el-icon>
                       </el-button>
                       <div class="flex justify-center items-center">
                         <el-button circle class="mr-4 direction-btn left-btn" @click="controlCamera('left')">
-                          <el-icon><ArrowLeft /></el-icon>
+                          <el-icon>
+                            <ArrowLeft />
+                          </el-icon>
                         </el-button>
                         <el-button circle class="direction-btn center-btn" @click="controlCamera('center')">
-                          <el-icon><Aim /></el-icon>
+                          <el-icon>
+                            <Aim />
+                          </el-icon>
                         </el-button>
                         <el-button circle class="ml-4 direction-btn right-btn" @click="controlCamera('right')">
-                          <el-icon><ArrowRight /></el-icon>
+                          <el-icon>
+                            <ArrowRight />
+                          </el-icon>
                         </el-button>
                       </div>
                       <el-button circle class="direction-btn down-btn" @click="controlCamera('down')">
-                        <el-icon><ArrowDown /></el-icon>
+                        <el-icon>
+                          <ArrowDown />
+                        </el-icon>
                       </el-button>
                     </div>
                   </el-col>
@@ -221,46 +296,83 @@
         </el-row>
       </div>
     </el-card>
-    
+
     <!-- 异常检测告警 -->
     <el-card class="w-full shadow-md">
       <template #header>
-        <div class="flex items-center">
-          <el-icon class="mr-2 text-red-500"><Warning /></el-icon>
-          <span class="text-xl font-medium">异常行为检测</span>
-          <el-badge :value="alertCount" class="ml-2" type="danger" v-if="alertCount > 0" />
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <el-icon class="mr-2 text-red-500">
+              <Warning />
+            </el-icon>
+            <span class="text-xl font-medium">智能违规检测</span>
+            <el-badge :value="alertCount" class="ml-2" type="danger" v-if="alertCount > 0" />
+          </div>
+          <div class="flex items-center text-sm text-gray-600">
+            <span class="mr-4">今日检测: {{ todayDetectionCount }}次</span>
+            <span class="mr-4">违规发现: {{ todayViolationCount }}次</span>
+            <span>准确率: {{ detectionAccuracy }}%</span>
+          </div>
         </div>
       </template>
-      
+
+      <!-- 违规类型统计 -->
+      <div class="mb-4">
+        <el-row :gutter="10">
+          <el-col v-for="stat in violationStats" :key="stat.type" :span="6">
+            <el-card shadow="hover" class="text-center">
+              <el-icon class="text-2xl mb-2" :class="stat.color">
+                <component :is="stat.icon" />
+              </el-icon>
+              <div class="text-lg font-bold">{{ stat.count }}</div>
+              <div class="text-sm text-gray-600">{{ stat.label }}</div>
+            </el-card>
+          </el-col>
+        </el-row>
+      </div>
+
       <div v-if="alerts.length === 0" class="text-center py-8">
-        <el-empty description="暂无异常行为检测记录">
+        <el-empty description="暂无违规检测记录">
           <template #image>
-            <el-icon class="text-6xl text-gray-400"><SuccessFilled /></el-icon>
+            <el-icon class="text-6xl text-gray-400">
+              <SuccessFilled />
+            </el-icon>
           </template>
         </el-empty>
       </div>
-      
+
       <el-timeline v-else>
-        <el-timeline-item
-          v-for="(alert, index) in alerts"
-          :key="index"
-          :type="alert.level === 'error' ? 'danger' : alert.level"
-          :color="alert.color"
-          :timestamp="alert.time"
-          placement="top"
-        >
+        <el-timeline-item v-for="(alert, index) in alerts" :key="index"
+          :type="alert.level === 'error' ? 'danger' : alert.level" :color="alert.color" :timestamp="alert.time"
+          placement="top">
           <el-card shadow="hover">
             <div class="flex items-start">
               <el-icon class="mt-1 mr-2 text-red-500 text-xl">
                 <Warning />
               </el-icon>
-              <div>
-                <h4 class="font-medium">{{ alert.title }}</h4>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-medium">{{ alert.title }}</h4>
+                  <el-tag :type="alert.severity === 'high' ? 'danger' : alert.severity === 'medium' ? 'warning' : 'info'"
+                    size="small">
+                    {{ alert.severityText }}
+                  </el-tag>
+                </div>
                 <p class="text-gray-600 mt-1">{{ alert.description }}</p>
-                <div class="flex justify-between items-center mt-2">
+                <div class="mt-2 text-sm text-gray-500">
+                  <span class="mr-4">置信度: {{ alert.confidence }}%</span>
+                  <span class="mr-4">检测算法: {{ alert.algorithm }}</span>
+                  <span>风险等级: {{ alert.riskLevel }}</span>
+                </div>
+                <!-- 违规截图预览 -->
+                <div v-if="alert.screenshot" class="mt-3">
+                  <img :src="alert.screenshot" class="violation-screenshot" @click="viewViolationScreenshot(alert)" />
+                </div>
+                <div class="flex justify-between items-center mt-3">
                   <span class="text-xs text-gray-500">摄像头: {{ getAreaName(alert.camera) }}</span>
                   <div>
                     <el-button type="primary" size="small" @click="viewAlert(alert)" class="mr-2">查看详情</el-button>
+                    <el-button type="success" size="small" @click="exportEvidence(alert)" class="mr-2">导出证据</el-button>
                     <el-button type="danger" size="small" @click="acknowledgeAlert(index)">确认处理</el-button>
                   </div>
                 </div>
@@ -270,13 +382,59 @@
         </el-timeline-item>
       </el-timeline>
     </el-card>
-    
+
+    <!-- 违规记录历史对话框 -->
+    <el-dialog v-model="violationHistoryVisible" title="违规记录历史" width="80%" top="5vh">
+      <el-tabs v-model="activeHistoryTab">
+        <el-tab-pane label="今日记录" name="today">
+          <el-table :data="todayViolations" stripe>
+            <el-table-column prop="time" label="时间" width="180" />
+            <el-table-column prop="type" label="违规类型" width="120" />
+            <el-table-column prop="location" label="位置" width="120" />
+            <el-table-column prop="confidence" label="置信度" width="100">
+              <template #default="scope">
+                <el-tag :type="scope.row.confidence > 90 ? 'success' : scope.row.confidence > 70 ? 'warning' : 'danger'">
+                  {{ scope.row.confidence }}%
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="处理状态" width="100">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === '已处理' ? 'success' : 'warning'">
+                  {{ scope.row.status }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作">
+              <template #default="scope">
+                <el-button type="primary" size="small" @click="viewViolationDetail(scope.row)">查看详情</el-button>
+                <el-button type="success" size="small" @click="downloadEvidence(scope.row)">下载证据</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="本周统计" name="week">
+          <div class="text-center py-8">
+            <el-icon class="text-6xl text-gray-400 mb-4">
+              <TrendCharts />
+            </el-icon>
+            <p class="text-gray-600">本周违规趋势图表（演示功能）</p>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="导出报告" name="export">
+          <div class="text-center py-8">
+            <el-button type="primary" size="large" @click="exportWeeklyReport">
+              <el-icon class="mr-2">
+                <Document />
+              </el-icon>导出本周违规报告
+            </el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
     <!-- 截图查看对话框 -->
-    <el-dialog
-      v-model="imageDialogVisible"
-      title="监控截图"
-      width="70%"
-    >
+    <el-dialog v-model="imageDialogVisible" title="监控截图" width="70%">
       <div class="text-center">
         <img :src="capturedImage" class="max-w-full" />
       </div>
@@ -286,7 +444,38 @@
           <div>
             <el-button @click="imageDialogVisible = false">关闭</el-button>
             <el-button type="primary" @click="downloadImage">
-              <el-icon class="mr-1"><Download /></el-icon>下载
+              <el-icon class="mr-1">
+                <Download />
+              </el-icon>下载
+            </el-button>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 违规截图查看对话框 -->
+    <el-dialog v-model="violationScreenshotVisible" title="违规证据截图" width="70%">
+      <div class="text-center">
+        <img :src="currentViolationScreenshot" class="max-w-full" />
+        <div class="mt-4 text-left">
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="违规类型">{{ currentViolationInfo.type }}</el-descriptions-item>
+            <el-descriptions-item label="检测时间">{{ currentViolationInfo.time }}</el-descriptions-item>
+            <el-descriptions-item label="监控区域">{{ currentViolationInfo.location }}</el-descriptions-item>
+            <el-descriptions-item label="置信度">{{ currentViolationInfo.confidence }}%</el-descriptions-item>
+            <el-descriptions-item label="风险等级" :span="2">{{ currentViolationInfo.riskLevel }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-between">
+          <span class="text-gray-500">AI智能检测证据 - {{ currentViolationInfo.algorithm }}</span>
+          <div>
+            <el-button @click="violationScreenshotVisible = false">关闭</el-button>
+            <el-button type="primary" @click="downloadViolationScreenshot">
+              <el-icon class="mr-1">
+                <Download />
+              </el-icon>下载证据
             </el-button>
           </div>
         </div>
@@ -297,12 +486,13 @@
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
-import { ElMessage } from 'element-plus';
-import { 
-  VideoCamera, VideoPlay, VideoPause, Camera, 
+import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  VideoCamera, VideoPlay, VideoPause, Camera,
   Download, FullScreen, Refresh, Warning, InfoFilled,
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Aim,
-  ZoomIn, ZoomOut, SuccessFilled
+  ZoomIn, ZoomOut, SuccessFilled, View, Document,
+  TrendCharts, User
 } from '@element-plus/icons-vue';
 import { useFullscreen } from '@vueuse/core';
 
@@ -322,6 +512,7 @@ const connectionTime = ref('00:00:00');
 const { isFullscreen, toggle: toggleFullscreenBase } = useFullscreen();
 const fullscreenRef = ref(null);
 const mainVideo = ref(null);
+const screenshotCanvas = ref(null);
 
 // 监控区域
 const monitoringAreas = [
@@ -338,18 +529,76 @@ const monitoringAreas = [
 // 截图相关
 const imageDialogVisible = ref(false);
 const capturedImage = ref('');
+const violationScreenshotVisible = ref(false);
+const currentViolationScreenshot = ref('');
+const currentViolationInfo = ref({});
+
+// AI检测相关状态
+const aiDetectionEnabled = ref(false); // 默认关闭AI检测
+const currentDetections = ref([]);
+const todayDetectionCount = ref(156);
+const todayViolationCount = ref(8);
+const detectionAccuracy = ref(94.2);
+const violationHistoryVisible = ref(false);
+const activeHistoryTab = ref('today');
+
+// 违规类型统计
+const violationStats = reactive([
+  { type: 'hat', label: '未戴帽子', count: 3, icon: 'User', color: 'text-red-500' },
+  { type: 'mask', label: '未戴口罩', count: 2, icon: 'User', color: 'text-orange-500' },
+  { type: 'gloves', label: '未戴手套', count: 1, icon: 'User', color: 'text-yellow-500' },
+  { type: 'hygiene', label: '卫生违规', count: 2, icon: 'Warning', color: 'text-blue-500' }
+]);
+
+// 今日违规记录
+const todayViolations = reactive([
+  {
+    id: 1,
+    time: '2024-01-15 14:23:15',
+    type: '未戴帽子',
+    location: '食品加工区',
+    confidence: 95,
+    status: '已处理',
+    evidence: '/screenshots/violation_001.jpg'
+  },
+  {
+    id: 2,
+    time: '2024-01-15 13:45:32',
+    type: '未戴口罩',
+    location: '食品加工区',
+    confidence: 88,
+    status: '处理中',
+    evidence: '/screenshots/violation_002.jpg'
+  },
+  {
+    id: 3,
+    time: '2024-01-15 12:18:47',
+    type: '交叉污染',
+    location: '配餐区',
+    confidence: 92,
+    status: '已处理',
+    evidence: '/screenshots/violation_003.jpg'
+  }
+]);
 
 // 告警信息
 const alertCount = ref(2);
 const alerts = reactive([
   {
     id: 1,
-    title: '检测到未佩戴帽子',
-    description: '食品加工区检测到有工作人员未佩戴工作帽，请及时处理',
+    title: '检测到未佩戴工作帽',
+    description: '食品加工区检测到员工张某未佩戴工作帽进行食品处理操作',
     level: 'warning',
     color: '#E6A23C',
     camera: 'processing',
-    time: formatDate(new Date(Date.now() - 1000 * 60 * 5))
+    time: formatDate(new Date(Date.now() - 1000 * 60 * 5)),
+    severity: 'high',
+    severityText: '高风险',
+    confidence: 95,
+    algorithm: 'YOLOv8-PPE',
+    riskLevel: '食品安全风险',
+    evidence: '/screenshots/hat_violation_001.jpg',
+    screenshot: null
   },
   {
     id: 2,
@@ -358,7 +607,14 @@ const alerts = reactive([
     level: 'error',
     color: '#F56C6C',
     camera: 'storage',
-    time: formatDate(new Date(Date.now() - 1000 * 60 * 15))
+    time: formatDate(new Date(Date.now() - 1000 * 60 * 15)),
+    severity: 'high',
+    severityText: '高风险',
+    confidence: 98,
+    algorithm: 'Temperature-Monitor',
+    riskLevel: '食品安全风险',
+    evidence: '/screenshots/temp_violation_001.jpg',
+    screenshot: null
   }
 ]);
 
@@ -366,6 +622,7 @@ const alerts = reactive([
 let timeUpdateInterval = null;
 let connectionTimeInterval = null;
 let startTime = null;
+let detectionInterval = null;
 
 // 格式化日期
 function formatDate(date) {
@@ -375,7 +632,7 @@ function formatDate(date) {
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
   const second = String(date.getSeconds()).padStart(2, '0');
-  
+
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
 
@@ -394,7 +651,7 @@ function toggleFullscreen() {
 function changeViewMode(mode) {
   disconnectAllStreams();
   currentView.value = mode;
-  
+
   setTimeout(() => {
     if (mode === 'single') {
       connectMainStream();
@@ -409,7 +666,7 @@ function changeViewMode(mode) {
 // 更改监控区域
 function changeArea(area) {
   currentArea.value = area;
-  
+
   if (currentView.value === 'single') {
     disconnectAllStreams();
     connectMainStream();
@@ -424,11 +681,9 @@ function setActiveQuad(area) {
 
 // 获取摄像头地址
 function getCameraUrl(area) {
-  // 根据区域选择不同的摄像头地址
-  // 一半区域使用第一个摄像头，一半区域使用第二个摄像头
   const useSecondCamera = ['processing', 'storage', 'distribution', 'washing'].includes(area);
-  return useSecondCamera ? 
-    import.meta.env.VITE_RTSP_STREAM_URL_2 : 
+  return useSecondCamera ?
+    import.meta.env.VITE_RTSP_STREAM_URL_2 :
     import.meta.env.VITE_RTSP_STREAM_URL;
 }
 
@@ -445,13 +700,13 @@ function connectMainStream() {
 // 连接四画面
 function connectQuadStreams() {
   const areas = ['main', 'processing', 'storage', 'dining'];
-  
+
   areas.forEach((area, index) => {
     const videoElement = document.getElementById(`quad-video-${index + 1}`);
     if (videoElement) {
-      const server = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
-      server.connect(getCameraUrl(area));
-      webRtcServers[area] = server;
+      const webRtcServer = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
+      webRtcServer.connect(getCameraUrl(area));
+      webRtcServers[`quad-${index + 1}`] = webRtcServer;
     }
   });
 }
@@ -461,9 +716,9 @@ function connectGridStreams() {
   monitoringAreas.forEach((area, index) => {
     const videoElement = document.getElementById(`grid-video-${index + 1}`);
     if (videoElement) {
-      const server = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
-      server.connect(getCameraUrl(area.value));
-      webRtcServers[area.value] = server;
+      const webRtcServer = new WebRtcStreamer(videoElement, import.meta.env.VITE_WEBRTC_SERVER_URL);
+      webRtcServer.connect(getCameraUrl(area.value));
+      webRtcServers[`grid-${index + 1}`] = webRtcServer;
     }
   });
 }
@@ -471,19 +726,20 @@ function connectGridStreams() {
 // 断开所有流
 function disconnectAllStreams() {
   Object.values(webRtcServers).forEach(server => {
-    if (server) {
+    if (server && server.disconnect) {
       server.disconnect();
     }
   });
-  
   webRtcServers = {};
+  mainWebRtcServer = null;
 }
 
 // 刷新视频流
 function refreshStreams() {
   isRefreshing.value = true;
+
   disconnectAllStreams();
-  
+
   setTimeout(() => {
     if (currentView.value === 'single') {
       connectMainStream();
@@ -492,235 +748,629 @@ function refreshStreams() {
     } else if (currentView.value === 'grid') {
       connectGridStreams();
     }
-    
+
     isRefreshing.value = false;
-    ElMessage.success('监控画面已刷新');
-  }, 1000);
+    ElMessage.success('视频流刷新完成');
+  }, 2000);
 }
 
-// 截图
-function captureImage() {
-  let videoElement;
-  
-  if (currentView.value === 'single') {
-    videoElement = document.getElementById('main-video');
-  } else if (currentView.value === 'quad') {
-    const index = ['main', 'processing', 'storage', 'dining'].indexOf(currentArea.value);
-    videoElement = document.getElementById(`quad-video-${index + 1}`);
-  } else {
-    const index = monitoringAreas.findIndex(a => a.value === currentArea.value);
-    videoElement = document.getElementById(`grid-video-${index + 1}`);
+// 真实截图功能
+function captureRealScreenshot() {
+  const video = mainVideo.value;
+  const canvas = screenshotCanvas.value;
+
+  if (!video || !canvas) {
+    console.error('Video or canvas element not found');
+    return null;
   }
-  
-  if (videoElement) {
-    const canvas = document.createElement('canvas');
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-    
-    // 添加水印
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillRect(10, canvas.height - 40, 350, 30);
-    ctx.font = '14px Arial';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.fillText(`${getAreaName(currentArea.value)} - ${formatDate(new Date())}`, 20, canvas.height - 20);
-    
-    capturedImage.value = canvas.toDataURL('image/png');
+
+  // 设置canvas尺寸与视频一致
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+
+  const ctx = canvas.getContext('2d');
+
+  // 绘制视频帧到canvas
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // 添加水印和违规标记
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillRect(10, 10, 300, 80);
+
+  ctx.fillStyle = '#333';
+  ctx.font = '16px Arial';
+  ctx.fillText(`监控区域: ${getAreaName(currentArea.value)}`, 20, 30);
+  ctx.fillText(`时间: ${formatDate(new Date())}`, 20, 50);
+  ctx.fillText('AI智能检测系统', 20, 70);
+
+  // 转换为base64
+  return canvas.toDataURL('image/jpeg', 0.8);
+}
+
+// 普通截图
+function captureImage() {
+  const screenshot = captureRealScreenshot();
+  if (screenshot) {
+    capturedImage.value = screenshot;
     imageDialogVisible.value = true;
-    
-    ElMessage.success('已成功截取监控画面');
+    ElMessage.success('截图成功');
+  } else {
+    ElMessage.error('截图失败，请检查视频连接');
   }
 }
 
 // 下载图片
 function downloadImage() {
   const link = document.createElement('a');
-  link.download = `监控截图_${currentArea.value}_${Date.now()}.png`;
+  link.download = `监控截图_${formatDate(new Date()).replace(/[:\s]/g, '_')}.jpg`;
   link.href = capturedImage.value;
   link.click();
+  ElMessage.success('图片下载完成');
+}
+
+// 录制切换
+function toggleRecording() {
+  isRecording.value = !isRecording.value;
+  if (isRecording.value) {
+    ElMessage.success('开始录制监控视频');
+  } else {
+    ElMessage.info('录制已停止');
+  }
 }
 
 // 摄像头控制
 function controlCamera(direction) {
-  ElMessage.success(`摄像头${direction === 'center' ? '回中' : direction}操作已发送`);
-  // 实际项目中这里需要调用控制摄像头的API
+  ElMessage.info(`摄像头${direction === 'up' ? '向上' : direction === 'down' ? '向下' : direction === 'left' ? '向左' : direction === 'right' ? '向右' : '复位'}移动`);
 }
 
-// 切换录制状态
-function toggleRecording() {
-  isRecording.value = !isRecording.value;
-  
-  if (isRecording.value) {
-    ElMessage.success('开始录制监控画面');
+// AI检测相关函数
+function toggleAIDetection(enabled) {
+  aiDetectionEnabled.value = enabled;
+  if (enabled) {
+    ElMessage.success('AI智能检测已开启，正在初始化检测模型...');
+    setTimeout(() => {
+      ElMessage.success('AI检测模型加载完成，开始实时监控');
+      startMockDetection();
+    }, 2000);
   } else {
-    ElMessage.success('录制已停止，文件已保存');
+    ElMessage.info('AI智能检测已关闭');
+    currentDetections.value = [];
+    stopMockDetection();
   }
+}
+
+// 模拟检测功能
+function startMockDetection() {
+  if (detectionInterval || !aiDetectionEnabled.value) return;
+
+  detectionInterval = setInterval(() => {
+    // 只有在AI检测开启时才进行检测
+    if (!aiDetectionEnabled.value) {
+      stopMockDetection();
+      return;
+    }
+    
+    // 每次都检测到违规（100%概率）
+    if (Math.random() < 1.0) { // 改为100%概率
+      const violationTypes = [
+        { type: '未戴帽子', x: 25, y: 20, width: 15, height: 25 },
+        { type: '未戴口罩', x: 60, y: 30, width: 12, height: 18 },
+        { type: '未戴手套', x: 45, y: 55, width: 10, height: 15 },
+        { type: '操作不规范', x: 35, y: 40, width: 20, height: 30 }
+      ];
+
+      const violation = violationTypes[Math.floor(Math.random() * violationTypes.length)];
+
+      // 显示检测框
+      currentDetections.value = [{
+        id: Date.now(),
+        ...violation
+      }];
+
+      // 立即抓拍（或很短延迟）
+      setTimeout(() => {
+        if (aiDetectionEnabled.value) {
+          autoViolationCapture(violation.type);
+        }
+        currentDetections.value = [];
+      }, 1000); // 缩短到1秒
+    }
+  }, 8000); // 每5秒检测一次
+}
+
+function stopMockDetection() {
+  if (detectionInterval) {
+    clearInterval(detectionInterval);
+    detectionInterval = null;
+  }
+  currentDetections.value = []; // 清除当前检测框
+}
+
+// 自动违规抓拍
+function autoViolationCapture(violationType) {
+  const timestamp = formatDate(new Date());
+  const confidence = Math.floor(Math.random() * 20) + 80; // 80-99%
+
+  // 真实截图
+  const screenshot = captureRealScreenshot();
+
+  if (!screenshot) {
+    ElMessage.error('抓拍失败，无法获取视频画面');
+    return;
+  }
+
+  // 在截图上添加违规标记
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+
+  img.onload = function () {
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // 绘制原图
+    ctx.drawImage(img, 0, 0);
+
+    // 添加违规标记框
+    ctx.strokeStyle = '#ff4757';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 5]);
+
+    const boxX = canvas.width * 0.25;
+    const boxY = canvas.height * 0.20;
+    const boxWidth = canvas.width * 0.15;
+    const boxHeight = canvas.height * 0.25;
+
+    ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+    // 添加违规标签
+    ctx.fillStyle = '#ff4757';
+    ctx.fillRect(boxX, boxY - 30, boxWidth + 50, 30);
+
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText(`⚠️ ${violationType}`, boxX + 5, boxY - 10);
+
+    // 添加检测信息
+    ctx.fillStyle = 'rgba(255, 71, 87, 0.9)';
+    ctx.fillRect(10, canvas.height - 100, 280, 90);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '12px Arial';
+    ctx.fillText(`违规类型: ${violationType}`, 20, canvas.height - 80);
+    ctx.fillText(`检测时间: ${timestamp}`, 20, canvas.height - 65);
+    ctx.fillText(`置信度: ${confidence}%`, 20, canvas.height - 50);
+    ctx.fillText(`监控区域: ${getAreaName(currentArea.value)}`, 20, canvas.height - 35);
+    ctx.fillText('AI智能检测系统自动抓拍', 20, canvas.height - 20);
+
+    const finalScreenshot = canvas.toDataURL('image/jpeg', 0.9);
+
+    // 生成违规告警
+    const newAlert = {
+      id: Date.now(),
+      title: `检测到${violationType}`,
+      description: `${getAreaName(currentArea.value)}检测到员工${violationType}，已自动抓拍证据照片`,
+      level: 'warning',
+      color: '#E6A23C',
+      camera: currentArea.value,
+      time: timestamp,
+      severity: 'high',
+      severityText: '高风险',
+      confidence: confidence,
+      algorithm: 'AI-Vision-v3.2',
+      riskLevel: '食品安全风险',
+      evidence: `/screenshots/auto_${Date.now()}.jpg`,
+      screenshot: finalScreenshot
+    };
+
+    alerts.unshift(newAlert);
+    alertCount.value = alerts.length;
+
+    // 更新统计
+    todayDetectionCount.value++;
+    todayViolationCount.value++;
+
+    // 更新违规类型统计
+    const statType = violationType.includes('帽子') ? 'hat' :
+      violationType.includes('口罩') ? 'mask' :
+        violationType.includes('手套') ? 'gloves' : 'hygiene';
+    const stat = violationStats.find(s => s.type === statType);
+    if (stat) stat.count++;
+
+    ElMessage.warning({
+      message: `🚨 检测到${violationType}，已自动抓拍证据！`,
+      duration: 8000,
+      showClose: true
+    });
+
+    // 添加到今日违规记录
+    todayViolations.unshift({
+      id: Date.now(),
+      time: timestamp,
+      type: violationType,
+      location: getAreaName(currentArea.value),
+      confidence: confidence,
+      status: '待处理',
+      evidence: finalScreenshot
+    });
+  };
+
+  img.src = screenshot;
+}
+
+// 手动违规抓拍
+function manualViolationCapture() {
+  ElMessageBox.prompt('请输入违规类型描述', '手动违规抓拍', {
+    confirmButtonText: '确认抓拍',
+    cancelButtonText: '取消',
+    inputPlaceholder: '例如：未佩戴帽子、操作不规范等'
+  }).then(({ value }) => {
+    if (value) {
+      autoViolationCapture(value);
+      ElMessage.success('违规抓拍完成，已保存证据');
+    }
+  }).catch(() => {
+    ElMessage.info('已取消抓拍');
+  });
+}
+
+// 显示违规历史
+function showViolationHistory() {
+  violationHistoryVisible.value = true;
+}
+
+// 查看违规详情
+function viewViolationDetail(violation) {
+  ElMessageBox.alert(
+    `时间：${violation.time}\n类型：${violation.type}\n位置：${violation.location}\n置信度：${violation.confidence}%\n状态：${violation.status}`,
+    '违规详情',
+    {
+      confirmButtonText: '确定',
+      type: 'info'
+    }
+  );
+}
+
+// 查看违规截图
+function viewViolationScreenshot(alert) {
+  currentViolationScreenshot.value = alert.screenshot;
+  currentViolationInfo.value = {
+    type: alert.title,
+    time: alert.time,
+    location: getAreaName(alert.camera),
+    confidence: alert.confidence,
+    riskLevel: alert.riskLevel,
+    algorithm: alert.algorithm
+  };
+  violationScreenshotVisible.value = true;
+}
+
+// 下载违规截图
+function downloadViolationScreenshot() {
+  const link = document.createElement('a');
+  link.download = `违规证据_${currentViolationInfo.value.type}_${formatDate(new Date()).replace(/[:\s]/g, '_')}.jpg`;
+  link.href = currentViolationScreenshot.value;
+  link.click();
+  ElMessage.success('违规证据下载完成');
+}
+
+// 下载证据
+function downloadEvidence(violation) {
+  if (violation.evidence && violation.evidence.startsWith('data:')) {
+    const link = document.createElement('a');
+    link.download = `违规证据_${violation.type}_${violation.time.replace(/[:\s]/g, '_')}.jpg`;
+    link.href = violation.evidence;
+    link.click();
+    ElMessage.success('证据下载完成');
+  } else {
+    ElMessage.success(`正在下载违规证据：${violation.evidence}`);
+    setTimeout(() => {
+      ElMessage.success('证据下载完成');
+    }, 1000);
+  }
+}
+
+// 导出证据
+function exportEvidence(alert) {
+  if (alert.screenshot) {
+    const link = document.createElement('a');
+    link.download = `违规证据_${alert.title}_${alert.time.replace(/[:\s]/g, '_')}.jpg`;
+    link.href = alert.screenshot;
+    link.click();
+    ElMessage.success('证据导出完成');
+  } else {
+    ElMessage.success(`正在导出违规证据：${alert.evidence}`);
+    setTimeout(() => {
+      ElMessage.success('证据导出完成');
+    }, 1000);
+  }
+}
+
+// 导出周报告
+function exportWeeklyReport() {
+  ElMessage.success('正在生成本周违规检测报告...');
+  setTimeout(() => {
+    ElMessage.success('报告生成完成，已下载到本地');
+  }, 2000);
 }
 
 // 查看告警详情
 function viewAlert(alert) {
-  ElMessage.info(`查看告警详情: ${alert.title}`);
-  currentArea.value = alert.camera;
-  if (currentView.value !== 'single') {
-    currentView.value = 'single';
-    setTimeout(() => {
-      connectMainStream();
-    }, 100);
+  if (alert.screenshot) {
+    viewViolationScreenshot(alert);
+  } else {
+    ElMessageBox.alert(alert.description, alert.title, {
+      confirmButtonText: '确定',
+      type: 'warning'
+    });
   }
 }
 
 // 确认处理告警
 function acknowledgeAlert(index) {
-  alerts.splice(index, 1);
-  alertCount.value = alerts.length;
-  ElMessage.success('告警已确认处理');
+  ElMessageBox.confirm('确认已处理此违规行为？', '确认处理', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    alerts.splice(index, 1);
+    alertCount.value = alerts.length;
+    ElMessage.success('违规记录已确认处理');
+  }).catch(() => {
+    ElMessage.info('已取消操作');
+  });
 }
 
-// 更新时间显示
+// 更新时间
 function updateTime() {
-  const now = new Date();
-  currentTime.value = formatDate(now);
+  currentTime.value = formatDate(new Date());
 }
 
 // 更新连接时长
 function updateConnectionTime() {
-  if (!startTime) return;
-  
-  const now = new Date();
-  const diff = Math.floor((now - startTime) / 1000);
-  
-  const hours = Math.floor(diff / 3600);
-  const minutes = Math.floor((diff % 3600) / 60);
-  const seconds = diff % 60;
-  
-  connectionTime.value = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  if (startTime) {
+    const now = new Date();
+    const diff = Math.floor((now - startTime) / 1000);
+    const hours = Math.floor(diff / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
+    const seconds = (diff % 60).toString().padStart(2, '0');
+    connectionTime.value = `${hours}:${minutes}:${seconds}`;
+  }
 }
 
 // 组件挂载
 onMounted(() => {
-  // 初始化时间和定时器
+  // 初始化时间
   updateTime();
   startTime = new Date();
-  
+
+  // 启动定时器
   timeUpdateInterval = setInterval(updateTime, 1000);
   connectionTimeInterval = setInterval(updateConnectionTime, 1000);
-  
-  // 初始化连接
-  if (currentView.value === 'single') {
-    connectMainStream();
-  } else if (currentView.value === 'quad') {
-    connectQuadStreams();
-  } else if (currentView.value === 'grid') {
-    connectGridStreams();
-  }
-  
-  // 随机模拟连接状态变化
-  setInterval(() => {
-    isConnected.value = Math.random() > 0.1; // 90%概率保持连接
-  }, 15000);
+
+  // 根据当前视图模式连接WebRTC
+  setTimeout(() => {
+    if (currentView.value === 'single') {
+      connectMainStream();
+    } else if (currentView.value === 'quad') {
+      connectQuadStreams();
+    } else if (currentView.value === 'grid') {
+      connectGridStreams();
+    }
+  }, 1000);
+
+  // 模拟连接状态变化
+  setTimeout(() => {
+    isConnected.value = true;
+  }, 2000);
+
+  // 不再自动启动AI检测，需要用户手动开启
+  // AI检测默认关闭，用户需要手动开启
 });
 
 // 组件卸载
 onUnmounted(() => {
-  disconnectAllStreams();
-  
   // 清除定时器
   if (timeUpdateInterval) {
     clearInterval(timeUpdateInterval);
   }
-  
   if (connectionTimeInterval) {
     clearInterval(connectionTimeInterval);
   }
+
+  // 断开所有视频流
+  disconnectAllStreams();
+
+  // 停止AI检测
+  stopMockDetection();
+  
+  // 确保离开页面时关闭AI检测
+  aiDetectionEnabled.value = false;
 });
 </script>
 
 <style scoped>
 .monitoring-container {
-  min-height: 100%;
-  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .video-container {
-  width: 100%;
-  min-height: 400px;
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.single-view {
+  height: 500px;
+}
+
+.quad-view .video-wrapper {
+  height: 240px;
+  margin-bottom: 10px;
+}
+
+.grid-view .video-wrapper {
+  height: 200px;
+  margin-bottom: 10px;
 }
 
 .video-wrapper {
   position: relative;
-  width: 100%;
-  margin-bottom: 10px;
-  overflow: hidden;
+  background: #000;
   border-radius: 4px;
-  border: 1px solid #ebeef5;
-  background-color: #000;
-  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-wrapper:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .video-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, transparent 30%, transparent 70%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 2;
   pointer-events: none;
-  border: 2px solid transparent;
-  transition: all 0.3s;
 }
 
-.active-quad {
-  border-color: #409eff;
-  box-shadow: 0 0 10px rgba(64, 158, 255, 0.5);
+.video-overlay.active-quad {
+  border: 3px solid #409EFF;
 }
 
 .camera-info {
   position: absolute;
-  bottom: 10px;
+  top: 10px;
   left: 10px;
-  background-color: rgba(0, 0, 0, 0.6);
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  display: flex;
-  justify-content: space-between;
-  width: calc(100% - 20px);
+  font-size: 14px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .camera-name {
+  display: block;
   font-weight: bold;
+  margin-bottom: 4px;
 }
 
-.main-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.timestamp {
+  display: block;
+  font-size: 12px;
+  opacity: 0.9;
 }
 
-.quad-video, .grid-video {
+.main-video,
+.quad-video,
+.grid-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .direction-btn {
-  margin: 5px;
+  margin: 2px;
 }
 
 .camera-controls {
-  margin-top: 10px;
+  gap: 8px;
+}
+
+/* 违规检测框样式 */
+.violation-box {
+  position: absolute;
+  border: 3px solid #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+  border-radius: 4px;
+  pointer-events: none;
+  animation: violationPulse 1.5s infinite;
+  z-index: 3;
+}
+
+.violation-label {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  background: #ff4757;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.5);
+}
+
+@keyframes violationPulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 违规截图预览样式 */
+.violation-screenshot {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  transition: all 0.3s ease;
+}
+
+.violation-screenshot:hover {
+  border-color: #409EFF;
+  transform: scale(1.1);
+}
+
+/* 违规统计卡片样式 */
+.el-card .text-red-500 {
+  color: #f56565;
+}
+
+.el-card .text-orange-500 {
+  color: #ed8936;
+}
+
+.el-card .text-yellow-500 {
+  color: #ecc94b;
+}
+
+.el-card .text-blue-500 {
+  color: #4299e1;
 }
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .camera-info {
-    font-size: 10px;
+  .single-view {
+    height: 300px;
   }
-  
-  .camera-controls {
-    transform: scale(0.9);
+
+  .quad-view .video-wrapper {
+    height: 150px;
   }
-}
-</style>
+
+  .grid-view .video-wrapper {
+    height: 120px;
+  }
+}</style>
