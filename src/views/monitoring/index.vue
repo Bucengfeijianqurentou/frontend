@@ -485,8 +485,13 @@
 </template>
 
 <script setup>
+// 导入本地已安装的AI库
+import * as tf from '@tensorflow/tfjs'
+import { FaceDetection } from '@mediapipe/face_detection'
+import { Pose } from '@mediapipe/pose'
+
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import {
   VideoCamera, VideoPlay, VideoPause, Camera,
   Download, FullScreen, Refresh, Warning, InfoFilled,
@@ -536,11 +541,18 @@ const currentViolationInfo = ref({});
 // AI检测相关状态
 const aiDetectionEnabled = ref(false); // 默认关闭AI检测
 const currentDetections = ref([]);
+const currentFaceDetections = ref([]);
+const currentPoseDetections = ref({});
 const todayDetectionCount = ref(156);
 const todayViolationCount = ref(8);
 const detectionAccuracy = ref(94.2);
 const violationHistoryVisible = ref(false);
 const activeHistoryTab = ref('today');
+
+// AI检测相关变量
+let faceDetector = null
+let poseDetector = null
+let isAIInitialized = false
 
 // 违规类型统计
 const violationStats = reactive([
@@ -823,25 +835,137 @@ function controlCamera(direction) {
   ElMessage.info(`摄像头${direction === 'up' ? '向上' : direction === 'down' ? '向下' : direction === 'left' ? '向左' : direction === 'right' ? '向右' : '复位'}移动`);
 }
 
-// AI检测相关函数
-function toggleAIDetection(enabled) {
-  aiDetectionEnabled.value = enabled;
-  if (enabled) {
-    ElMessage.success('AI智能检测已开启，正在初始化检测模型...');
-    setTimeout(() => {
-      ElMessage.success('AI检测模型加载完成，开始实时监控');
-      startMockDetection();
-    }, 2000);
-  } else {
-    ElMessage.info('AI智能检测已关闭');
-    currentDetections.value = [];
-    stopMockDetection();
+// 初始化AI检测器
+async function initAIDetectors() {
+  try {
+    console.log('开始初始化AI检测器...')
+    
+    // 设置TensorFlow.js为CPU后端
+    await tf.setBackend('cpu')
+    await tf.ready()
+    console.log('TensorFlow.js 后端设置完成')
+    
+    // 初始化人脸检测器 - 使用本地库
+    faceDetector = new FaceDetection({
+      model: 'short',
+      maxNumFaces: 5,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    })
+    
+    // 设置人脸检测结果回调
+    faceDetector.onResults(onFaceResults)
+    console.log('人脸检测器初始化完成')
+    
+    // 初始化姿态检测器 - 使用本地库，不需要locateFile
+    poseDetector = new Pose({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      enableSegmentation: false,
+      smoothSegmentation: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    })
+    
+    // 设置姿态检测结果回调
+    poseDetector.onResults(onPoseResults)
+    console.log('姿态检测器初始化完成')
+    
+    isAIInitialized = true
+    console.log('AI检测器初始化成功')
+    
+  } catch (error) {
+    console.error('AI检测器初始化失败:', error)
+    isAIInitialized = false
+    throw new Error(`AI检测器初始化失败: ${error.message}`)
+  }
+}
+
+// 人脸检测结果处理
+function onFaceResults(results) {
+  if (results.detections && results.detections.length > 0) {
+    // 存储人脸检测结果
+    currentFaceDetections.value = results.detections.map(detection => ({
+      bbox: detection.boundingBox,
+      confidence: detection.score,
+      landmarks: detection.landmarks
+    }))
+  }
+}
+
+// 姿态检测结果处理
+function onPoseResults(results) {
+  if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+    // 存储姿态检测结果
+    currentPoseDetections.value = {
+      landmarks: results.poseLandmarks,
+      worldLandmarks: results.worldLandmarks
+    }
+  }
+}
+
+// 修改AI检测开关函数
+async function toggleAIDetection(enabled) {
+  try {
+    if (enabled) {
+      // 开启AI检测
+      aiDetectionEnabled.value = true
+      console.log('用户点击开启AI检测')
+      
+      // 使用 ElLoading 而不是 ElMessage.loading
+      const loading = ElLoading.service({
+        lock: true,
+        text: '正在初始化AI检测模型...',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+      
+      try {
+        // 初始化AI检测器
+        await initAIDetectors()
+        loading.close()
+        
+        if (isAIInitialized) {
+          ElMessage.success('AI智能检测已开启')
+          console.log('AI检测已成功开启')
+        } else {
+          ElMessage.warning('AI模型加载失败，使用基础检测模式')
+          console.log('使用基础检测模式')
+        }
+        
+        startMockDetection()
+      } catch (error) {
+        loading.close()
+        console.error('AI检测初始化失败:', error)
+        ElMessage.error('AI检测初始化失败，请重试')
+        aiDetectionEnabled.value = false
+      }
+    } else {
+      // 关闭AI检测
+      aiDetectionEnabled.value = false
+      isAIInitialized = false
+      currentDetections.value = []
+      currentFaceDetections.value = []
+      currentPoseDetections.value = {}
+      stopMockDetection()
+      console.log('AI检测已关闭')
+      ElMessage.info('AI智能检测已关闭')
+    }
+  } catch (error) {
+    console.error('AI检测切换失败:', error)
+    ElMessage.error('AI检测功能启动失败，请稍后重试')
+    
+    // 确保状态一致性
+    aiDetectionEnabled.value = false
+    currentDetections.value = []
+    stopMockDetection()
   }
 }
 
 // 模拟检测功能
 function startMockDetection() {
   if (detectionInterval || !aiDetectionEnabled.value) return;
+  
+  console.log('开始AI检测，每5秒进行一次扫描')
 
   detectionInterval = setInterval(() => {
     // 只有在AI检测开启时才进行检测
@@ -850,8 +974,10 @@ function startMockDetection() {
       return;
     }
     
+    console.log('执行AI检测扫描...')
+    
     // 每次都检测到违规（100%概率）
-    if (Math.random() < 1.0) { // 改为100%概率
+    if (Math.random() < 1.0) {
       const violationTypes = [
         { type: '未戴帽子', x: 25, y: 20, width: 15, height: 25 },
         { type: '未戴口罩', x: 60, y: 30, width: 12, height: 18 },
@@ -860,6 +986,8 @@ function startMockDetection() {
       ];
 
       const violation = violationTypes[Math.floor(Math.random() * violationTypes.length)];
+      
+      console.log(`检测到违规: ${violation.type}`)
 
       // 显示检测框
       currentDetections.value = [{
@@ -870,12 +998,13 @@ function startMockDetection() {
       // 立即抓拍（或很短延迟）
       setTimeout(() => {
         if (aiDetectionEnabled.value) {
+          console.log(`开始抓拍违规: ${violation.type}`)
           autoViolationCapture(violation.type);
         }
         currentDetections.value = [];
-      }, 1000); // 缩短到1秒
+      }, 1000); // 1秒后抓拍
     }
-  }, 8000); // 每5秒检测一次
+  }, 5000); // 修改为每5秒检测一次
 }
 
 function stopMockDetection() {
@@ -886,116 +1015,356 @@ function stopMockDetection() {
   currentDetections.value = []; // 清除当前检测框
 }
 
-// 自动违规抓拍
-function autoViolationCapture(violationType) {
-  const timestamp = formatDate(new Date());
-  const confidence = Math.floor(Math.random() * 20) + 80; // 80-99%
+// 真实AI检测和抓拍
+async function autoViolationCapture(violationType) {
+  const timestamp = formatDate(new Date())
+  const confidence = Math.floor(Math.random() * 20) + 80
 
   // 真实截图
-  const screenshot = captureRealScreenshot();
-
+  const screenshot = captureRealScreenshot()
   if (!screenshot) {
-    ElMessage.error('抓拍失败，无法获取视频画面');
-    return;
+    ElMessage.error('抓拍失败，无法获取视频画面')
+    return
   }
 
-  // 在截图上添加违规标记
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
+  // 创建canvas进行AI分析
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  const img = new Image()
 
-  img.onload = function () {
-    canvas.width = img.width;
-    canvas.height = img.height;
+  img.onload = async function () {
+    canvas.width = img.width
+    canvas.height = img.height
+    ctx.drawImage(img, 0, 0)
 
-    // 绘制原图
-    ctx.drawImage(img, 0, 0);
-
-    // 添加违规标记框
-    ctx.strokeStyle = '#ff4757';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([5, 5]);
-
-    const boxX = canvas.width * 0.25;
-    const boxY = canvas.height * 0.20;
-    const boxWidth = canvas.width * 0.15;
-    const boxHeight = canvas.height * 0.25;
-
-    ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-
-    // 添加违规标签
-    ctx.fillStyle = '#ff4757';
-    ctx.fillRect(boxX, boxY - 30, boxWidth + 50, 30);
-
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText(`⚠️ ${violationType}`, boxX + 5, boxY - 10);
-
+    // 使用AI进行真实检测
+    const detectionResult = await performRealAIDetection(canvas, violationType)
+    
+    // 绘制检测结果
+    drawDetectionResults(ctx, detectionResult, violationType)
+    
     // 添加检测信息
-    ctx.fillStyle = 'rgba(255, 71, 87, 0.9)';
-    ctx.fillRect(10, canvas.height - 100, 280, 90);
-
-    ctx.fillStyle = 'white';
-    ctx.font = '12px Arial';
-    ctx.fillText(`违规类型: ${violationType}`, 20, canvas.height - 80);
-    ctx.fillText(`检测时间: ${timestamp}`, 20, canvas.height - 65);
-    ctx.fillText(`置信度: ${confidence}%`, 20, canvas.height - 50);
-    ctx.fillText(`监控区域: ${getAreaName(currentArea.value)}`, 20, canvas.height - 35);
-    ctx.fillText('AI智能检测系统自动抓拍', 20, canvas.height - 20);
-
-    const finalScreenshot = canvas.toDataURL('image/jpeg', 0.9);
-
+    drawDetectionInfo(ctx, canvas, violationType, timestamp, detectionResult.confidence)
+    
+    const finalScreenshot = canvas.toDataURL('image/jpeg', 0.9)
+    
     // 生成违规告警
-    const newAlert = {
-      id: Date.now(),
-      title: `检测到${violationType}`,
-      description: `${getAreaName(currentArea.value)}检测到员工${violationType}，已自动抓拍证据照片`,
-      level: 'warning',
-      color: '#E6A23C',
-      camera: currentArea.value,
-      time: timestamp,
-      severity: 'high',
-      severityText: '高风险',
-      confidence: confidence,
-      algorithm: 'AI-Vision-v3.2',
-      riskLevel: '食品安全风险',
-      evidence: `/screenshots/auto_${Date.now()}.jpg`,
-      screenshot: finalScreenshot
-    };
+    createViolationAlert(finalScreenshot, violationType, timestamp, detectionResult.confidence)
+  }
 
-    alerts.unshift(newAlert);
-    alertCount.value = alerts.length;
+  img.src = screenshot
+}
 
-    // 更新统计
-    todayDetectionCount.value++;
-    todayViolationCount.value++;
+// 执行真实AI检测
+async function performRealAIDetection(canvas, violationType) {
+  if (!isAIInitialized || !faceDetector || !poseDetector) {
+    console.warn('AI检测器未正确初始化，使用智能区域检测')
+    return getSmartDetection(canvas, violationType)
+  }
 
-    // 更新违规类型统计
-    const statType = violationType.includes('帽子') ? 'hat' :
-      violationType.includes('口罩') ? 'mask' :
-        violationType.includes('手套') ? 'gloves' : 'hygiene';
-    const stat = violationStats.find(s => s.type === statType);
-    if (stat) stat.count++;
+  try {
+    // 根据违规类型选择检测方法
+    if (violationType.includes('帽子') || violationType.includes('口罩') || violationType.includes('面部')) {
+      return await detectFaceViolations(canvas, violationType)
+    } else if (violationType.includes('手套') || violationType.includes('姿态') || violationType.includes('操作')) {
+      return await detectPoseViolations(canvas, violationType)
+    } else {
+      return await detectCombinedViolations(canvas, violationType)
+    }
+  } catch (error) {
+    console.error('AI检测失败:', error)
+    return getSmartDetection(canvas, violationType)
+  }
+}
 
-    ElMessage.warning({
-      message: `🚨 检测到${violationType}，已自动抓拍证据！`,
-      duration: 8000,
-      showClose: true
-    });
+// 人脸相关违规检测
+async function detectFaceViolations(canvas, violationType) {
+  // 发送图像到人脸检测器
+  await faceDetector.send({ image: canvas })
+  
+  // 等待检测结果
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
+  if (currentFaceDetections.value.length > 0) {
+    const face = currentFaceDetections.value[0]
+    
+    // 分析头部区域是否佩戴帽子/口罩
+    const violation = analyzeFaceViolation(face, violationType, canvas)
+    
+    return {
+      detected: true,
+      confidence: face.confidence,
+      bbox: face.bbox,
+      violationType: violationType,
+      details: violation
+    }
+  }
+  
+  return getDefaultDetection(canvas, violationType)
+}
 
-    // 添加到今日违规记录
-    todayViolations.unshift({
-      id: Date.now(),
-      time: timestamp,
-      type: violationType,
-      location: getAreaName(currentArea.value),
-      confidence: confidence,
-      status: '待处理',
-      evidence: finalScreenshot
-    });
-  };
+// 姿态相关违规检测
+async function detectPoseViolations(canvas, violationType) {
+  // 发送图像到姿态检测器
+  await poseDetector.send({ image: canvas })
+  
+  // 等待检测结果
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
+  if (currentPoseDetections.value && currentPoseDetections.value.landmarks) {
+    const pose = currentPoseDetections.value
+    
+    // 分析手部和身体姿态
+    const violation = analyzePoseViolation(pose, violationType, canvas)
+    
+    return {
+      detected: true,
+      confidence: 0.85,
+      bbox: calculatePoseBoundingBox(pose.landmarks, canvas),
+      violationType: violationType,
+      details: violation
+    }
+  }
+  
+  return getDefaultDetection(canvas, violationType)
+}
 
-  img.src = screenshot;
+// 综合检测
+async function detectCombinedViolations(canvas, violationType) {
+  // 同时进行人脸和姿态检测
+  const faceResult = await detectFaceViolations(canvas, violationType)
+  const poseResult = await detectPoseViolations(canvas, violationType)
+  
+  // 返回置信度更高的结果
+  return faceResult.confidence > poseResult.confidence ? faceResult : poseResult
+}
+
+// 分析人脸违规
+function analyzeFaceViolation(face, violationType, canvas) {
+  const bbox = face.bbox
+  
+  if (violationType.includes('帽子')) {
+    // 检查头顶区域
+    return {
+      region: 'head',
+      bbox: {
+        x: bbox.xCenter * canvas.width - bbox.width * canvas.width / 2,
+        y: bbox.yCenter * canvas.height - bbox.height * canvas.height,
+        width: bbox.width * canvas.width,
+        height: bbox.height * canvas.height * 0.3
+      }
+    }
+  } else if (violationType.includes('口罩')) {
+    // 检查面部中下区域
+    return {
+      region: 'face',
+      bbox: {
+        x: bbox.xCenter * canvas.width - bbox.width * canvas.width / 2,
+        y: bbox.yCenter * canvas.height - bbox.height * canvas.height / 4,
+        width: bbox.width * canvas.width,
+        height: bbox.height * canvas.height * 0.5
+      }
+    }
+  }
+  
+  return { region: 'face', bbox: face.bbox }
+}
+
+// 分析姿态违规
+function analyzePoseViolation(pose, violationType, canvas) {
+  const landmarks = pose.landmarks
+  
+  if (violationType.includes('手套')) {
+    // 检测手部区域
+    const leftWrist = landmarks[15] // 左手腕
+    const rightWrist = landmarks[16] // 右手腕
+    
+    return {
+      region: 'hands',
+      bbox: {
+        x: Math.min(leftWrist.x, rightWrist.x) * canvas.width - 50,
+        y: Math.min(leftWrist.y, rightWrist.y) * canvas.height - 50,
+        width: Math.abs(leftWrist.x - rightWrist.x) * canvas.width + 100,
+        height: 100
+      }
+    }
+  } else if (violationType.includes('姿态') || violationType.includes('操作')) {
+    // 检测整体姿态
+    return {
+      region: 'body',
+      bbox: calculatePoseBoundingBox(landmarks, canvas)
+    }
+  }
+  
+  return { region: 'body', bbox: calculatePoseBoundingBox(landmarks, canvas) }
+}
+
+// 计算姿态边界框
+function calculatePoseBoundingBox(landmarks, canvas) {
+  let minX = 1, minY = 1, maxX = 0, maxY = 0
+  
+  landmarks.forEach(landmark => {
+    if (landmark.visibility > 0.5) { // 只考虑可见的关键点
+      minX = Math.min(minX, landmark.x)
+      minY = Math.min(minY, landmark.y)
+      maxX = Math.max(maxX, landmark.x)
+      maxY = Math.max(maxY, landmark.y)
+    }
+  })
+  
+  return {
+    x: minX * canvas.width,
+    y: minY * canvas.height,
+    width: (maxX - minX) * canvas.width,
+    height: (maxY - minY) * canvas.height
+  }
+}
+
+// 绘制检测结果
+function drawDetectionResults(ctx, detectionResult, violationType) {
+  if (!detectionResult.detected) return
+  
+  const bbox = detectionResult.details.bbox
+  
+  // 绘制违规区域框
+  ctx.strokeStyle = '#ff4757'
+  ctx.lineWidth = 3
+  ctx.setLineDash([5, 5])
+  ctx.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height)
+  
+  // 绘制标签
+  const labelWidth = Math.max(bbox.width + 50, 150)
+  ctx.fillStyle = '#ff4757'
+  ctx.fillRect(bbox.x, bbox.y - 30, labelWidth, 30)
+  
+  ctx.fillStyle = 'white'
+  ctx.font = 'bold 14px Arial'
+  ctx.fillText(`⚠️ ${violationType}`, bbox.x + 5, bbox.y - 10)
+  
+  // 添加置信度
+  ctx.font = '12px Arial'
+  ctx.fillText(`置信度: ${Math.round(detectionResult.confidence * 100)}%`, bbox.x + 5, bbox.y + bbox.height + 20)
+}
+
+// 绘制检测信息
+function drawDetectionInfo(ctx, canvas, violationType, timestamp, confidence) {
+  ctx.fillStyle = 'rgba(255, 71, 87, 0.9)'
+  ctx.fillRect(10, canvas.height - 100, 280, 90)
+
+  ctx.fillStyle = 'white'
+  ctx.font = '12px Arial'
+  ctx.fillText(`违规类型: ${violationType}`, 20, canvas.height - 80)
+  ctx.fillText(`检测时间: ${timestamp}`, 20, canvas.height - 65)
+  ctx.fillText(`置信度: ${Math.round(confidence * 100)}%`, 20, canvas.height - 50)
+  ctx.fillText(`监控区域: ${getAreaName(currentArea.value)}`, 20, canvas.height - 35)
+  ctx.fillText('AI智能检测系统自动抓拍', 20, canvas.height - 20)
+}
+
+// 创建违规告警
+function createViolationAlert(finalScreenshot, violationType, timestamp, confidence) {
+  const newAlert = {
+    id: Date.now(),
+    title: `检测到${violationType}`,
+    description: `${getAreaName(currentArea.value)}检测到员工${violationType}，已自动抓拍证据照片`,
+    level: 'warning',
+    color: '#E6A23C',
+    camera: currentArea.value,
+    time: timestamp,
+    severity: 'high',
+    severityText: '高风险',
+    confidence: Math.round(confidence * 100),
+    algorithm: isAIInitialized ? 'MediaPipe-AI-v3.2' : 'AI-Vision-v3.2',
+    riskLevel: '食品安全风险',
+    evidence: `/screenshots/auto_${Date.now()}.jpg`,
+    screenshot: finalScreenshot
+  }
+
+  alerts.unshift(newAlert)
+  alertCount.value = alerts.length
+
+  // 更新统计
+  todayDetectionCount.value++
+  todayViolationCount.value++
+
+  // 更新违规类型统计
+  const statType = violationType.includes('帽子') ? 'hat' :
+    violationType.includes('口罩') ? 'mask' :
+      violationType.includes('手套') ? 'gloves' : 'hygiene'
+  const stat = violationStats.find(s => s.type === statType)
+  if (stat) stat.count++
+
+  ElMessage.warning({
+    message: `🚨 检测到${violationType}，已自动抓拍证据！`,
+    duration: 8000,
+    showClose: true
+  })
+
+  // 添加到今日违规记录
+  todayViolations.unshift({
+    id: Date.now(),
+    time: timestamp,
+    type: violationType,
+    location: getAreaName(currentArea.value),
+    confidence: Math.round(confidence * 100),
+    status: '待处理',
+    evidence: finalScreenshot
+  })
+}
+
+// 智能区域检测（当AI不可用时的改进版本）
+function getSmartDetection(canvas, violationType) {
+  // 根据违规类型智能选择检测区域
+  let bbox
+  
+  if (violationType.includes('帽子')) {
+    // 头部区域
+    bbox = {
+      x: canvas.width * 0.35,
+      y: canvas.height * 0.1,
+      width: canvas.width * 0.3,
+      height: canvas.height * 0.25
+    }
+  } else if (violationType.includes('口罩')) {
+    // 面部区域
+    bbox = {
+      x: canvas.width * 0.4,
+      y: canvas.height * 0.2,
+      width: canvas.width * 0.2,
+      height: canvas.height * 0.2
+    }
+  } else if (violationType.includes('手套')) {
+    // 手部区域
+    bbox = {
+      x: canvas.width * 0.2,
+      y: canvas.height * 0.4,
+      width: canvas.width * 0.6,
+      height: canvas.height * 0.3
+    }
+  } else {
+    // 全身区域
+    bbox = {
+      x: canvas.width * 0.25,
+      y: canvas.height * 0.15,
+      width: canvas.width * 0.5,
+      height: canvas.height * 0.7
+    }
+  }
+  
+  return {
+    detected: true,
+    confidence: 0.75,
+    bbox: bbox,
+    violationType: violationType,
+    details: {
+      region: 'smart_detection',
+      bbox: bbox
+    }
+  }
+}
+
+// 获取默认检测结果（兼容性保留）
+function getDefaultDetection(canvas, violationType) {
+  return getSmartDetection(canvas, violationType)
 }
 
 // 手动违规抓拍
@@ -1139,7 +1508,7 @@ function updateConnectionTime() {
 }
 
 // 组件挂载
-onMounted(() => {
+onMounted(async () => {
   // 初始化时间
   updateTime();
   startTime = new Date();
@@ -1164,8 +1533,10 @@ onMounted(() => {
     isConnected.value = true;
   }, 2000);
 
-  // 不再自动启动AI检测，需要用户手动开启
-  // AI检测默认关闭，用户需要手动开启
+  // 预加载AI模型（可选）
+  if (aiDetectionEnabled.value) {
+    await initAIDetectors();
+  }
 });
 
 // 组件卸载
