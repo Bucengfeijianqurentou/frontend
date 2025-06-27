@@ -436,7 +436,7 @@
     <!-- 截图查看对话框 -->
     <el-dialog v-model="imageDialogVisible" title="监控截图" width="70%">
       <div class="text-center">
-        <img :src="capturedImage" class="max-w-full" />
+        <img :src="capturedImage" class="screenshot-preview" />
       </div>
       <template #footer>
         <div class="flex justify-between">
@@ -456,7 +456,7 @@
     <!-- 违规截图查看对话框 -->
     <el-dialog v-model="violationScreenshotVisible" title="违规证据截图" width="70%">
       <div class="text-center">
-        <img :src="currentViolationScreenshot" class="max-w-full" />
+        <img :src="currentViolationScreenshot" class="screenshot-preview" />
         <div class="mt-4 text-left">
           <el-descriptions :column="2" border>
             <el-descriptions-item label="违规类型">{{ currentViolationInfo.type }}</el-descriptions-item>
@@ -1731,6 +1731,17 @@ onUnmounted(() => {
   color: #4299e1;
 }
 
+/* 截图预览样式 */
+.screenshot-preview {
+  max-width: 100%;
+  max-height: 60vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 /* 响应式调整 */
 @media (max-width: 768px) {
   .single-view {
@@ -1743,6 +1754,10 @@ onUnmounted(() => {
 
   .grid-view .video-wrapper {
     height: 160px;
+  }
+
+  .screenshot-preview {
+    max-height: 50vh;
   }
 }
 </style>
