@@ -17,6 +17,24 @@ export function useTracingApi() {
         method: 'post',
         data
       })
+    },
+    
+    /**
+     * 根据日期和餐次获取菜品列表
+     * 
+     * @param {string} date 日期 (YYYY-MM-DD)
+     * @param {string} mealType 餐次类型
+     * @returns {Promise} 菜品列表
+     */
+    getDishes(date, mealType) {
+      return request({
+        url: '/api/tracing/dishes',
+        method: 'get',
+        params: {
+          date,
+          mealType
+        }
+      })
     }
   }
-} 
+}

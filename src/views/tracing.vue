@@ -37,10 +37,22 @@
           </el-form-item>
           
           <el-form-item label="菜品名称" prop="dishName">
-            <el-input
+            <el-select
               v-model="queryForm.dishName"
-              placeholder="请输入菜品名称，如：蛋炒饭"
-            />
+              placeholder="请先选择日期和餐次"
+              :loading="dishesLoading"
+              :disabled="!queryForm.date || !queryForm.mealType"
+              clearable
+              filterable
+              class="w-full"
+            >
+              <el-option
+                v-for="dish in dishOptions"
+                :key="dish"
+                :label="dish"
+                :value="dish"
+              />
+            </el-select>
           </el-form-item>
           
           <el-form-item class="mt-6">
@@ -389,7 +401,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, h, onMounted } from 'vue'
+import { ref, reactive, h, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Link, Search, Refresh, Calendar, ShoppingCart, Box, Check, WarningFilled, Document, DocumentCopy } from '@element-plus/icons-vue'
 import { useTracingApi } from '@/api/tracing'
@@ -780,6 +792,48 @@ const copyToClipboard = (text) => {
     ElMessage.error('复制失败，请手动复制')
   })
 }
+// 菜品选项相关
+const dishOptions = ref([])
+const dishesLoading = ref(false)
+
+// 监听日期和餐次变化，自动加载菜品列表
+watch(
+  () => [queryForm.date, queryForm.mealType],
+  async ([newDate, newMealType]) => {
+    // 清空菜品选择
+    queryForm.dishName = ''
+    dishOptions.value = []
+    
+    if (newDate && newMealType) {
+      await loadDishes(newDate, newMealType)
+    }
+  },
+  { immediate: false }
+)
+
+// 加载菜品列表
+const loadDishes = async (date, mealType) => {
+  if (!date || !mealType) return
+  
+  dishesLoading.value = true
+  try {
+    const res = await tracingApi.getDishes(date, mealType)
+    if (res.code === 200 && res.data) {
+      dishOptions.value = res.data
+      if (res.data.length === 0) {
+        ElMessage.warning('该日期和餐次暂无菜品信息')
+      }
+    } else {
+      console.error('获取菜品列表失败:', res.message)
+      ElMessage.error('获取菜品列表失败')
+    }
+  } catch (error) {
+    console.error('获取菜品列表异常:', error)
+    ElMessage.error('获取菜品列表异常')
+  } finally {
+    dishesLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -911,4 +965,4 @@ const copyToClipboard = (text) => {
 :deep(.exporting-pdf .el-tag) {
   display: none !important;
 }
-</style> 
+</style>
