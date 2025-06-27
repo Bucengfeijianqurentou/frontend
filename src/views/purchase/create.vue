@@ -112,10 +112,14 @@
             <span v-else class="text-gray-400">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right" align="center">
+        <el-table-column label="操作" width="250" fixed="right" align="center">
           <template #default="scope">
             <el-button link type="primary" size="small" @click="handleView(scope.row)" class="text-blue-500 hover:text-blue-700 font-medium">
               <el-icon class="mr-1"><View /></el-icon>详情
+            </el-button>
+            <el-divider direction="vertical" />
+            <el-button link type="success" size="small" @click="showBarcode(scope.row)" class="text-green-500 hover:text-green-700 font-medium">
+              <el-icon class="mr-1"><Picture /></el-icon>条形码
             </el-button>
             <el-divider direction="vertical" />
             <el-button link type="danger" size="small" @click="handleDelete(scope.row)" class="text-red-500 hover:text-red-700 font-medium">
@@ -146,6 +150,34 @@
         @close="showViewer = false"
       />
     </el-card>
+
+    <!-- 条形码预览弹窗 -->
+    <el-dialog
+      v-model="barcodeDialogVisible"
+      title="条形码"
+      width="500px"
+      center
+    >
+      <div class="barcode-container">
+        <div class="barcode-info">
+          <p><strong>批次号：</strong>{{ currentBatchNumber }}</p>
+          <p><strong>食品名称：</strong>{{ currentFoodName }}</p>
+        </div>
+        <div class="barcode-display">
+          <canvas ref="barcodeCanvas" id="barcode-canvas"></canvas>
+        </div>
+        <div class="barcode-actions">
+          <el-button type="primary" @click="downloadBarcode">
+            <el-icon><Download /></el-icon>
+            下载条形码
+          </el-button>
+          <el-button @click="printBarcode">
+            <el-icon><Printer /></el-icon>
+            打印条形码
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
 
     <!-- 采购单弹窗 -->
     <el-dialog
@@ -381,14 +413,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ShoppingCart, Plus, Search, Refresh, View, Delete, Check, Upload, Picture, InfoFilled, Food, CircleCheck, Phone, Document } from '@element-plus/icons-vue'
+import { ShoppingCart, Plus, Search, Refresh, View, Delete, Check, Upload, Picture, InfoFilled, Food, CircleCheck, Phone, Document, Download, Printer } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 import { usePurchaseApi } from '@/api/purchase'
 import { useSupplierApi } from '@/api/supplier'
 import { useUserStore } from '@/stores/user'
 import { getUserById } from '@/api/user'
+import JsBarcode from 'jsbarcode'
 
 const purchaseApi = usePurchaseApi()
 const supplierApi = useSupplierApi()
@@ -421,6 +454,12 @@ const purchaserPhone = ref('') // 采购人员电话
 // 图片预览
 const showViewer = ref(false)
 const currentImage = ref('')
+
+// 条形码相关状态
+const barcodeDialogVisible = ref(false)
+const currentBatchNumber = ref('')
+const currentFoodName = ref('')
+const barcodeCanvas = ref(null)
 
 // 供应商选项
 const supplierOptions = ref([])
@@ -811,6 +850,88 @@ function formatTransactionHash(hash) {
   return `${hash.substring(0, 10)}...${hash.substring(hash.length - 10)}`;
 }
 
+// 显示条形码
+async function showBarcode(row) {
+  currentBatchNumber.value = row.batchNumber
+  currentFoodName.value = row.name
+  barcodeDialogVisible.value = true
+  
+  // 等待DOM更新后生成条形码
+  await nextTick()
+  generateBarcode(row.batchNumber)
+}
+
+// 生成条形码
+function generateBarcode(batchNumber) {
+  if (barcodeCanvas.value) {
+    try {
+      JsBarcode(barcodeCanvas.value, batchNumber, {
+        format: "CODE128",
+        width: 2,
+        height: 100,
+        displayValue: true,
+        fontSize: 14,
+        margin: 10
+      })
+    } catch (error) {
+      console.error('条形码生成失败:', error)
+      ElMessage.error('条形码生成失败')
+    }
+  }
+}
+
+// 下载条形码
+function downloadBarcode() {
+  if (barcodeCanvas.value) {
+    const link = document.createElement('a')
+    link.download = `barcode_${currentBatchNumber.value}.png`
+    link.href = barcodeCanvas.value.toDataURL()
+    link.click()
+  }
+}
+
+// 打印条形码
+function printBarcode() {
+  if (barcodeCanvas.value) {
+    const printWindow = window.open('', '_blank')
+    const canvas = barcodeCanvas.value
+    const dataURL = canvas.toDataURL()
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>打印条形码 - ${currentBatchNumber.value}</title>
+          <style>
+            body { 
+              margin: 0; 
+              padding: 20px; 
+              text-align: center; 
+              font-family: Arial, sans-serif;
+            }
+            .barcode-info {
+              margin-bottom: 20px;
+              font-size: 14px;
+            }
+            img {
+              max-width: 100%;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="barcode-info">
+            <p><strong>批次号：</strong>${currentBatchNumber.value}</p>
+            <p><strong>食品名称：</strong>${currentFoodName.value}</p>
+          </div>
+          <img src="${dataURL}" alt="条形码" />
+        </body>
+      </html>
+    `)
+    
+    printWindow.document.close()
+    printWindow.print()
+  }
+}
+
 // 初始化
 onMounted(async () => {
   // 确保有用户信息
@@ -874,4 +995,41 @@ onMounted(async () => {
 :deep(.el-range-editor .el-range-input) {
   width: 42% !important;
 }
-</style> 
+
+.barcode-container {
+  text-align: center;
+}
+
+.barcode-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+}
+
+.barcode-info p {
+  margin: 5px 0;
+  color: #606266;
+}
+
+.barcode-display {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.barcode-actions {
+  margin-top: 20px;
+}
+
+.barcode-actions .el-button {
+  margin: 0 10px;
+}
+
+#barcode-canvas {
+  max-width: 100%;
+}
+</style>
+
