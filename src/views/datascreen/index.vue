@@ -264,14 +264,14 @@ function initSafetyIndexChart() {
       left: 'center',
       top: 'center',
       textStyle: {
-        fontSize: 36,
-        fontWeight: 'bold',
-        color: '#7CFFB2'
-      },
+          fontSize: 36,
+          fontWeight: 'bold',
+          color: '#E0AAFF'
+        },
       subtextStyle: {
-        fontSize: 16,
-        color: '#7CFFB2'
-      }
+          fontSize: 16,
+          color: '#E0AAFF'
+        }
     },
     series: [
       {
@@ -284,8 +284,8 @@ function initSafetyIndexChart() {
             width: 20,
             color: [
               [0.3, '#FF6E76'],
-              [0.7, '#FDDD60'],
-              [1, '#7CFFB2']
+              [0.7, '#C77DFF'],
+              [1, '#E0AAFF']
             ]
           }
         },
@@ -341,7 +341,7 @@ function initSafetyIndexChart() {
                     lineHeight: 20
                   },
                   b: {
-                    color: '#7CFFB2',
+                    color: '#E0AAFF',
                     fontSize: 18,
                     fontWeight: 'bold',
                     lineHeight: 20
@@ -364,7 +364,7 @@ function initSafetyIndexChart() {
                     lineHeight: 20
                   },
                   b: {
-                    color: '#7CFFB2',
+                    color: '#E0AAFF',
                     fontSize: 18,
                     fontWeight: 'bold',
                     lineHeight: 20
@@ -387,7 +387,7 @@ function initSafetyIndexChart() {
                     lineHeight: 20
                   },
                   d: {
-                    color: '#7CFFB2',
+                    color: '#E0AAFF',
                     fontSize: 20,
                     fontWeight: 'bold',
                     lineHeight: 20
@@ -418,7 +418,7 @@ function initSafetyIndexChart() {
           lineStyle: {
             width: 6,
             color: [
-              [0.94, '#7CFFB2'],
+              [0.94, '#E0AAFF'],
               [1, '#eee']
             ]
           }
@@ -444,7 +444,7 @@ function initSafetyIndexChart() {
         detail: {
           show: true,
           fontSize: 14,
-          color: '#7CFFB2',
+          color: '#E0AAFF',
           offsetCenter: [0, 0],
           formatter: '{value}%'
         },
@@ -469,7 +469,7 @@ function initSafetyIndexChart() {
           lineStyle: {
             width: 6,
             color: [
-              [0.89, '#FDDD60'],
+              [0.89, '#C77DFF'],
               [1, '#eee']
             ]
           }
@@ -495,7 +495,7 @@ function initSafetyIndexChart() {
         detail: {
           show: true,
           fontSize: 14,
-          color: '#FDDD60',
+          color: '#C77DFF',
           offsetCenter: [0, 0],
           formatter: '{value}%'
         },
@@ -520,7 +520,7 @@ function initSafetyIndexChart() {
           lineStyle: {
             width: 6,
             color: [
-              [0.96, '#7CFFB2'],
+              [0.96, '#E0AAFF'],
               [1, '#eee']
             ]
           }
@@ -607,7 +607,7 @@ function initPurchaseTrendChart() {
         smooth: true,
         data: [120, 132, 101, 134, 90, 30, 85],
         itemStyle: {
-          color: '#80FFA5'
+          color: '#E0AAFF'
         },
         areaStyle: {
           color: {
@@ -617,8 +617,8 @@ function initPurchaseTrendChart() {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(128, 255, 165, 0.7)' },
-              { offset: 1, color: 'rgba(128, 255, 165, 0.1)' }
+              { offset: 0, color: 'rgba(224, 170, 255, 0.7)' },
+              { offset: 1, color: 'rgba(224, 170, 255, 0.1)' }
             ],
           }
         }
@@ -629,7 +629,7 @@ function initPurchaseTrendChart() {
         smooth: true,
         data: [50, 62, 40, 44, 55, 25, 30],
         itemStyle: {
-          color: '#FFDD6F'
+          color: '#C77DFF'
         },
         areaStyle: {
           color: {
@@ -639,8 +639,8 @@ function initPurchaseTrendChart() {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(255, 221, 111, 0.7)' },
-              { offset: 1, color: 'rgba(255, 221, 111, 0.1)' }
+              { offset: 0, color: 'rgba(199, 125, 255, 0.7)' },
+              { offset: 1, color: 'rgba(199, 125, 255, 0.1)' }
             ],
           }
         }
@@ -798,7 +798,7 @@ function initInventoryAlertChart() {
         data: [
           {value: 10, itemStyle: {color: '#ff6464'}}, 
           {value: 8, itemStyle: {color: '#ff6464'}}, 
-          {value: 15, itemStyle: {color: '#3aa0ff'}}, 
+          {value: 15, itemStyle: {color: '#E0AAFF'}}, 
           {value: 6, itemStyle: {color: '#ff6464'}}, 
           {value: 5, itemStyle: {color: '#ff6464'}}
         ],
@@ -939,8 +939,8 @@ function initProcessingStatChart() {
         data: [200, 150, 100, 50, 80],
         itemStyle: {
           color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
-            { offset: 0, color: '#3aa0ff' },
-            { offset: 1, color: '#5b87f7' }
+            { offset: 0, color: '#E0AAFF' },
+            { offset: 1, color: '#C77DFF' }
           ])
         }
       }
@@ -1179,7 +1179,7 @@ onUnmounted(() => {
 .datascreen-container {
   width: 100%;
   height: 100vh;
-  background-color: #05172e;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
   color: #fff;
   padding: 15px;
   overflow: hidden;
@@ -1194,17 +1194,20 @@ onUnmounted(() => {
   height: 60px;
   margin-bottom: 15px;
   padding: 0 20px;
-  background: linear-gradient(to right, rgba(18, 69, 145, 0.8), rgba(18, 69, 145, 0.3));
-  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(139, 69, 255, 0.8), rgba(75, 0, 130, 0.6), rgba(139, 69, 255, 0.3));
+  border-radius: 8px;
+  border: 1px solid rgba(139, 69, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(139, 69, 255, 0.3);
 }
 
 .title {
   font-size: 28px;
   font-weight: bold;
-  background: linear-gradient(to right, #54e7ff, #ffffff);
+  background: linear-gradient(45deg, #e0aaff, #c77dff, #a663cc, #ffffff);
   -webkit-background-clip: text;
   color: transparent;
-  text-shadow: 0 0 10px rgba(84, 231, 255, 0.5);
+  text-shadow: 0 0 15px rgba(224, 170, 255, 0.6);
+  filter: drop-shadow(0 0 8px rgba(224, 170, 255, 0.4));
 }
 
 .datetime, .weather {
@@ -1235,12 +1238,13 @@ onUnmounted(() => {
 }
 
 .panel-item {
-  background-color: rgba(18, 69, 145, 0.3);
-  border-radius: 4px;
-  border: 1px solid rgba(84, 231, 255, 0.3);
-  box-shadow: 0 0 15px rgba(18, 69, 145, 0.5);
+  background: linear-gradient(135deg, rgba(75, 0, 130, 0.4), rgba(139, 69, 255, 0.2), rgba(75, 0, 130, 0.3));
+  border-radius: 8px;
+  border: 1px solid rgba(139, 69, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(139, 69, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   overflow: hidden;
   height: calc(33.33% - 10px);
+  backdrop-filter: blur(10px);
 }
 
 .main-monitor {
@@ -1248,7 +1252,7 @@ onUnmounted(() => {
 }
 
 .panel-header {
-  background-color: rgba(18, 69, 145, 0.7);
+  background: linear-gradient(135deg, rgba(139, 69, 255, 0.8), rgba(75, 0, 130, 0.9));
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1256,6 +1260,7 @@ onUnmounted(() => {
   font-size: 16px;
   font-weight: bold;
   color: #fff;
+  border-bottom: 1px solid rgba(139, 69, 255, 0.3);
 }
 
 .panel-content {
@@ -1317,16 +1322,17 @@ onUnmounted(() => {
 
 .blockchain-item {
   flex: 1;
-  background-color: rgba(33, 87, 168, 0.5);
-  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(139, 69, 255, 0.3), rgba(75, 0, 130, 0.4));
+  border-radius: 8px;
   display: flex;
   align-items: center;
   padding: 0 15px;
   gap: 15px;
-  border: 1px solid rgba(84, 231, 255, 0.3);
-  box-shadow: 0 0 15px rgba(18, 69, 145, 0.5);
+  border: 1px solid rgba(139, 69, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(139, 69, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .blockchain-item::before {
@@ -1336,7 +1342,7 @@ onUnmounted(() => {
   left: -100%;
   width: 100%;
   height: 2px;
-  background: linear-gradient(to right, transparent, #54e7ff, transparent);
+  background: linear-gradient(to right, transparent, #e0aaff, #c77dff, transparent);
   animation: scanLine 3s infinite;
 }
 
@@ -1354,7 +1360,8 @@ onUnmounted(() => {
 
 .blockchain-item .el-icon {
   font-size: 30px;
-  color: #54e7ff;
+  color: #e0aaff;
+  filter: drop-shadow(0 0 8px rgba(224, 170, 255, 0.6));
 }
 
 .info-content {
@@ -1374,11 +1381,12 @@ onUnmounted(() => {
 .block-hash {
   font-family: monospace;
   font-size: 12px;
-  color: #76d0ff;
-  background-color: rgba(0, 0, 0, 0.2);
+  color: #c77dff;
+  background-color: rgba(0, 0, 0, 0.3);
   padding: 1px 4px;
-  border-radius: 2px;
+  border-radius: 3px;
   margin-left: 8px;
+  border: 1px solid rgba(199, 125, 255, 0.3);
 }
 
 .tx-indicator {
@@ -1398,24 +1406,24 @@ onUnmounted(() => {
 .info-value {
   font-size: 24px;
   font-weight: bold;
-  color: #54e7ff;
+  color: #e0aaff;
 }
 
 .count-animation {
   position: relative;
-  text-shadow: 0 0 10px rgba(84, 231, 255, 0.7);
+  text-shadow: 0 0 12px rgba(224, 170, 255, 0.8);
   animation: pulseNumber 2s infinite;
 }
 
 @keyframes pulseNumber {
   0% {
-    text-shadow: 0 0 5px rgba(84, 231, 255, 0.7);
+    text-shadow: 0 0 8px rgba(224, 170, 255, 0.7);
   }
   50% {
-    text-shadow: 0 0 15px rgba(84, 231, 255, 1);
+    text-shadow: 0 0 18px rgba(224, 170, 255, 1), 0 0 25px rgba(199, 125, 255, 0.8);
   }
   100% {
-    text-shadow: 0 0 5px rgba(84, 231, 255, 0.7);
+    text-shadow: 0 0 8px rgba(224, 170, 255, 0.7);
   }
 }
 
@@ -1427,8 +1435,8 @@ onUnmounted(() => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #54e7ff;
-  box-shadow: 0 0 15px #54e7ff;
+  background-color: #e0aaff;
+  box-shadow: 0 0 15px #e0aaff, 0 0 25px rgba(224, 170, 255, 0.6);
   animation: pulse 1.5s infinite;
 }
 
@@ -1449,11 +1457,12 @@ onUnmounted(() => {
 
 .staff-carousel {
   height: 170px;
-  background-color: rgba(18, 69, 145, 0.3);
-  border-radius: 4px;
-  border: 1px solid rgba(84, 231, 255, 0.3);
-  box-shadow: 0 0 15px rgba(18, 69, 145, 0.5);
+  background: linear-gradient(135deg, rgba(75, 0, 130, 0.4), rgba(139, 69, 255, 0.2));
+  border-radius: 8px;
+  border: 1px solid rgba(139, 69, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(139, 69, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .staff-scroll-container {
@@ -1473,9 +1482,10 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   padding: 10px;
-  background-color: rgba(33, 87, 168, 0.5);
-  border-radius: 4px;
-  border-left: 3px solid #54e7ff;
+  background: linear-gradient(135deg, rgba(139, 69, 255, 0.3), rgba(75, 0, 130, 0.4));
+  border-radius: 6px;
+  border-left: 3px solid #e0aaff;
+  box-shadow: 0 2px 10px rgba(139, 69, 255, 0.2);
 }
 
 .staff-avatar {
