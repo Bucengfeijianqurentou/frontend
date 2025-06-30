@@ -1,7 +1,7 @@
 <template>
   <div class="datascreen-container" ref="fullScreenRef">
     <div class="header">
-      <div class="title">区块链食堂监管平台数据大屏</div>
+      <div class="title">智膳云数据监控大屏</div>
       <div class="datetime">{{ currentDate }} {{ currentTime }}</div>
       <div class="weather">
       </div>
@@ -1203,11 +1203,11 @@ onUnmounted(() => {
 .title {
   font-size: 28px;
   font-weight: bold;
-  background: linear-gradient(45deg, #60a5fa, #3b82f6, #1d4ed8, #ffffff);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 15px rgba(96, 165, 250, 0.6);
-  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.4));
+  color: #ffffff;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.5px;
 }
 
 .datetime, .weather {
