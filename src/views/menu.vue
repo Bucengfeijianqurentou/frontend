@@ -714,7 +714,7 @@ const handleUploadSuccess = (res) => {
 // 上传前检查
 const beforeUpload = (file) => {
   const isImage = /^image\//.test(file.type)
-  const isLt2M = file.size / 1024 / 1024 < 2
+  const isLt2M = file.size / 1024 / 1024 < 10
   
   if (!isImage) {
     ElMessage.error('只能上传图片文件!')
@@ -722,7 +722,7 @@ const beforeUpload = (file) => {
   }
   
   if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB!')
+    ElMessage.error('图片大小不能超过 10MB!')
     return false
   }
   
