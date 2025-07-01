@@ -46,7 +46,7 @@
                 <School />
               </el-icon>
             </div>
-            <h2 class="main-title">中小学食堂监管平台</h2>
+            <h2 class="main-title">智膳云</h2>
           </div>
 
           <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form-content"
