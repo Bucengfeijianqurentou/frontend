@@ -1,38 +1,64 @@
 <template>
   <div class="login-container">
     <div class="food-pattern-bg"></div>
+    <div class="floating-elements">
+      <div class="floating-food food-1">🍎</div>
+      <div class="floating-food food-2">🥕</div>
+      <div class="floating-food food-3">🥛</div>
+      <div class="floating-food food-4">🍞</div>
+      <div class="floating-food food-5">🥗</div>
+    </div>
 
     <div class="content-wrapper">
       <!-- 左侧部分内容 -->
       <div class="illustration-pane">
         <div class="illustration-content">
+          <div class="welcome-badge animate__animated animate__bounceIn">
+            <span class="badge-emoji">🎓</span>
+            <span class="badge-text">欢迎来到智膳云</span>
+          </div>
+          
           <img src="/public/undraw_breakfast_rgx5.svg" alt="中小学食堂监管平台插画"
             class="main-illustration animate__animated animate__fadeInUp" />
 
           <div class="features-icons">
             <div class="feature-icon animate__animated animate__fadeIn animate__delay-1s">
-              <el-icon>
-                <Monitor />
-              </el-icon>
+              <div class="icon-wrapper">
+                <el-icon>
+                  <Monitor />
+                </el-icon>
+              </div>
               <span>实时监控</span>
+              <div class="feature-desc">24小时守护</div>
             </div>
             <div class="feature-icon animate__animated animate__fadeIn animate__delay-1s">
-              <el-icon>
-                <DataAnalysis />
-              </el-icon>
+              <div class="icon-wrapper">
+                <el-icon>
+                  <DataAnalysis />
+                </el-icon>
+              </div>
               <span>数据分析</span>
+              <div class="feature-desc">智能统计</div>
             </div>
             <div class="feature-icon animate__animated animate__fadeIn animate__delay-1s">
-              <el-icon>
-                <Bell />
-              </el-icon>
+              <div class="icon-wrapper">
+                <el-icon>
+                  <Bell />
+                </el-icon>
+              </div>
               <span>预警提醒</span>
+              <div class="feature-desc">及时通知</div>
             </div>
           </div>
 
           <div class="illustration-text animate__animated animate__fadeInUp animate__delay-1s">
-            <h3>智慧监管，食安护航</h3>
-            <p>科技赋能中小学食堂安全管理新篇章</p>
+            <h3>🌟 智慧监管，食安护航 🌟</h3>
+            <p>为中小学生打造安全、健康、美味的校园食堂体验</p>
+            <div class="safety-badges">
+              <span class="safety-badge">🛡️ 安全第一</span>
+              <span class="safety-badge">💚 营养健康</span>
+              <span class="safety-badge">😊 美味可口</span>
+            </div>
           </div>
         </div>
       </div>
@@ -45,8 +71,14 @@
               <el-icon class="platform-logo">
                 <School />
               </el-icon>
+              <div class="sparkles">
+                <span class="sparkle sparkle-1">✨</span>
+                <span class="sparkle sparkle-2">⭐</span>
+                <span class="sparkle sparkle-3">💫</span>
+              </div>
             </div>
-            <h2 class="main-title">智膳云</h2>
+            <h2 class="main-title">🍽️ 智膳云 🍽️</h2>
+            <p class="subtitle">让每一餐都安心美味</p>
           </div>
 
           <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form-content"
@@ -69,7 +101,8 @@
                 <el-icon class="mr-1">
                   <Right />
                 </el-icon>
-                登 录
+                <span v-if="!loading">🚀 开始探索</span>
+                <span v-else>正在登录中...</span>
               </el-button>
             </el-form-item>
             <div class="form-links">
@@ -88,7 +121,15 @@
             </div>
           </el-form>
           <footer class="page-footer-form">
-            © {{ new Date().getFullYear() }} 中小学食堂监管平台
+            <div class="footer-content">
+              <span>© {{ new Date().getFullYear() }} 中小学食堂监管平台</span>
+              <div class="footer-icons">
+                <span>🏫</span>
+                <span>🍎</span>
+                <span>👨‍🍳</span>
+                <span>👩‍🎓</span>
+              </div>
+            </div>
           </footer>
         </div>
       </div>
@@ -178,6 +219,10 @@ const handleLogin = async () => {
   /* 深色调 */
   --accent-color: #6C63FF;
   /* 强调色：紫色 */
+  --success-color: #4CAF50;
+  /* 成功色：绿色 */
+  --info-color: #2196F3;
+  /* 信息色：蓝色 */
   --text-primary: #333333;
   /* 主要文字颜色 */
   --text-secondary: #666666;
@@ -190,6 +235,12 @@ const handleLogin = async () => {
   /* 渐变结束色：淡桃色 */
   --shadow-color: rgba(249, 168, 37, 0.2);
   /* 阴影颜色：稍微加深 */
+  --cute-pink: #FFB6C1;
+  /* 可爱粉色 */
+  --cute-blue: #87CEEB;
+  /* 可爱蓝色 */
+  --cute-green: #98FB98;
+  /* 可爱绿色 */
 }
 
 /* --- 全局容器样式 --- */
@@ -211,9 +262,74 @@ const handleLogin = async () => {
     radial-gradient(circle at 10% 20%, rgba(249, 168, 37, 0.1) 0%, transparent 8%),
     radial-gradient(circle at 90% 30%, rgba(108, 99, 255, 0.1) 0%, transparent 8%),
     radial-gradient(circle at 30% 70%, rgba(249, 168, 37, 0.1) 0%, transparent 8%),
-    radial-gradient(circle at 70% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 8%);
+    radial-gradient(circle at 70% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 8%),
+    radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.08) 0%, transparent 12%);
   z-index: 0;
   opacity: 0.9;
+}
+
+/* --- 浮动食物元素 --- */
+.floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.floating-food {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.6;
+  animation: float 6s ease-in-out infinite;
+}
+
+.food-1 {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.food-2 {
+  top: 20%;
+  right: 8%;
+  animation-delay: 1s;
+}
+
+.food-3 {
+  top: 60%;
+  left: 3%;
+  animation-delay: 2s;
+}
+
+.food-4 {
+  top: 70%;
+  right: 5%;
+  animation-delay: 3s;
+}
+
+.food-5 {
+  top: 40%;
+  left: 50%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-3deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(2deg);
+  }
 }
 
 .content-wrapper {
@@ -231,7 +347,7 @@ const handleLogin = async () => {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 3rem;
+  padding: 1.5rem;
   background-color: rgba(240, 229, 202, 0.5);
 }
 
@@ -242,11 +358,49 @@ const handleLogin = async () => {
   max-width: 90%;
 }
 
+/* --- 欢迎徽章 --- */
+.welcome-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--cute-pink), var(--cute-blue));
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.2rem;
+  animation-duration: 1s;
+}
+
+.badge-emoji {
+  font-size: 1.3rem;
+  animation: bounce 2s infinite;
+}
+
+.badge-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
 .main-illustration {
-  max-width: 80%;
+  max-width: 70%;
   height: auto;
   object-fit: contain;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
   transform-origin: center;
   transition: transform 0.5s ease;
@@ -260,61 +414,155 @@ const handleLogin = async () => {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 400px;
-  margin-bottom: 2rem;
+  max-width: 350px;
+  margin-bottom: 1.2rem;
 }
 
 .feature-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
-  background-color: rgba(255, 253, 245, 0.85);
+  padding: 0.8rem;
+  background: linear-gradient(145deg, rgba(255, 253, 245, 0.9), rgba(255, 248, 225, 0.8));
   border-radius: 12px;
-  box-shadow: 0 4px 12px var(--shadow-color);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px var(--shadow-color);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
 }
 
 .feature-icon:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px var(--shadow-color);
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 12px 25px var(--shadow-color);
+  border-color: var(--primary-color);
+}
+
+.feature-icon:hover::before {
+  left: 100%;
+}
+
+.icon-wrapper {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 3px 8px rgba(249, 168, 37, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.feature-icon:hover .icon-wrapper {
+  transform: rotate(360deg);
 }
 
 .feature-icon .el-icon {
-  font-size: 28px;
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  font-size: 20px;
+  color: white;
 }
 
-.feature-icon span {
-  font-size: 14px;
+.feature-icon > span {
+  font-size: 13px;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.feature-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 .illustration-text {
   text-align: center;
-  padding: 2rem;
-  background: rgba(255, 253, 245, 0.7);
-  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(255, 253, 245, 0.8), rgba(255, 248, 225, 0.7));
+  backdrop-filter: blur(15px);
   border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 450px;
-  border: 1px solid rgba(249, 168, 37, 0.2);
+  max-width: 420px;
+  border: 2px solid rgba(249, 168, 37, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.illustration-text::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(249, 168, 37, 0.1), transparent);
+  animation: rotate 10s linear infinite;
+}
+
+.illustration-text > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .illustration-text h3 {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  color: var(--primary-color);
-  margin-bottom: 1rem;
+  color: var(--primary-dark);
+  margin-bottom: 0.8rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .illustration-text p {
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.5;
   color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* --- 安全徽章 --- */
+.safety-badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.safety-badge {
+  background: var(--success-color);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  transition: transform 0.3s ease;
+  cursor: default;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.safety-badge:hover {
+  transform: scale(1.1);
 }
 
 /* --- 右侧表单区域样式 --- */
@@ -324,7 +572,7 @@ const handleLogin = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: 1.5rem 1.5rem;
   background-color: #F4E9D6;
   box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -333,57 +581,111 @@ const handleLogin = async () => {
 
 .themed-login-box {
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
   animation-duration: 0.6s;
   background-color: rgba(255, 253, 245, 0.8);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .title-section {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .icon-container {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 1.5rem;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary-light);
+  background: linear-gradient(135deg, var(--primary-light), #FFF);
   border: 2px solid var(--primary-color);
   border-radius: 16px;
-  box-shadow: 0 6px 12px rgba(249, 168, 37, 0.2);
+  box-shadow: 0 6px 15px rgba(249, 168, 37, 0.3);
   transform-origin: center;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .icon-container:hover {
-  transform: rotate(5deg);
+  transform: rotate(10deg) scale(1.1);
+  box-shadow: 0 12px 30px rgba(249, 168, 37, 0.4);
 }
 
 .platform-logo {
-  font-size: 32px;
+  font-size: 28px;
   color: var(--primary-color);
+  z-index: 2;
+  position: relative;
+}
+
+/* --- 闪烁星星效果 --- */
+.sparkles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sparkle {
+  position: absolute;
+  font-size: 12px;
+  animation: sparkle 2s infinite;
+}
+
+.sparkle-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.sparkle-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 0.7s;
+}
+
+.sparkle-3 {
+  bottom: 15%;
+  left: 20%;
+  animation-delay: 1.4s;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 
 .main-title {
-  font-size: 1.9rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(to right, var(--primary-color), var(--primary-dark));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0.5rem;
+  color: var(--primary-dark);
+  margin-bottom: 0.3rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+  font-weight: 500;
 }
 
 /* 表单样式 */
 .login-form-content {
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 1rem;
 }
 
 :deep(.el-form-item__label) {
@@ -464,10 +766,35 @@ const handleLogin = async () => {
 
 .page-footer-form {
   text-align: center;
-  margin-top: 3rem;
+  margin-top: 1.5rem;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-content > span {
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
+
+.footer-icons {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.footer-icons span {
+  animation: bounce 2s infinite;
+}
+
+.footer-icons span:nth-child(1) { animation-delay: 0s; }
+.footer-icons span:nth-child(2) { animation-delay: 0.2s; }
+.footer-icons span:nth-child(3) { animation-delay: 0.4s; }
+.footer-icons span:nth-child(4) { animation-delay: 0.6s; }
 
 /* 响应式设计 */
 @media (max-width: 1100px) {
